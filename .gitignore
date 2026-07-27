@@ -1,0 +1,27 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build folders
+**/bin/
+**/obj/
+
+# NuGet packages
+packages/
+
+# Logs
+*.log
+
+# ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# Test results
+TestResults/
+
+# OS files
+.DS_Store
+Thumbs.db
