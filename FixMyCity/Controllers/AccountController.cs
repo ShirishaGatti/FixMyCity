@@ -1,11 +1,11 @@
 
-using FixMyCity.Infrastructure;
 using FixMyCity.Exceptions;
+using FixMyCity.Infrastructure;
 using FixMyCity.Model;
+using FixMyCity.Models;
 using FixMyCity.Service;
 using FixMyCityModel;
 using FixMyCityModel.ViewModel;
-
 using System;
 using System.Web;
 using System.Web.Mvc;
@@ -26,14 +26,22 @@ namespace FixMyCity.Controllers
             _emailService = emailService;
         }
 
-        private void PopulateCitiesAndWards(int? selectedCityId = null, int? selectedWardId = null)
+        /* private void PopulateCitiesAndWards(int? selectedCityId = null, int? selectedWardId = null)
+         {
+             var cities = _authRepo.GetCities();
+             ViewBag.Cities = new SelectList(cities, "CityId", "CityName", selectedCityId);
+
+             int cityId = selectedCityId ?? (cities.Count > 0 ? cities[0].CityId : 1);
+             var wards = _authRepo.GetWardsByCity(cityId);
+             ViewBag.Wards = new SelectList(wards, "WardId", "WardName", selectedWardId);
+         }*/
+        private void PopulateCitiesAndWards(RegisterViewModel vm)
         {
             var cities = _authRepo.GetCities();
-            ViewBag.Cities = new SelectList(cities, "CityId", "CityName", selectedCityId);
+            vm.Cities = new SelectList(cities, "CityId", "CityName", vm.CityId);
 
-            int cityId = selectedCityId ?? (cities.Count > 0 ? cities[0].CityId : 1);
-            var wards = _authRepo.GetWardsByCity(cityId);
-            ViewBag.Wards = new SelectList(wards, "WardId", "WardName", selectedWardId);
+            int cityId = vm.CityId ?? (cities.Count > 0 ? cities[0].CityId : 1);
+            vm.Wards = new SelectList(_authRepo.GetWardsByCity(cityId), "WardId", "WardName", vm.WardId);
         }
 
         // ===========================

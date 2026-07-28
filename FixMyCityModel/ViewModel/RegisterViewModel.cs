@@ -42,5 +42,7 @@ namespace FixMyCityModel
 
         public int? DepartmentId { get; set; }
         public string Designation { get; set; }
+        public IEnumerable<SelectListItem> Cities { get; set; }
+        public IEnumerable<SelectListItem> Wards { get; set; }
     }
 }
