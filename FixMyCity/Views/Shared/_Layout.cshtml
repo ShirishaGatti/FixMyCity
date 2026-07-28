@@ -1,44 +1,212 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - My ASP.NET Application</title>
-    @Styles.Render("~/Content/css")
-    @Scripts.Render("~/bundles/modernizr")
+    <title>@ViewBag.Title - FixMyCity Municipal Portal</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS & Icons -->
+    <link href="~/Content/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="~/Content/css/aos.css" rel="stylesheet" />
+    <link href="~/Content/css/style.css" rel="stylesheet" />
 
+    @RenderSection("styles", required: false)
 </head>
-<body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-            </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
-                    <li>@Html.ActionLink("About", "About", "Home")</li>
-                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
-                </ul>
-                @Html.Partial("_LoginPartial")
-            </div>
+<body class="d-flex flex-column min-vh-100">
+    <!-- TOP MUNICIPAL HEADER BAR -->
+    <div class="py-1 px-4 text-white d-none d-md-flex align-items-center justify-content-between" style="background: rgba(21, 116, 224, 0.15); border-bottom: 1px solid var(--bd); font-size: 0.82rem;">
+        <div class="d-flex align-items-center gap-3">
+            <span><i class="bi bi-geo-alt-fill text-warning me-1"></i> City Municipal Corporation Portal</span>
+            <span class="text-muted">|</span>
+            <span><i class="bi bi-clock-fill me-1"></i> Helpline 24/7 Available</span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="badge bg-danger rounded-pill px-3 py-1"><i class="bi bi-telephone-fill me-1"></i> Emergency Hotline: 1800-FIX-CITY</span>
         </div>
     </div>
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
-        </footer>
-    </div>
 
-    @Scripts.Render("~/bundles/jquery")
-    @Scripts.Render("~/bundles/bootstrap")
+    <!-- MAIN NAVBAR -->
+    <nav class="navbar navbar-expand-lg sticky-top py-3" id="nbar" style="background: var(--bg2); border-bottom: 1px solid var(--bd); backdrop-filter: blur(12px);">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-white fs-4" href="@Url.Action("Index", "Home")">
+                <div class="d-flex align-items-center justify-content-center rounded-3 p-2 text-white" style="background: var(--grad); width: 42px; height: 42px;">
+                    <i class="bi bi-building-fill fs-5"></i>
+                </div>
+                <span>Fix<span class="gt">MyCity</span></span>
+            </a>
+
+            <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-list fs-2"></i>
+            </button>
+
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4 gap-lg-1">
+                    <li class="nav-item">
+                        <a class="nav-link px-3 py-2 text-white-50 fw-medium text-hover-white" href="@Url.Action("Index", "Home")">
+                            <i class="bi bi-house-door-fill me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3 py-2 text-white-50 fw-medium text-hover-white" href="@Url.Action("Index", "Home")#services">
+                            <i class="bi bi-grid-fill me-1"></i> Services
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3 py-2 text-white-50 fw-medium text-hover-white" href="@Url.Action("Index", "Home")#how-it-works">
+                            <i class="bi bi-diagram-3-fill me-1"></i> Process
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3 py-2 text-white-50 fw-medium text-hover-white" href="@Url.Action("About", "Home")">
+                            <i class="bi bi-info-circle-fill me-1"></i> About
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3 py-2 text-white-50 fw-medium text-hover-white" href="@Url.Action("Contact", "Home")">
+                            <i class="bi bi-envelope-fill me-1"></i> Contact Us
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2">
+                    <!-- THEME SWITCH BUTTON IN NAVBAR -->
+                    <button type="button" class="btn boc px-3 py-2 text-white d-flex align-items-center gap-2" id="thbtn" title="Toggle Light/Dark Theme">
+                        <i class="bi bi-sun-fill text-warning" id="suni" style="display:none"></i>
+                        <i class="bi bi-moon-stars-fill text-info" id="mooni"></i>
+                        <span id="themeLabel" class="small fw-semibold">Dark</span>
+                    </button>
+
+                    @if (Request.IsAuthenticated)
+                    {
+                        <a href="@Url.Action("MyComplaints", "Complaint")" class="btn boc px-3 py-2">
+                            <i class="bi bi-list-task me-1"></i> Dashboard
+                        </a>
+                        using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { id = "logoutForm", @class = "d-inline" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-danger px-3 py-2 rounded-3">
+                                <i class="bi bi-box-arrow-right me-1"></i> Logout
+                            </button>
+                        }
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Login", "Account")" class="btn boc px-3 py-2">
+                            <i class="bi bi-person-fill me-1"></i> Log In
+                        </a>
+                        <a href="@Url.Action("Register", "Account")" class="btn bgrd px-4 py-2">
+                            <i class="bi bi-plus-circle-fill me-1"></i> Register Citizen
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN BODY -->
+    <main class="flex-grow-1">
+        @RenderBody()
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mt-auto pt-5 pb-4" style="background: var(--bg2); border-top: 1px solid var(--bd);">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-3 fs-4 fw-bold text-white">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 p-2 text-white" style="background: var(--grad); width: 38px; height: 38px;">
+                            <i class="bi bi-building-fill fs-5"></i>
+                        </div>
+                        <span>Fix<span class="gt">MyCity</span></span>
+                    </div>
+                    <p class="text-white-50 small mb-3">
+                        Empowering citizens and municipal authorities to connect, track, and resolve urban infrastructure issues quickly and transparently.
+                    </p>
+                </div>
+
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="text-white fw-bold mb-3">Quick Links</h6>
+                    <ul class="list-unstyled text-white-50 small d-flex flex-column gap-2">
+                        <li><a href="@Url.Action("Index", "Home")" class="text-decoration-none text-white-50">Home</a></li>
+                        <li><a href="@Url.Action("Login", "Account")" class="text-decoration-none text-white-50">Citizen Login</a></li>
+                        <li><a href="@Url.Action("Register", "Account")" class="text-decoration-none text-white-50">New Registration</a></li>
+                        <li><a href="@Url.Action("Contact", "Home")" class="text-decoration-none text-white-50">Support & Help</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white fw-bold mb-3">Municipal Departments</h6>
+                    <ul class="list-unstyled text-white-50 small d-flex flex-column gap-2">
+                        <li><i class="bi bi-cone-striped me-2 text-warning"></i> Roads & Infrastructure</li>
+                        <li><i class="bi bi-droplet-fill me-2 text-info"></i> Water Supply & Sewage</li>
+                        <li><i class="bi bi-trash-fill me-2 text-success"></i> Solid Waste Management</li>
+                        <li><i class="bi bi-lightbulb-fill me-2 text-warning"></i> Street Lighting Department</li>
+                    </ul>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-white fw-bold mb-3">Municipal Help Desk</h6>
+                    <p class="text-white-50 small mb-2"><i class="bi bi-geo-alt-fill me-2 text-primary"></i> City Corporation Head Office, Civic Center</p>
+                    <p class="text-white-50 small mb-2"><i class="bi bi-telephone-fill me-2 text-primary"></i> Toll Free: 1800-FIX-CITY</p>
+                    <p class="text-white-50 small mb-0"><i class="bi bi-envelope-fill me-2 text-primary"></i> support@fixmycity.gov</p>
+                </div>
+            </div>
+
+            <hr style="border-color: var(--bd);" />
+
+            <div class="d-flex flex-column flex-md-row align-items-center justify-content-between text-white-50 small">
+                <p class="mb-0">&copy; @DateTime.Now.Year FixMyCity Municipal Complaint Application System. All rights reserved.</p>
+                <div class="d-flex gap-3 mt-2 mt-md-0">
+                    <a href="#" class="text-white-50 text-decoration-none">Privacy Policy</a>
+                    <a href="#" class="text-white-50 text-decoration-none">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="~/Content/js/jquery-3.7.1.min.js"></script>
+    <script src="~/Content/js/bootstrap.bundle.min.js"></script>
+    <script src="~/Content/js/aos.js"></script>
+    <script>
+        AOS.init({ duration: 800, once: true });
+        
+        // Theme Switcher Logic with LocalStorage Persistence
+        function applyTheme(isLight) {
+            var root = $('#htmlRoot');
+            if (isLight) {
+                root.addClass('lm');
+                $('#suni').show();
+                $('#mooni').hide();
+                $('#themeLabel').text('Light');
+            } else {
+                root.removeClass('lm');
+                $('#suni').hide();
+                $('#mooni').show();
+                $('#themeLabel').text('Dark');
+            }
+        }
+
+        var savedTheme = localStorage.getItem('fixmycity_theme');
+        if (savedTheme === 'light') {
+            applyTheme(true);
+        } else {
+            applyTheme(false);
+        }
+
+        $('#thbtn').on('click', function() {
+            var isLight = !$('#htmlRoot').hasClass('lm');
+            applyTheme(isLight);
+            localStorage.setItem('fixmycity_theme', isLight ? 'light' : 'dark');
+        });
+    </script>
     @RenderSection("scripts", required: false)
 </body>
 </html>

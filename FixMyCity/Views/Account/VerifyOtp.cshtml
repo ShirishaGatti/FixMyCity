@@ -1,0 +1,53 @@
+@using FixMyCityModel.ViewModel
+@model VerifyOtpViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Verify OTP";
+}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+<link href="~/Content/css/auth.css" rel="stylesheet" />
+
+<div class="container otp-wrapper">
+    <div class="card otp-card">
+        <div class="card-body p-5">
+            <div class="text-center mb-4">
+                <div class="otp-icon mb-3"><i class="bi bi-shield-lock-fill text-primary"></i></div>
+                <h3 class="fw-bold">Verify OTP</h3>
+                <p class="otp-text">
+                    We've sent a 6-digit verification code to your registered email.
+                    It expires in 5 minutes.
+                </p>
+            </div>
+
+            @using (Html.BeginForm("VerifyOtp", "Account", FormMethod.Post, new { id = "otpForm" }))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-group mb-2">
+                    @Html.LabelFor(m => m.EnteredOtp, "Enter Verification Code", new { @class = "form-label fw-semibold" })
+                    @Html.TextBoxFor(m => m.EnteredOtp, new
+                    {
+                        maxlength = "6",
+                        @class = "form-control otp-input",
+                        autocomplete = "one-time-code",
+                        inputmode = "numeric",
+                        placeholder = "000000"
+                    })
+                    @Html.ValidationMessageFor(m => m.EnteredOtp, "", new { @class = "field-error" })
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-verify mt-4 w-100" id="otpSubmit">
+                    <span class="spinner-border spinner-border-sm d-none" id="otpSpinner"></span>
+                    Verify OTP
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/Content/js/Auth.js"></script>
+}

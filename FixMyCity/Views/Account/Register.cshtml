@@ -1,41 +1,156 @@
-﻿@model FixMyCity.Models.RegisterViewModel
+@using FixMyCity.ViewModel
+@model FixMyCityModel.RegisterViewModel
 @{
-    ViewBag.Title = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Register Citizen Account";
 }
 
-<h2>@ViewBag.Title.</h2>
+<link href="~/Content/css/auth.css" rel="stylesheet" />
 
-@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
-{
-    @Html.AntiForgeryToken()
-    <h4>Create a new account.</h4>
-    <hr />
-    @Html.ValidationSummary("", new { @class = "text-danger" })
-    <div class="form-group">
-        @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
-        <div class="col-md-10">
-            @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
+<div class="container py-5 my-md-3">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-xl-8">
+            <div class="gc p-4 p-md-5 shadow-lg border-0" style="background: var(--sf);">
+                
+                <!-- HEADER -->
+                <div class="text-center mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle p-3 mb-2">
+                        <i class="bi bi-person-plus-fill fs-3"></i>
+                    </div>
+                    <h2 class="fw-bold text-white mb-1">Create Citizen Account</h2>
+                    <p class="text-white-50 small mx-auto" style="max-width: 520px;">
+                        Register your citizen account to report infrastructure issues, track ward complaints, and receive official status notifications.
+                    </p>
+                    <div class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 border border-warning border-opacity-25 rounded-pill small mt-2">
+                        <i class="bi bi-info-circle-fill me-1"></i> Staff accounts (Support Executive / Admin) are provisioned directly by Municipal Admins.
+                    </div>
+                </div>
+
+                <!-- DYNAMIC ALERT CONTAINER FOR AJAX MESSAGES -->
+                <div id="alertContainer"></div>
+
+                @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { id = "registerForm" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.RoleId)
+
+                    <!-- SECTION 1: PERSONAL INFORMATION -->
+                    <div class="mb-4">
+                        <h6 class="text-primary fw-bold text-uppercase fs-7 letter-spacing-1 mb-3">
+                            <i class="bi bi-person-badge me-1"></i> Personal Information
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.Name, "Full Name *", new { @class = "form-label text-white-50 small fw-semibold" })
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-person-fill"></i></span>
+                                    @Html.TextBoxFor(m => m.Name, new { @class = "form-control bg-dark border-secondary text-white custom-input", placeholder = "John Doe" })
+                                </div>
+                                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger small mt-1" })
+                            </div>
+
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.Contact, "Contact Number *", new { @class = "form-label text-white-50 small fw-semibold" })
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-telephone-fill"></i></span>
+                                    @Html.TextBoxFor(m => m.Contact, new { @class = "form-control bg-dark border-secondary text-white custom-input", placeholder = "+91 9876543210" })
+                                </div>
+                                @Html.ValidationMessageFor(m => m.Contact, "", new { @class = "text-danger small mt-1" })
+                            </div>
+
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.Email, "Email Address *", new { @class = "form-label text-white-50 small fw-semibold" })
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-envelope-fill"></i></span>
+                                    @Html.TextBoxFor(m => m.Email, new { type = "email", @class = "form-control bg-dark border-secondary text-white custom-input", placeholder = "john@example.com" })
+                                </div>
+                                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small mt-1" })
+                            </div>
+
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.DOB, "Date of Birth", new { @class = "form-label text-white-50 small fw-semibold" })
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-calendar-date-fill"></i></span>
+                                    @Html.TextBoxFor(m => m.DOB, "{0:yyyy-MM-dd}", new { type = "date", @class = "form-control bg-dark border-secondary text-white custom-input" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: LOCATION & WARD DETAILS -->
+                    <div class="mb-4">
+                        <h6 class="text-primary fw-bold text-uppercase fs-7 letter-spacing-1 mb-3">
+                            <i class="bi bi-geo-alt-fill me-1"></i> Location & Ward Info
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.CityId, "City Municipal Area *", new { @class = "form-label text-white-50 small fw-semibold" })
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-building"></i></span>
+                                    @Html.DropDownListFor(m => m.CityId, (IEnumerable<SelectListItem>)ViewBag.Cities, "-- Select City --", new { @class = "form-select bg-dark border-secondary text-white custom-input", id = "CityId" })
+                                </div>
+                                @Html.ValidationMessageFor(m => m.CityId, "", new { @class = "text-danger small mt-1" })
+                            </div>
+
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.WardId, "Ward District *", new { @class = "form-label text-white-50 small fw-semibold" })
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-pin-map-fill"></i></span>
+                                    @Html.DropDownListFor(m => m.WardId, (IEnumerable<SelectListItem>)ViewBag.Wards, "-- Select Ward --", new { @class = "form-select bg-dark border-secondary text-white custom-input", id = "WardId" })
+                                </div>
+                                @Html.ValidationMessageFor(m => m.WardId, "", new { @class = "text-danger small mt-1" })
+                            </div>
+
+                            <div class="col-12">
+                                @Html.LabelFor(m => m.AddressLine, "Street Address", new { @class = "form-label text-white-50 small fw-semibold" })
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-house-door-fill"></i></span>
+                                    @Html.TextAreaFor(m => m.AddressLine, new { rows = 2, @class = "form-control bg-dark border-secondary text-white custom-input", placeholder = "House/Apartment no, Street, Area" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: ACCOUNT SECURITY -->
+                    <div class="mb-4">
+                        <h6 class="text-primary fw-bold text-uppercase fs-7 letter-spacing-1 mb-3">
+                            <i class="bi bi-shield-lock-fill me-1"></i> Security Credentials
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                @Html.LabelFor(m => m.Password, "Account Password *", new { @class = "form-label text-white-50 small fw-semibold" })
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-lock-fill"></i></span>
+                                    @Html.PasswordFor(m => m.Password, new { @class = "form-control bg-dark border-secondary text-white custom-input", placeholder = "Min 8 characters, uppercase, lowercase, digit & symbol" })
+                                    <span class="input-group-text bg-dark border-secondary text-white-50" id="togglePassword" style="cursor:pointer">
+                                        <i class="bi bi-eye-fill" id="eyeIcon"></i>
+                                    </span>
+                                </div>
+                                <small class="text-white-50 d-block mt-1">Must contain at least 8 characters with upper/lowercase, numbers and special symbols.</small>
+                                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small mt-1" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUBMIT BUTTON -->
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn bgrd py-3 fw-semibold text-white d-flex align-items-center justify-content-center gap-2" id="registerSubmit">
+                            <span class="spinner-border spinner-border-sm d-none" id="registerSpinner"></span>
+                            <span>Create Citizen Account</span>
+                            <i class="bi bi-check-circle-fill"></i>
+                        </button>
+                    </div>
+
+                    <div class="text-center text-white-50 small mt-3">
+                        Already have an account?
+                        @Html.ActionLink("Log In Here", "Login", "Account", null, new { @class = "text-info fw-semibold text-decoration-none ms-1" })
+                    </div>
+                }
+            </div>
         </div>
     </div>
-    <div class="form-group">
-        @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
-        <div class="col-md-10">
-            @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
-        </div>
-    </div>
-    <div class="form-group">
-        @Html.LabelFor(m => m.ConfirmPassword, new { @class = "col-md-2 control-label" })
-        <div class="col-md-10">
-            @Html.PasswordFor(m => m.ConfirmPassword, new { @class = "form-control" })
-        </div>
-    </div>
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <input type="submit" class="btn btn-default" value="Register" />
-        </div>
-    </div>
-}
+</div>
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Content/js/Auth.js"></script>
 }

@@ -43,6 +43,7 @@
       <HintPath>C:\Users\Administrator\Downloads\EnterpriseLibraries 3 (1)\Microsoft.Practices.ObjectBuilder2.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -54,6 +55,14 @@
   <ItemGroup>
     <Compile Include="Class1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repo\AuthRepository.cs" />
+    <Compile Include="Repo\IAuthRepository.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FixMyCityModel\FixMyCityModel.csproj">
+      <Project>{1d272b20-61d4-484a-a612-714097b854bc}</Project>
+      <Name>FixMyCityModel</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

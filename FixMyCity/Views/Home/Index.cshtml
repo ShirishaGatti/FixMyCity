@@ -1,31 +1,261 @@
-﻿@{
-    ViewBag.Title = "Home Page";
+@{
+    ViewBag.Title = "Municipal Complaint System";
 }
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="http://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-</div>
+<!-- HERO SECTION -->
+<section class="position-relative overflow-hidden py-5 my-lg-4" style="background: radial-gradient(circle at 50% 20%, rgba(21, 116, 224, 0.12), transparent 70%);">
+    <div class="aur aur-a" style="top:-100px; left:10%;"></div>
+    <div class="aur aur-b" style="bottom:-100px; right:10%;"></div>
 
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
+    <div class="container position-relative z-1">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7 text-center text-lg-start">
+                <div class="slbl mb-3">
+                    <i class="bi bi-shield-check text-warning"></i> Official City Corporation Portal
+                </div>
+                <h1 class="stitle display-4 fw-bold mb-4">
+                    Empowering Citizens for a <span class="gt">Cleaner, Safer & Smarter</span> City
+                </h1>
+                <p class="ssub fs-5 mb-4 text-white-50 mx-auto mx-lg-0" style="max-width: 620px;">
+                    Report roads, water, sanitation, and electrical issues directly to city department officers. Track resolution progress in real time with complete transparency.
+                </p>
+
+                <div class="d-flex flex-column flex-sm-row align-items-center justify-content-center justify-content-lg-start gap-3 mb-5">
+                    @if (Request.IsAuthenticated)
+                    {
+                        <a href="@Url.Action("MyComplaints", "Complaint")" class="btn bgrd px-4 py-3 fs-6 fw-semibold shadow-lg">
+                            <i class="bi bi-plus-circle-fill me-2"></i> Submit New Complaint
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Register", "Account")" class="btn bgrd px-4 py-3 fs-6 fw-semibold shadow-lg">
+                            <i class="bi bi-person-plus-fill me-2"></i> Register as Citizen
+                        </a>
+                        <a href="@Url.Action("Login", "Account")" class="btn boc px-4 py-3 fs-6 fw-medium">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Log In to Track
+                        </a>
+                    }
+                </div>
+
+                <!-- LIVE STATS BAR -->
+                <div class="row g-3 text-center text-sm-start">
+                    <div class="col-6 col-sm-3">
+                        <div class="gc p-3 text-center">
+                            <h3 class="fw-bold mb-0 text-primary">14,850+</h3>
+                            <small class="text-white-50">Complaints Fixed</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="gc p-3 text-center">
+                            <h3 class="fw-bold mb-0 text-success">96.4%</h3>
+                            <small class="text-white-50">Resolution Rate</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="gc p-3 text-center">
+                            <h3 class="fw-bold mb-0 text-warning">48</h3>
+                            <small class="text-white-50">City Wards</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="gc p-3 text-center">
+                            <h3 class="fw-bold mb-0 text-info">&lt; 24 hrs</h3>
+                            <small class="text-white-50">Avg Turnaround</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HERO CARD GRAPHIC -->
+            <div class="col-lg-5">
+                <div class="gc p-4 p-lg-5 shadow-lg position-relative" style="background: rgba(22, 22, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid var(--bd2);">
+                    <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="spinner-grow spinner-grow-sm text-success" role="status"></span>
+                            <span class="fw-bold text-white fs-6">Live Complaint Resolution Status</span>
+                        </div>
+                        <span class="badge bg-primary bg-opacity-25 text-primary px-3 py-1">City Wide</span>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3 mb-4">
+                        <div class="p-3 rounded-3" style="background: var(--bg2); border: 1px solid var(--bd);">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <span class="fw-semibold text-white small"><i class="bi bi-cone-striped me-2 text-warning"></i> Potholes on MG Road Ward #12</span>
+                                <span class="badge bg-success bg-opacity-25 text-success small">Resolved</span>
+                            </div>
+                            <small class="text-white-50">Assigned: Public Works Dept · Fixed in 4 hrs</small>
+                        </div>
+
+                        <div class="p-3 rounded-3" style="background: var(--bg2); border: 1px solid var(--bd);">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <span class="fw-semibold text-white small"><i class="bi bi-lightbulb-fill me-2 text-info"></i> Streetlight Outage in Ward #7</span>
+                                <span class="badge bg-warning bg-opacity-25 text-warning small">In Progress</span>
+                            </div>
+                            <small class="text-white-50">Assigned: Electrical Wing · Crew Dispatched</small>
+                        </div>
+
+                        <div class="p-3 rounded-3" style="background: var(--bg2); border: 1px solid var(--bd);">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <span class="fw-semibold text-white small"><i class="bi bi-trash-fill me-2 text-success"></i> Waste Clearance in Ward #24</span>
+                                <span class="badge bg-primary bg-opacity-25 text-primary small">Submitted</span>
+                            </div>
+                            <small class="text-white-50">Assigned: Sanitation Officer · Processing</small>
+                        </div>
+                    </div>
+
+                    <div class="text-center pt-2">
+                        <a href="@Url.Action("Register", "Account")" class="text-decoration-none text-info fw-semibold small">
+                            Have an issue in your area? Submit now &raquo;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
+</section>
+
+<!-- SERVICES / CATEGORIES -->
+<section id="services" class="py-5 my-4">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="slbl">Civic Categories</div>
+            <h2 class="stitle mx-auto">What Issues Can You Report?</h2>
+            <p class="ssub mx-auto text-white-50">Select your concern category for automated routing to the responsible municipal officers.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="gc p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="rounded-3 p-3 d-inline-flex mb-3 text-warning bg-warning bg-opacity-10 fs-3">
+                            <i class="bi bi-cone-striped"></i>
+                        </div>
+                        <h5 class="fw-bold text-white mb-2">Roads & Potholes</h5>
+                        <p class="text-white-50 small mb-4">Report damaged roads, open manholes, missing footpaths, and dangerous potholes for quick resurfacing.</p>
+                    </div>
+                    <a href="@Url.Action("Login", "Account")" class="text-warning text-decoration-none fw-semibold small">File Road Complaint &rarr;</a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="gc p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="rounded-3 p-3 d-inline-flex mb-3 text-info bg-info bg-opacity-10 fs-3">
+                            <i class="bi bi-droplet-fill"></i>
+                        </div>
+                        <h5 class="fw-bold text-white mb-2">Water Supply & Leakage</h5>
+                        <p class="text-white-50 small mb-4">Report pipeline bursts, low water pressure, contaminated water supply, or drainage blockage.</p>
+                    </div>
+                    <a href="@Url.Action("Login", "Account")" class="text-info text-decoration-none fw-semibold small">File Water Complaint &rarr;</a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="gc p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="rounded-3 p-3 d-inline-flex mb-3 text-success bg-success bg-opacity-10 fs-3">
+                            <i class="bi bi-trash-fill"></i>
+                        </div>
+                        <h5 class="fw-bold text-white mb-2">Garbage & Sanitation</h5>
+                        <p class="text-white-50 small mb-4">Uncleared dumpsters, illegal dumping, public restroom maintenance, and sweep schedules.</p>
+                    </div>
+                    <a href="@Url.Action("Login", "Account")" class="text-success text-decoration-none fw-semibold small">File Waste Complaint &rarr;</a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="gc p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="rounded-3 p-3 d-inline-flex mb-3 text-primary bg-primary bg-opacity-10 fs-3">
+                            <i class="bi bi-lightbulb-fill"></i>
+                        </div>
+                        <h5 class="fw-bold text-white mb-2">Street Lighting</h5>
+                        <p class="text-white-50 small mb-4">Faulty poles, dark street stretches, flickering lights, or exposed electrical wiring hazards.</p>
+                    </div>
+                    <a href="@Url.Action("Login", "Account")" class="text-primary text-decoration-none fw-semibold small">File Lighting Complaint &rarr;</a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="gc p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="rounded-3 p-3 d-inline-flex mb-3 text-danger bg-danger bg-opacity-10 fs-3">
+                            <i class="bi bi-tree-fill"></i>
+                        </div>
+                        <h5 class="fw-bold text-white mb-2">Parks & Tree Pruning</h5>
+                        <p class="text-white-50 small mb-4">Fallen trees, dangerous branches near power lines, public park cleanliness, and playground safety.</p>
+                    </div>
+                    <a href="@Url.Action("Login", "Account")" class="text-danger text-decoration-none fw-semibold small">File Park Complaint &rarr;</a>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="gc p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="rounded-3 p-3 d-inline-flex mb-3 text-light bg-secondary bg-opacity-10 fs-3">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                        <h5 class="fw-bold text-white mb-2">General Civic Emergencies</h5>
+                        <p class="text-white-50 small mb-4">Stray animal management, stray noise disturbances, stray encroachments, and unclassified civic issues.</p>
+                    </div>
+                    <a href="@Url.Action("Login", "Account")" class="text-light text-decoration-none fw-semibold small">File General Complaint &rarr;</a>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
+</section>
+
+<!-- HOW IT WORKS TIMELINE -->
+<section id="how-it-works" class="py-5" style="background: var(--bg2); border-top: 1px solid var(--bd); border-bottom: 1px solid var(--bd);">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="slbl">Simple & Transparent</div>
+            <h2 class="stitle mx-auto">How FixMyCity Works</h2>
+            <p class="ssub mx-auto text-white-50">From submission to resolution in 3 easy steps.</p>
+        </div>
+
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="gc p-4 h-100">
+                    <div class="badge bg-primary rounded-circle mb-3 fs-5 p-3" style="width:54px; height:54px;">1</div>
+                    <h5 class="fw-bold text-white mb-2">Report the Issue</h5>
+                    <p class="text-white-50 small">Register or log in, select your ward, provide location details and upload photos of the civic problem.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="gc p-4 h-100">
+                    <div class="badge bg-info rounded-circle mb-3 fs-5 p-3" style="width:54px; height:54px;">2</div>
+                    <h5 class="fw-bold text-white mb-2">Department Assignment</h5>
+                    <p class="text-white-50 small">The system automatically assigns your ticket to the specific ward officer and field executive.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="gc p-4 h-100">
+                    <div class="badge bg-success rounded-circle mb-3 fs-5 p-3" style="width:54px; height:54px;">3</div>
+                    <h5 class="fw-bold text-white mb-2">Resolution & Update</h5>
+                    <p class="text-white-50 small">Field officers resolve the ticket and upload resolution proof. You get instant updates via SMS/Email.</p>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+</section>
+
+<!-- CALL TO ACTION BANNER -->
+<section class="py-5">
+    <div class="container">
+        <div class="gc p-5 text-center position-relative overflow-hidden" style="background: var(--grad);">
+            <div class="position-relative z-1">
+                <h2 class="fw-bold text-white mb-3">Ready to Make Your Neighborhood Better?</h2>
+                <p class="text-white-50 fs-5 mb-4 mx-auto" style="max-width: 600px;">
+                    Join thousands of active citizens making our municipality clean, safe, and efficient.
+                </p>
+                <a href="@Url.Action("Register", "Account")" class="btn btn-light text-dark fw-bold px-4 py-3 rounded-3 shadow">
+                    <i class="bi bi-person-plus-fill me-2"></i> Register as a Citizen Now
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

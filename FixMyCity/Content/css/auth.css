@@ -1,0 +1,38 @@
+.custom-input {
+    background-color: var(--bg3) !important;
+    border-color: var(--bd2) !important;
+    color: var(--tx) !important;
+    border-radius: 8px;
+    padding: 0.65rem 0.9rem;
+    transition: all 0.25s ease-in-out;
+}
+
+.custom-input:focus {
+    background-color: var(--bg2) !important;
+    border-color: var(--pur) !important;
+    box-shadow: 0 0 0 0.25rem rgba(21, 116, 224, 0.25) !important;
+    color: var(--tx) !important;
+}
+
+.input-group-text {
+    border-color: var(--bd2) !important;
+    background-color: var(--bg3) !important;
+    color: var(--tx2) !important;
+}
+
+.input-group:focus-within .input-group-text {
+    border-color: var(--pur) !important;
+    color: var(--pur) !important;
+}
+
+.letter-spacing-1 {
+    letter-spacing: 0.08em;
+}
+
+.fs-7 {
+    font-size: 0.8rem;
+}
+
+.text-hover-white:hover {
+    color: #ffffff !important;
+}

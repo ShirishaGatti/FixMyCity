@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>1d272b20-61d4-484a-a612-714097b854bc</ProjectGuid>
+    <ProjectGuid>{1D272B20-61D4-484A-A612-714097B854BC}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FixMyCityModel</RootNamespace>
@@ -30,24 +30,38 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System"/>
-    
-    <Reference Include="System.Core"/>
-    <Reference Include="System.Xml.Linq"/>
-    <Reference Include="System.Data.DataSetExtensions"/>
-    
-    
-    <Reference Include="Microsoft.CSharp"/>
-    
-    <Reference Include="System.Data"/>
-    
-    <Reference Include="System.Net.Http"/>
-    
-    <Reference Include="System.Xml"/>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="Exceptions\AppExceptions.cs" />
+    <Compile Include="Model\City.cs" />
+    <Compile Include="Model\Consumer.cs" />
+    <Compile Include="Model\ConsumerCredential.cs" />
+    <Compile Include="Model\Department.cs" />
+    <Compile Include="Model\RefreshToken.cs" />
+    <Compile Include="Model\Role.cs" />
+    <Compile Include="Model\TokenPair.cs" />
+    <Compile Include="Model\Ward.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModel\AuthResultViewModel.cs" />
+    <Compile Include="ViewModel\ForgotPasswordViewModel.cs" />
+    <Compile Include="ViewModel\LoginViewModel.cs" />
+    <Compile Include="ViewModel\RegisterViewModel.cs" />
+    <Compile Include="ViewModel\ResetPasswordViewModel.cs" />
+    <Compile Include="ViewModel\StaffRegisterViewModel.cs" />
+    <Compile Include="ViewModel\VerifyOtpViewModel.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="JWT\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -57,5 +71,4 @@
   <Target Name="AfterBuild">
   </Target>
   -->
-
- </Project>
+</Project>

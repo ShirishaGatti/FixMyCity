@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿using FixMyCity.Filters;
+using System.Web;
 using System.Web.Mvc;
 
 namespace FixMyCity
@@ -7,7 +8,7 @@ namespace FixMyCity
     {
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
-            filters.Add(new HandleErrorAttribute());
+            filters.Add(new GlobalMvcExceptionFilter());
         }
     }
 }

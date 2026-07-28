@@ -1,63 +1,115 @@
-﻿@using FixMyCity.Models
-@model LoginViewModel
+@model FixMyCityModel.ViewModel.LoginViewModel 
 @{
-    ViewBag.Title = "Log in";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Log In";
 }
 
-<h2>@ViewBag.Title.</h2>
-<div class="row">
-    <div class="col-md-8">
-        <section id="loginForm">
-            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
-            {
-                @Html.AntiForgeryToken()
-                <h4>Use a local account to log in.</h4>
-                <hr />
-                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Email, new { @class = "col-md-2 control-label" })
-                    <div class="col-md-10">
-                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control" })
-                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+<link href="~/Content/css/auth.css" rel="stylesheet" />
+
+<div class="container py-5 my-md-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-9">
+            <div class="gc overflow-hidden shadow-lg border-0" style="background: var(--sf);">
+                <div class="row g-0">
+                    <!-- LEFT PANEL (BRANDING) -->
+                    <div class="col-md-5 p-4 p-lg-5 text-white d-flex flex-column justify-content-between position-relative" style="background: linear-gradient(135deg, rgba(21, 116, 224, 0.95), rgba(15, 15, 26, 0.95)), url('https://images.unsplash.com/photo-1477959858617-67f30ac4ce71?auto=format&fit=crop&w=800&q=80') center/cover;">
+                        <div class="mb-4">
+                            <div class="d-inline-flex align-items-center justify-content-center bg-white text-primary rounded-3 p-3 mb-3 shadow">
+                                <i class="bi bi-building-fill fs-3"></i>
+                            </div>
+                            <h3 class="fw-bold">Fix<span class="text-warning">MyCity</span></h3>
+                            <p class="text-white-50 small">Municipal Complaint Application System</p>
+                        </div>
+
+                        <div class="my-auto py-4">
+                            <h4 class="fw-bold mb-3">Welcome Back!</h4>
+                            <p class="text-white-50 small mb-0">
+                                Sign in to submit civic complaints, track officer assignments, receive live updates, and manage your account.
+                            </p>
+                        </div>
+
+                        <div class="pt-3 border-top border-white border-opacity-10 small text-white-50">
+                            <i class="bi bi-shield-lock-fill me-1 text-warning"></i> Secure Municipal Citizen Portal
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
-                    <div class="col-md-10">
-                        @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
-                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <div class="checkbox">
-                            @Html.CheckBoxFor(m => m.RememberMe)
-                            @Html.LabelFor(m => m.RememberMe)
+
+                    <!-- RIGHT PANEL (FORM) -->
+                    <div class="col-md-7 p-4 p-lg-5" style="background: var(--bg2);">
+                        <div class="login-form-section">
+                            <div class="mb-4">
+                                <h3 class="fw-bold text-white mb-1">Citizen Sign In</h3>
+                                <p class="text-white-50 small mb-0">Enter your credentials to access your complaints dashboard</p>
+                            </div>
+
+                            <!-- DYNAMIC ALERT CONTAINER FOR AJAX MESSAGES -->
+                            <div id="alertContainer">
+                                @if (TempData["SuccessMessage"] != null)
+                                {
+                                    <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                                        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                    </div>
+                                }
+                            </div>
+
+                            @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { id = "loginForm" }))
+                            {
+                                @Html.AntiForgeryToken()
+
+                                <!-- EMAIL -->
+                                <div class="mb-3">
+                                    @Html.LabelFor(m => m.Email, "Email Address", new { @class = "form-label text-white-50 small fw-semibold" })
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-envelope-fill"></i></span>
+                                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control bg-dark border-secondary text-white custom-input", placeholder = "name@example.com", autocomplete = "username" })
+                                    </div>
+                                    @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small mt-1" })
+                                </div>
+
+                                <!-- PASSWORD -->
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        @Html.LabelFor(m => m.Password, "Password", new { @class = "form-label text-white-50 small fw-semibold mb-0" })
+                                        @Html.ActionLink("Forgot Password?", "ForgotPassword", "Account", null, new { @class = "text-decoration-none text-info small" })
+                                    </div>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-lock-fill"></i></span>
+                                        @Html.PasswordFor(m => m.Password, new { @class = "form-control bg-dark border-secondary text-white custom-input", placeholder = "Enter password", autocomplete = "current-password" })
+                                        <span class="input-group-text bg-dark border-secondary text-white-50" id="togglePassword" style="cursor:pointer">
+                                            <i class="bi bi-eye-fill" id="eyeIcon"></i>
+                                        </span>
+                                    </div>
+                                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small mt-1" })
+                                </div>
+
+                                <!-- REMEMBER ME -->
+                                <div class="form-check mb-4">
+                                    @Html.CheckBoxFor(m => m.RememberMe, new { @class = "form-check-input", id = "RememberMe" })
+                                    @Html.LabelFor(m => m.RememberMe, "Keep me logged in on this device", new { @class = "form-check-label text-white-50 small", @for = "RememberMe" })
+                                </div>
+
+                                <!-- SUBMIT BUTTON -->
+                                <div class="d-grid mb-4">
+                                    <button type="submit" class="btn bgrd py-3 fw-semibold text-white d-flex align-items-center justify-content-center gap-2" id="loginSubmit">
+                                        <span class="spinner-border spinner-border-sm d-none" id="loginSpinner"></span>
+                                        <span>Sign In to Dashboard</span>
+                                        <i class="bi bi-arrow-right"></i>
+                                    </button>
+                                </div>
+
+                                <div class="text-center text-white-50 small">
+                                    Don't have a citizen account?
+                                    @Html.ActionLink("Register Here", "Register", "Account", null, new { @class = "text-info fw-semibold text-decoration-none ms-1" })
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <input type="submit" value="Log in" class="btn btn-default" />
-                    </div>
-                </div>
-                <p>
-                    @Html.ActionLink("Register as a new user", "Register")
-                </p>
-                @* Enable this once you have account confirmation enabled for password reset functionality
-                    <p>
-                        @Html.ActionLink("Forgot your password?", "ForgotPassword")
-                    </p>*@
-            }
-        </section>
-    </div>
-    <div class="col-md-4">
-        <section id="socialLoginForm">
-            @Html.Partial("_ExternalLoginsListPartial", new ExternalLoginListViewModel { ReturnUrl = ViewBag.ReturnUrl })
-        </section>
+            </div>
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Content/js/Auth.js"></script>
 }
