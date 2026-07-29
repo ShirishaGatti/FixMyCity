@@ -1,8 +1,10 @@
 ﻿using FixMyCity.Exceptions;
-using FixMyCity.Model;
 using FixMyCityModel;
+using FixMyCityModel.Model;
+using FixMyCityModel.ViewModel;
 using Microsoft.Practices.EnterpriseLibrary.Data;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
@@ -42,108 +44,45 @@ namespace FixMyCity.Repository
             int newConsumerId = 0;
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("Auth_Register");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Auth_Register");
                 this.db.AddOutParameter(com, "NewConsumerId", DbType.Int32, 4);
 
-                if (!String.IsNullOrEmpty(vm.Name))
-                {
-                    this.db.AddInParameter(com, "Name", DbType.String, vm.Name);
-                }
-                else
-                {
-                    this.db.AddInParameter(com, "Name", DbType.String, DBNull.Value);
-                }
-
-                if (!String.IsNullOrEmpty(vm.Email))
-                {
-                    this.db.AddInParameter(com, "Email", DbType.String, vm.Email);
-                }
-                else
-                {
-                    this.db.AddInParameter(com, "Email", DbType.String, DBNull.Value);
-                }
-
-                if (!String.IsNullOrEmpty(vm.Contact))
-                {
-                    this.db.AddInParameter(com, "Contact", DbType.String, vm.Contact);
-                }
-                else
-                {
-                    this.db.AddInParameter(com, "Contact", DbType.String, DBNull.Value);
-                }
-
-                if (vm.DOB.HasValue && vm.DOB.Value > DateTime.MinValue)
-                {
-                    this.db.AddInParameter(com, "DOB", DbType.DateTime, vm.DOB.Value);
-                }
-                else
-                {
-                    this.db.AddInParameter(com, "DOB", DbType.DateTime, DBNull.Value);
-                }
-
-                if (!String.IsNullOrEmpty(vm.AddressLine))
-                {
-                    this.db.AddInParameter(com, "AddressLine", DbType.String, vm.AddressLine);
-                }
-                else
-                {
-                    this.db.AddInParameter(com, "AddressLine", DbType.String, DBNull.Value);
-                }
-
-                if (vm.CityId.HasValue && vm.CityId.Value > 0)
-                {
-                    this.db.AddInParameter(com, "CityId", DbType.Int32, vm.CityId.Value);
-                }
-                else
-                {
-                    this.db.AddInParameter(com, "CityId", DbType.Int32, DBNull.Value);
-                }
-
-                if (vm.WardId.HasValue && vm.WardId.Value > 0)
-                {
-                    this.db.AddInParameter(com, "WardId", DbType.Int32, vm.WardId.Value);
-                }
-                else
-                {
-                    this.db.AddInParameter(com, "WardId", DbType.Int32, DBNull.Value);
-                }
-
+                // Nullable string/int parameters collapsed to one-liners.
+                // Model validation already enforced required fields; the
+                // repository's only job here is correct DB type mapping.
+                this.db.AddInParameter(com, "Name",
+                    DbType.String, string.IsNullOrEmpty(vm.Name) ? (object)DBNull.Value : vm.Name);
+                this.db.AddInParameter(com, "Email",
+                    DbType.String, string.IsNullOrEmpty(vm.Email) ? (object)DBNull.Value : vm.Email);
+                this.db.AddInParameter(com, "Contact",
+                    DbType.String, string.IsNullOrEmpty(vm.Contact) ? (object)DBNull.Value : vm.Contact);
+                this.db.AddInParameter(com, "DOB",
+                    DbType.DateTime, vm.DOB.HasValue ? (object)vm.DOB.Value : DBNull.Value);
+                this.db.AddInParameter(com, "AddressLine",
+                    DbType.String, string.IsNullOrEmpty(vm.AddressLine) ? (object)DBNull.Value : vm.AddressLine);
+                this.db.AddInParameter(com, "CityId",
+                    DbType.Int32, (vm.CityId.HasValue && vm.CityId.Value > 0) ? (object)vm.CityId.Value : DBNull.Value);
+                this.db.AddInParameter(com, "WardId",
+                    DbType.Int32, (vm.WardId.HasValue && vm.WardId.Value > 0) ? (object)vm.WardId.Value : DBNull.Value);
                 this.db.AddInParameter(com, "RoleId", DbType.Int32, vm.RoleId);
-
-                if (vm.DepartmentId.HasValue && vm.DepartmentId.Value > 0)
-                {
-                    this.db.AddInParameter(com, "DeptId", DbType.Int32, vm.DepartmentId.Value);
-                }
-                else
-                {
-                    this.db.AddInParameter(com, "DeptId", DbType.Int32, DBNull.Value);
-                }
-
-                if (!String.IsNullOrEmpty(vm.Designation))
-                {
-                    this.db.AddInParameter(com, "Designation", DbType.String, vm.Designation);
-                }
-                else
-                {
-                    this.db.AddInParameter(com, "Designation", DbType.String, DBNull.Value);
-                }
-
+                this.db.AddInParameter(com, "DeptId",
+                    DbType.Int32, (vm.DepartmentId.HasValue && vm.DepartmentId.Value > 0) ? (object)vm.DepartmentId.Value : DBNull.Value);
+                this.db.AddInParameter(com, "Designation",
+                    DbType.String, string.IsNullOrEmpty(vm.Designation) ? (object)DBNull.Value : vm.Designation);
                 this.db.AddInParameter(com, "PassHash", DbType.Binary, passHash);
                 this.db.AddInParameter(com, "PassSalt", DbType.Binary, passSalt);
 
                 this.db.ExecuteNonQuery(com);
-                newConsumerId = Convert.ToInt32(this.db.GetParameterValue(com, "NewConsumerId")); // Read in the output parameter value
+                newConsumerId = Convert.ToInt32(this.db.GetParameterValue(com, "NewConsumerId"));
             }
             catch (SqlException ex)
             {
                 if (ex.Number == 2627 || ex.Number == 2601)
-                {
                     throw new DataAccessException("An account with this email address already exists.", "Auth_Register", ex);
-                }
                 throw new DataAccessException("Registration failed due to a database error.", "Auth_Register", ex);
             }
 
-            return newConsumerId; // Return whether ID was returned
+            return newConsumerId;
         }
 
         /// <summary>
@@ -154,32 +93,94 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("Auth_GetCredentialByEmail");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Auth_GetCredentialByEmail");
                 this.db.AddInParameter(com, "Email", DbType.String, email);
                 DataSet ds = this.db.ExecuteDataSet(com);
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
-                {
                     return MapCredential(ds.Tables[0].Rows[0]);
-                }
+
+                return null; // No row → user doesn't exist (not a DB failure)
             }
-            catch (Exception ex)
+            catch (SqlException ex)
             {
-                //FileLogger.Log(ex, "AuthRepository.GetCredentialByEmail");
+                // A real DB outage must not silently collapse into "user not found".
+                throw new DataAccessException(
+                    "Failed to retrieve credentials. Please try again later.",
+                    "Auth_GetCredentialByEmail", ex);
+            }
+        }
+
+        /// <summary>
+        /// Fetches a Consumer's profile row by primary key.
+        /// </summary>
+        public Consumer GetConsumerById(int consumerId)
+        {
+            try
+            {
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Consumer_GetById");
+                this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
+                DataSet ds = this.db.ExecuteDataSet(com);
+                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    DataRow row = ds.Tables[0].Rows[0];
+                    return new Consumer
+                    {
+                        ConsumerId = Convert.ToInt32(row["ConsumerId"]),
+                        Name       = Convert.ToString(row["Name"]),
+                        Email      = Convert.ToString(row["Email"]),
+                        Contact    = Convert.ToString(row["Contact"]),
+                        DOB        = row["DOB"] is DBNull ? (DateTime?)null : Convert.ToDateTime(row["DOB"]),
+                        AddressLine= row["AddressLine"] is DBNull ? null : Convert.ToString(row["AddressLine"]),
+                        CityId     = row["CityId"] is DBNull ? (int?)null : Convert.ToInt32(row["CityId"]),
+                        WardId     = row["WardId"] is DBNull ? (int?)null : Convert.ToInt32(row["WardId"]),
+                        RoleId     = Convert.ToInt32(row["RoleId"]),
+                        Designation= row["Designation"] is DBNull ? null : Convert.ToString(row["Designation"]),
+                        IsActive   = Convert.ToBoolean(row["IsActive"]),
+                    };
+                }
                 return null;
             }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to retrieve consumer profile.", "Consumer_GetById", ex);
+            }
+        }
 
-            return null;
+        /// <summary>
+        /// Updates editable profile fields for a Consumer (name, contact, DOB, address, city, ward, designation).
+        /// </summary>
+        public bool UpdateConsumerProfile(int consumerId, string name, string contact,
+            DateTime? dob, string addressLine, int? cityId, int? wardId, string designation)
+        {
+            try
+            {
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Consumer_UpdateProfile");
+                this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
+                this.db.AddInParameter(com, "Name", DbType.String, name);
+                this.db.AddInParameter(com, "Contact", DbType.String, contact);
+                this.db.AddInParameter(com, "DOB", DbType.Date, dob.HasValue ? (object)dob.Value : DBNull.Value);
+                this.db.AddInParameter(com, "AddressLine", DbType.String, (object)addressLine ?? DBNull.Value);
+                this.db.AddInParameter(com, "CityId", DbType.Int32, cityId.HasValue ? (object)cityId.Value : DBNull.Value);
+                this.db.AddInParameter(com, "WardId", DbType.Int32, wardId.HasValue ? (object)wardId.Value : DBNull.Value);
+                this.db.AddInParameter(com, "Designation", DbType.String, (object)designation ?? DBNull.Value);
+                this.db.ExecuteNonQuery(com);
+                return true;
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to update profile.", "Consumer_UpdateProfile", ex);
+            }
         }
 
         /// <summary>
         /// Fetches cities list from database with safe fallback.
         /// </summary>
-        public System.Collections.Generic.List<City> GetCities()
+        public List<City> GetCities()
         {
-            var list = new System.Collections.Generic.List<City>();
+            var list = new List<City>();
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("City_GetAll");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.City_GetAll");
                 DataSet ds = this.db.ExecuteDataSet(com);
                 if (ds != null && ds.Tables.Count > 0)
                 {
@@ -193,29 +194,23 @@ namespace FixMyCity.Repository
                     }
                 }
             }
-            catch { }
-
-            if (list.Count == 0)
+            catch (SqlException ex)
             {
-                list.Add(new City { CityId = 1, CityName = "Central Metropolitan Area" });
-                list.Add(new City { CityId = 2, CityName = "North District Corporation" });
-                list.Add(new City { CityId = 3, CityName = "South District Corporation" });
-                list.Add(new City { CityId = 4, CityName = "East Suburban Municipal" });
-                list.Add(new City { CityId = 5, CityName = "West Coastal Zone" });
+                throw new DataAccessException("Failed to load cities list.", "City_GetAll", ex);
             }
 
             return list;
         }
 
         /// <summary>
-        /// Fetches wards list for a given city from database with safe fallback.
+        /// Fetches wards list for a given city from database.
         /// </summary>
-        public System.Collections.Generic.List<Ward> GetWardsByCity(int cityId)
+        public List<Ward> GetWardsByCity(int cityId)
         {
-            var list = new System.Collections.Generic.List<Ward>();
+            var list = new List<Ward>();
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("Ward_GetByCityId");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Ward_GetByCityId");
                 this.db.AddInParameter(com, "CityId", DbType.Int32, cityId);
                 DataSet ds = this.db.ExecuteDataSet(com);
                 if (ds != null && ds.Tables.Count > 0)
@@ -231,20 +226,9 @@ namespace FixMyCity.Repository
                     }
                 }
             }
-            catch { }
-
-            if (list.Count == 0)
+            catch (SqlException ex)
             {
-                int effectiveCity = cityId > 0 ? cityId : 1;
-                for (int i = 1; i <= 10; i++)
-                {
-                    list.Add(new Ward
-                    {
-                        WardId = (effectiveCity * 100) + i,
-                        WardName = "Ward #" + i + " (Zone " + effectiveCity + ")",
-                        CityId = effectiveCity
-                    });
-                }
+                throw new DataAccessException("Failed to load wards list.", "Ward_GetByCityId", ex);
             }
 
             return list;
@@ -259,7 +243,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("Auth_UpdateLoginState");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Auth_UpdateLoginState");
                 this.db.AddInParameter(com, "ConsumerCredId", DbType.Int32, consumerCredId);
                 this.db.AddInParameter(com, "FailedLoginCount", DbType.Int32, failedCount);
                 this.db.AddInParameter(com, "IsLocked", DbType.Boolean, isLocked);
@@ -300,7 +284,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("Auth_UpdatePassword");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Auth_UpdatePassword");
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 this.db.AddInParameter(com, "PassHash", DbType.Binary, passHash);
                 this.db.AddInParameter(com, "PassSalt", DbType.Binary, passSalt);
@@ -322,7 +306,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("Otp_Set");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Otp_Set");
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 this.db.AddInParameter(com, "OTPHash", DbType.Binary, otpHash);
                 this.db.AddInParameter(com, "ValidTill", DbType.DateTime, validTill);
@@ -344,7 +328,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("Otp_GetState");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Otp_GetState");
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 DataSet ds = this.db.ExecuteDataSet(com);
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
@@ -368,7 +352,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("Otp_IncrementAttempts");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Otp_IncrementAttempts");
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 this.db.ExecuteNonQuery(com);
             }
@@ -388,7 +372,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("Otp_MarkUsed");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Otp_MarkUsed");
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 this.db.ExecuteNonQuery(com);
             }
@@ -409,7 +393,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("RefreshToken_Create");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.RefreshToken_Create");
                 this.db.AddInParameter(com, "TokenHash", DbType.String, tokenHash);
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 this.db.AddInParameter(com, "Email", DbType.String, email);
@@ -435,7 +419,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("RefreshToken_GetByHash");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.RefreshToken_GetByHash");
                 this.db.AddInParameter(com, "TokenHash", DbType.String, tokenHash);
                 DataSet ds = this.db.ExecuteDataSet(com);
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
@@ -472,7 +456,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("RefreshToken_Rotate");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.RefreshToken_Rotate");
                 this.db.AddInParameter(com, "OldTokenHash", DbType.String, oldHash);
                 this.db.AddInParameter(com, "NewTokenHash", DbType.String, newHash);
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
@@ -499,7 +483,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("RefreshToken_RevokeAllForConsumer");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.RefreshToken_RevokeAllForConsumer");
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 this.db.ExecuteNonQuery(com);
             }

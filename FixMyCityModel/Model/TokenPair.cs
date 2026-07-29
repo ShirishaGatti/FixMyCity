@@ -1,6 +1,6 @@
 using System;
 
-namespace FixMyCity.Model
+namespace FixMyCityModel.Model
 {
     // Returned by the service after a successful login/refresh.
     // RefreshToken here is the RAW value — only ever exists in memory

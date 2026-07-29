@@ -1,5 +1,6 @@
-@using FixMyCity.ViewModel
-@model FixMyCityModel.RegisterViewModel
+@using FixMyCityModel.ViewModel
+@using FixMyCityModel.Model
+@model FixMyCityModel.ViewModel.RegisterViewModel
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewBag.Title = "Register Citizen Account";
@@ -74,6 +75,13 @@
                                     @Html.TextBoxFor(m => m.DOB, "{0:yyyy-MM-dd}", new { type = "date", @class = "form-control bg-dark border-secondary text-white custom-input" })
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                @Html.LabelFor(m => m.Designation, "Designation", new { @class = "form-label text-white-50 small fw-semibold" })
+                                <div class="input-group">
+                                    <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-briefcase-fill"></i></span>
+                                    @Html.TextBoxFor(m => m.Designation, new { @class = "form-control bg-dark border-secondary text-white custom-input", placeholder = "e.g. Resident, Shop Owner (optional)" })
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -87,7 +95,7 @@
                                 @Html.LabelFor(m => m.CityId, "City Municipal Area *", new { @class = "form-label text-white-50 small fw-semibold" })
                                 <div class="input-group">
                                     <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-building"></i></span>
-                                    @Html.DropDownListFor(m => m.CityId, (IEnumerable<SelectListItem>)ViewBag.Cities, "-- Select City --", new { @class = "form-select bg-dark border-secondary text-white custom-input", id = "CityId" })
+                                    @Html.DropDownListFor(m => m.CityId, new SelectList(Model.Cities ?? System.Linq.Enumerable.Empty<FixMyCityModel.Model.City>(), "CityId", "CityName", Model.CityId), "-- Select City --", new { @class = "form-select bg-dark border-secondary text-white custom-input", id = "CityId" })
                                 </div>
                                 @Html.ValidationMessageFor(m => m.CityId, "", new { @class = "text-danger small mt-1" })
                             </div>
@@ -96,7 +104,7 @@
                                 @Html.LabelFor(m => m.WardId, "Ward District *", new { @class = "form-label text-white-50 small fw-semibold" })
                                 <div class="input-group">
                                     <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-pin-map-fill"></i></span>
-                                    @Html.DropDownListFor(m => m.WardId, (IEnumerable<SelectListItem>)ViewBag.Wards, "-- Select Ward --", new { @class = "form-select bg-dark border-secondary text-white custom-input", id = "WardId" })
+                                    @Html.DropDownListFor(m => m.WardId, new SelectList(Model.Wards ?? System.Linq.Enumerable.Empty<Ward>(), "WardId", "WardName", Model.WardId), "-- Select Ward --", new { @class = "form-select bg-dark border-secondary text-white custom-input", id = "WardId" })
                                 </div>
                                 @Html.ValidationMessageFor(m => m.WardId, "", new { @class = "text-danger small mt-1" })
                             </div>

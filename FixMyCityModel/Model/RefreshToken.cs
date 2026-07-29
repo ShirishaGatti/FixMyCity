@@ -1,6 +1,6 @@
 using System;
 
-namespace FixMyCity.Model
+namespace FixMyCityModel.Model
 {
     // Maps Complaint.RefreshToken (see SQL/Auth_Schema_Additions.sql —
     // this table is NOT in the original complaints.sql and had to be added,

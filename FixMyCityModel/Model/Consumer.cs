@@ -1,6 +1,6 @@
 using System;
 
-namespace FixMyCity.Model
+namespace FixMyCityModel.Model
 {
     // Maps Complaint.Consumer
     // "Consumer" here is the single user table for the whole system —

@@ -234,6 +234,7 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AdminController.cs" />
+    <Compile Include="Controllers\ComplaintController.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
@@ -252,6 +253,10 @@
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="service\AuthService.cs" />
+    <Compile Include="service\ComplaintService.cs" />
+    <Compile Include="service\ConsumerService.cs" />
+    <Compile Include="service\IComplaintService.cs" />
+    <Compile Include="service\IConsumerService.cs" />
     <Compile Include="service\MailService.cs" />
     <Compile Include="service\IAuthService.cs" />
     <Compile Include="Startup.cs" />
@@ -261,7 +266,9 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\css\all.min.css" />
     <Content Include="Content\css\aos.css" />
+    <Content Include="Content\css\auth.css" />
     <Content Include="Content\css\bootstrap.min.css" />
+    <Content Include="Content\css\citizen.css" />
     <Content Include="Content\css\magnific-popup.css" />
     <Content Include="Content\css\style.css" />
     <Content Include="Content\css\swiper-bundle.min.css" />
@@ -294,6 +301,7 @@
     <Content Include="Content\img\testimonial\3.jpg" />
     <Content Include="Content\img\testimonial\4.jpg" />
     <Content Include="Content\js\aos.js" />
+    <Content Include="Content\js\Auth.js" />
     <Content Include="Content\js\bootstrap.bundle.min.js" />
     <Content Include="Content\js\bootstrap.min.js" />
     <Content Include="Content\js\chart.umd.min.js" />
@@ -359,6 +367,10 @@
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Account\VerifyOtp.cshtml" />
     <Content Include="Views\Account\LoginOtp.html" />
+    <Content Include="Views\Complaint\Home.cshtml" />
+    <Content Include="Views\Shared\_CitizenLayout.cshtml" />
+    <Content Include="Views\Complaint\Profile.cshtml" />
+    <Content Include="Views\Complaint\MyComplaints.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

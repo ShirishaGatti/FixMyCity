@@ -1,12 +1,11 @@
 
 using FixMyCity.Exceptions;
 using FixMyCity.Infrastructure;
-using FixMyCity.Model;
-using FixMyCity.Models;
 using FixMyCity.Service;
-using FixMyCityModel;
+using FixMyCityModel.Model;
 using FixMyCityModel.ViewModel;
 using System;
+using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
@@ -15,17 +14,17 @@ namespace FixMyCity.Controllers
     public class AccountController : Controller
     {
         private readonly IAuthService _authService;
-        private readonly FixMyCity.Repository.IAuthRepository _authRepo;
+        //private readonly FixMyCity.Repository.IAuthRepository _authRepo;
         private readonly IMailService _emailService;
 
-        public AccountController() : this(new AuthService(), new FixMyCity.Repository.AuthRepository(), new MailService()) { }
-        public AccountController(IAuthService authService, FixMyCity.Repository.IAuthRepository authRepo, IMailService emailService)
+        //  public AccountController() : this(new AuthService(){ }
+        public AccountController() : this(new AuthService(), new MailService()) { }
+
+        public AccountController(IAuthService authService, IMailService emailService)
         {
             _authService = authService;
-            _authRepo = authRepo;
             _emailService = emailService;
         }
-
         /* private void PopulateCitiesAndWards(int? selectedCityId = null, int? selectedWardId = null)
          {
              var cities = _authRepo.GetCities();
@@ -35,13 +34,14 @@ namespace FixMyCity.Controllers
              var wards = _authRepo.GetWardsByCity(cityId);
              ViewBag.Wards = new SelectList(wards, "WardId", "WardName", selectedWardId);
          }*/
-        private void PopulateCitiesAndWards(RegisterViewModel vm)
+        private void PopulateCitiesAndWards(RegisterViewModel vm = null)
         {
-            var cities = _authRepo.GetCities();
-            vm.Cities = new SelectList(cities, "CityId", "CityName", vm.CityId);
+            if (vm == null) vm = new RegisterViewModel();
+            var cities = _authService.GetCities();
+            vm.Cities = cities;
 
             int cityId = vm.CityId ?? (cities.Count > 0 ? cities[0].CityId : 1);
-            vm.Wards = new SelectList(_authRepo.GetWardsByCity(cityId), "WardId", "WardName", vm.WardId);
+            vm.Wards = _authService.GetWardsByCity(cityId);
         }
 
         // ===========================
@@ -50,18 +50,26 @@ namespace FixMyCity.Controllers
         [HttpGet]
         public ActionResult Register()
         {
-            PopulateCitiesAndWards();
-            return View(new RegisterViewModel());
+            var vm = new RegisterViewModel();
+            PopulateCitiesAndWards(vm);
+            return View(vm);
         }
 
         [HttpGet]
         public JsonResult GetWards(int cityId)
         {
-            var wards = _authRepo.GetWardsByCity(cityId);
-            var result = System.Linq.Enumerable.Select(wards, w => new { id = w.WardId, name = w.WardName });
-            return Json(result, JsonRequestBehavior.AllowGet);
+            try
+            {
+                var wards = _authService.GetWardsByCity(cityId);
+                var result = wards.Select(w => new { id = w.WardId, name = w.WardName });
+                return Json(result, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 500;
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Register(RegisterViewModel vm)
@@ -69,8 +77,13 @@ namespace FixMyCity.Controllers
             if (!ModelState.IsValid)
             {
                 if (Request.IsAjaxRequest())
-                    return Json(new { success = false, message = "Please correct the highlighted fields." });
-                PopulateCitiesAndWards(vm.CityId, vm.WardId);
+                {
+                    var errors = string.Join(" | ", System.Linq.Enumerable.Select(
+                        System.Linq.Enumerable.SelectMany(ModelState.Values, v => v.Errors),
+                        e => e.ErrorMessage));
+                    return Json(new { success = false, message = "Please correct the highlighted fields: " + errors });
+                }
+                PopulateCitiesAndWards(vm);
                 return View(vm);
             }
 
@@ -88,7 +101,7 @@ namespace FixMyCity.Controllers
                 if (Request.IsAjaxRequest())
                     return Json(new { success = false, message = ex.Message, code = ex.ErrorCode });
                 ModelState.AddModelError("", ex.Message);
-                PopulateCitiesAndWards(vm.CityId, vm.WardId);
+                PopulateCitiesAndWards(vm);
                 return View(vm);
             }
             catch (DataAccessException ex)
@@ -96,7 +109,7 @@ namespace FixMyCity.Controllers
                 if (Request.IsAjaxRequest())
                     return Json(new { success = false, message = ex.Message });
                 ModelState.AddModelError("", ex.Message);
-                PopulateCitiesAndWards(vm.CityId, vm.WardId);
+                PopulateCitiesAndWards(vm);
                 return View(vm);
             }
             catch (Exception)
@@ -105,7 +118,7 @@ namespace FixMyCity.Controllers
                 if (Request.IsAjaxRequest())
                     return Json(new { success = false, message = msg });
                 ModelState.AddModelError("", msg);
-                PopulateCitiesAndWards(vm.CityId, vm.WardId);
+                PopulateCitiesAndWards(vm);
                 return View(vm);
             }
         }
@@ -162,9 +175,13 @@ namespace FixMyCity.Controllers
                 ModelState.AddModelError("", ex.Message);
                 return View(vm);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                string msg = "Invalid email or password. Please try again.";
+                // Do NOT reuse the "Invalid email or password" message here.
+                // This catch handles infrastructure failures (mail server down,
+                // token creation error, etc.) — they are unrelated to credentials
+                // and deserve a distinct, honest message.
+                string msg = "An unexpected error occurred. Please try again later.";
                 if (Request.IsAjaxRequest())
                     return Json(new { success = false, message = msg });
                 ModelState.AddModelError("", msg);

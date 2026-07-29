@@ -1,6 +1,6 @@
 using System;
 
-namespace FixMyCity.Model
+namespace FixMyCityModel.Model
 {
     // Maps Complaint.Role
     // Seed rows expected: 1 = Citizen, 2 = SupportExecutive, 3 = Admin

@@ -1,5 +1,5 @@
 ﻿using System.Security.Claims;
-
+using System.Web;
 namespace FixMyCity.Infrastructure
 {
     // Abstraction over "who is the current user" so controllers/services
@@ -15,46 +15,44 @@ namespace FixMyCity.Infrastructure
         bool IsLoggedIn { get; }
     }
 
-    // Reads identity off the validated JWT (set onto HttpContext.User by
-    // RoleAuthorizeAttribute) instead of Session — this is what makes the
-    // "rotating JWT" auth stateless across web-farm nodes.
-    public class JwtSessionContext : ISessionContext
-    {
-        private readonly ClaimsPrincipal _principal;
 
-        public JwtSessionContext()
+        public class JwtSessionContext : ISessionContext
         {
-            var token = JwtHelper.GetTokenFromRequest();
-            _principal = token != null ? JwtHelper.ValidateToken(token) : null;
-        }
+            // Read HttpContext.Current.User lazily instead of re-parsing the
+            // raw cookie in the constructor. RoleAuthorizeAttribute runs
+            // *before* the action (and after this controller is constructed)
+            // and may silently rotate an expired access token — re-deriving
+            // from the original cookie here would miss that rotation and
+            // read a stale/expired token for the rest of the request.
+            private ClaimsPrincipal Principal => HttpContext.Current?.User as ClaimsPrincipal;
 
-        public int ConsumerId
-        {
-            get
+            public int ConsumerId
             {
-                var claim = _principal?.FindFirst("ConsumerId");
-                return claim != null ? int.Parse(claim.Value) : 0;
+                get
+                {
+                    var claim = Principal?.FindFirst("ConsumerId");
+                    return claim != null ? int.Parse(claim.Value) : 0;
+                }
             }
-        }
 
-        public int RoleId
-        {
-            get
+            public int RoleId
             {
-                var claim = _principal?.FindFirst("RoleId");
-                return claim != null ? int.Parse(claim.Value) : 0;
+                get
+                {
+                    var claim = Principal?.FindFirst("RoleId");
+                    return claim != null ? int.Parse(claim.Value) : 0;
+                }
             }
-        }
 
-        public string Email
-        {
-            get
+            public string Email
             {
-                var claim = _principal?.FindFirst("Email");
-                return claim?.Value ?? "";
+                get
+                {
+                    var claim = Principal?.FindFirst("Email");
+                    return claim?.Value ?? "";
+                }
             }
-        }
 
-        public bool IsLoggedIn => ConsumerId > 0;
+            public bool IsLoggedIn => ConsumerId > 0;
+        }
     }
-}

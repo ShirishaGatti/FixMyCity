@@ -7,6 +7,7 @@
 // =============================================
 
 using FixMyCity.Exceptions;
+using FixMyCity.Infrastructure;
 using System;
 using System.Data.SqlClient;
 using System.Web.Mvc;
@@ -70,46 +71,9 @@ namespace FixMyCity.Filters
             if (ex is DataAccessException) return "A database error occurred. Please try again later.";
             return "Something went wrong. Please try again or contact support.";
         }
+    
+
+  
     }
 
-    // Minimal stand-ins — swap for your real Serilog/file/db sinks.
-    public static class FileLogger
-    {
-        public static void Log(Exception ex, string url)
-        {
-            try
-            {
-                string logPath = System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/Logs/errors.log");
-                if (!string.IsNullOrEmpty(logPath))
-                {
-                    string dir = System.IO.Path.GetDirectoryName(logPath);
-                    if (!string.IsNullOrEmpty(dir) && !System.IO.Directory.Exists(dir))
-                    {
-                        System.IO.Directory.CreateDirectory(dir);
-                    }
-                    System.IO.File.AppendAllText(
-                        logPath,
-                        $"{DateTime.UtcNow:u} | {url} | {ex}\r\n");
-                }
-            }
-            catch
-            {
-                // Logging failure should never throw unhandled exceptions
-            }
-        }
-    }
-
-    public static class DbLogger
-    {
-        public static void Log(Exception ex, string url, string user)
-        {
-            // Intentionally best-effort: logging must never itself throw
-            // and mask the original exception.
-            try
-            {
-                FileLogger.Log(ex, url);
-            }
-            catch { /* swallow — logging is not allowed to crash the request */ }
-        }
-    }
 }

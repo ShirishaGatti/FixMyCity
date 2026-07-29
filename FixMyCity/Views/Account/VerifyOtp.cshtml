@@ -19,7 +19,7 @@
                     It expires in 5 minutes.
                 </p>
             </div>
-
+            <div id="alertContainer"></div>
             @using (Html.BeginForm("VerifyOtp", "Account", FormMethod.Post, new { id = "otpForm" }))
             {
                 @Html.AntiForgeryToken()

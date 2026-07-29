@@ -1,4 +1,4 @@
-namespace FixMyCity.Model
+namespace FixMyCityModel.Model
 {
     // Maps Complaint.Department
     public class Department

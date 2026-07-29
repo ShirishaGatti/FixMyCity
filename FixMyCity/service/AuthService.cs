@@ -1,15 +1,15 @@
 using FixMyCity.Infrastructure;
 using FixMyCity.Exceptions;
-using FixMyCity.Model;
 using FixMyCity.Repository;
 
-using FixMyCity.ViewModel;
 using FixMyCityModel;
 using FixMyCityModel.ViewModel;
 using System;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using FixMyCityModel.Model;
+using System.Collections.Generic;
 
 namespace FixMyCity.Service
 {
@@ -467,6 +467,18 @@ namespace FixMyCity.Service
         {
             return !string.IsNullOrEmpty(password) &&
                    Regex.IsMatch(password, @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_\-+=]).{8,}$");
+        }
+        public List<City> GetCities()
+        {
+            return _repo.GetCities();
+        }
+
+        public List<Ward> GetWardsByCity(int cityId)
+        {
+            if (cityId <= 0)
+                throw new BusinessException("Invalid city.", "INVALID_CITY");
+
+            return _repo.GetWardsByCity(cityId);
         }
     }
 }

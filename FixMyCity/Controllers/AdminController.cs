@@ -1,7 +1,7 @@
 ﻿using FixMyCity.Filters;
 using FixMyCity.Infrastructure;
 using FixMyCity.Service;
-using FixMyCity.ViewModel;
+using FixMyCityModel.ViewModel;
 using System.Web.Mvc;
 
 namespace FixMyCity.Controllers

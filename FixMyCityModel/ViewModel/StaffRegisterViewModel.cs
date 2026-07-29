@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace FixMyCity.ViewModel
+namespace FixMyCityModel.ViewModel
 {
     // Separate from RegisterViewModel on purpose: the public form must never
     // be able to set RoleId/DeptId/Designation (AuthService.Register() forces

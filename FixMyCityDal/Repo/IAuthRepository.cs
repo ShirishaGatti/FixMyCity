@@ -1,5 +1,6 @@
-using FixMyCity.Model;
 using FixMyCityModel;
+using FixMyCityModel.Model;
+using FixMyCityModel.ViewModel;
 using System;
 using System.Collections.Generic;
 
@@ -9,6 +10,8 @@ namespace FixMyCity.Repository
     {
         int Register(RegisterViewModel vm, byte[] passHash, byte[] passSalt);
         ConsumerCredential GetCredentialByEmail(string email);
+        Consumer GetConsumerById(int consumerId);
+        bool UpdateConsumerProfile(int consumerId, string name, string contact, DateTime? dob, string addressLine, int? cityId, int? wardId, string designation);
 
         List<City> GetCities();
         List<Ward> GetWardsByCity(int cityId);

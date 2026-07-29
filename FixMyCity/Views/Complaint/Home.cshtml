@@ -1,0 +1,143 @@
+@{
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+    ViewBag.Title = "Dashboard";
+    ViewBag.ActivePage = "Home";
+    var consumerName = ViewBag.ConsumerName as string ?? "Citizen";
+    var firstName = consumerName.Split(' ')[0];
+}
+
+<!-- Welcome banner -->
+<div class="dash-page-header">
+    <h1>Welcome back, @firstName 👋</h1>
+    <p>Here's a quick overview of FixMyCity and how you can report civic issues in your area.</p>
+</div>
+
+<!-- Benefit cards -->
+<div class="benefit-grid">
+    <div class="benefit-card" data-aos="fade-up">
+        <div class="b-icon" style="background:rgba(21,116,224,0.15);color:#1574e0;">
+            <i class="bi bi-lightning-fill"></i>
+        </div>
+        <h6>Fast Resolution</h6>
+        <p>Complaints are automatically assigned to the right department and tracked in real-time until resolved.</p>
+    </div>
+
+    <div class="benefit-card" data-aos="fade-up" data-aos-delay="80">
+        <div class="b-icon" style="background:rgba(16,185,129,0.15);color:#10b981;">
+            <i class="bi bi-eye-fill"></i>
+        </div>
+        <h6>Full Transparency</h6>
+        <p>Monitor every status update — from submission to resolution — with a complete audit trail.</p>
+    </div>
+
+    <div class="benefit-card" data-aos="fade-up" data-aos-delay="160">
+        <div class="b-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b;">
+            <i class="bi bi-bell-fill"></i>
+        </div>
+        <h6>Instant Updates</h6>
+        <p>Get notified when your complaint is assigned, being worked on, or resolved by the authority.</p>
+    </div>
+
+    <div class="benefit-card" data-aos="fade-up" data-aos-delay="240">
+        <div class="b-icon" style="background:rgba(139,92,246,0.15);color:#8b5cf6;">
+            <i class="bi bi-geo-alt-fill"></i>
+        </div>
+        <h6>Ward-Level Accuracy</h6>
+        <p>Pin your complaint to the exact ward so it reaches the correct local authority without delay.</p>
+    </div>
+
+    <div class="benefit-card" data-aos="fade-up" data-aos-delay="320">
+        <div class="b-icon" style="background:rgba(239,68,68,0.15);color:#ef4444;">
+            <i class="bi bi-shield-check-fill"></i>
+        </div>
+        <h6>Secure & Private</h6>
+        <p>Your data is protected. Complaints are visible only to assigned staff and the concerned department.</p>
+    </div>
+
+    <div class="benefit-card" data-aos="fade-up" data-aos-delay="400">
+        <div class="b-icon" style="background:rgba(236,144,5,0.15);color:#ec9005;">
+            <i class="bi bi-graph-up-arrow"></i>
+        </div>
+        <h6>Impact Tracking</h6>
+        <p>See complaint statistics for your ward and contribute to measurable civic improvement.</p>
+    </div>
+</div>
+
+<!-- How to file a complaint -->
+<div class="dash-card">
+    <div class="dash-card-header">
+        <span class="dash-card-title">
+            <i class="bi bi-list-ol me-2" style="color:var(--accent)"></i>
+            How to File a Complaint
+        </span>
+        <a href="@Url.Action("MyComplaints", "Complaint")" class="btn-dash-primary">
+            <i class="bi bi-plus-circle-fill"></i> File Now
+        </a>
+    </div>
+
+    <ol class="steps-list">
+        <li class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-line"></div>
+            <div class="step-content">
+                <h6>Navigate to My Complaints</h6>
+                <p>Click <strong>My Complaints</strong> in the sidebar or hit the <em>File Now</em> button above.</p>
+            </div>
+        </li>
+        <li class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-line"></div>
+            <div class="step-content">
+                <h6>Choose a Category</h6>
+                <p>Select the department best suited to your issue — Roads, Water, Waste, Lighting, or General.</p>
+            </div>
+        </li>
+        <li class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-line"></div>
+            <div class="step-content">
+                <h6>Describe the Issue</h6>
+                <p>Provide a clear title, detailed description, and exact location (ward + landmark if possible).</p>
+            </div>
+        </li>
+        <li class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-line"></div>
+            <div class="step-content">
+                <h6>Submit &amp; Track</h6>
+                <p>Your complaint is logged instantly. Track its status and resolution timeline right here on the dashboard.</p>
+            </div>
+        </li>
+    </ol>
+</div>
+
+<!-- Quick categories -->
+<div class="dash-card">
+    <div class="dash-card-header">
+        <span class="dash-card-title"><i class="bi bi-grid-fill me-2" style="color:var(--accent)"></i>Quick Categories</span>
+    </div>
+    <div class="row g-3">
+        @{
+            var cats = new[] {
+                new { Icon = "bi-cone-striped",      Label = "Roads",     Color = "#f59e0b" },
+                new { Icon = "bi-droplet-fill",      Label = "Water",     Color = "#3b82f6" },
+                new { Icon = "bi-trash-fill",        Label = "Waste",     Color = "#10b981" },
+                new { Icon = "bi-lightbulb-fill",    Label = "Lighting",  Color = "#facc15" },
+                new { Icon = "bi-tree-fill",         Label = "Parks",     Color = "#22c55e" },
+                new { Icon = "bi-three-dots",        Label = "General",   Color = "#8b5cf6" },
+            };
+        }
+        @foreach (var cat in cats)
+        {
+            <div class="col-6 col-sm-4 col-md-2">
+                <a href="@Url.Action("MyComplaints", "Complaint")"
+                   class="d-flex flex-column align-items-center gap-2 p-3 rounded-3 text-decoration-none"
+                   style="background:var(--bg3);border:1px solid var(--bd);transition:transform 0.2s;"
+                   onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                    <i class="bi @cat.Icon" style="font-size:1.6rem;color:@cat.Color;"></i>
+                    <span style="font-size:0.75rem;font-weight:600;color:var(--tx2);">@cat.Label</span>
+                </a>
+            </div>
+        }
+    </div>
+</div>

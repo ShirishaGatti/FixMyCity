@@ -11,7 +11,38 @@ $(document).ready(function () {
             eyeIcon.removeClass('bi-eye-slash-fill').addClass('bi-eye-fill');
         }
     });
+    $('#otpForm').on('submit', function (e) {
+        e.preventDefault();
+        var form = $(this);
+        var submitBtn = $('#otpSubmit');
+        var spinner = $('#otpSpinner');
 
+        submitBtn.prop('disabled', true);
+        spinner.removeClass('d-none');
+
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: form.serialize(),
+            success: function (res) {
+                submitBtn.prop('disabled', false);
+                spinner.addClass('d-none');
+
+                if (res.success) {
+                    window.location.href = res.redirectUrl || '/Complaint/MyComplaints';
+                } else {
+                    showAlert('#alertContainer', res.message || 'Invalid or expired OTP.', 'danger');
+                }
+            },
+            error: function (xhr) {
+                submitBtn.prop('disabled', false);
+                spinner.addClass('d-none');
+                var msg = 'An error occurred while verifying OTP. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                showAlert('#alertContainer', msg, 'danger');
+            }
+        });
+    });
     // Dynamic Ward Dropdown population on City change
     $('#CityId').on('change', function () {
         var cityId = $(this).val();

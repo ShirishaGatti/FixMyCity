@@ -1,4 +1,4 @@
-namespace FixMyCityModel
+namespace FixMyCityModel.Model
 {
     public class City
     {

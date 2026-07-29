@@ -1,0 +1,191 @@
+﻿@model FixMyCityModel.ViewModel.MyComplaintsViewModel
+@{
+    Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+    ViewBag.Title = "My Complaints";
+    ViewBag.ActivePage = "MyComplaints";
+}
+
+<div class="dash-page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+        <h1>My Complaints</h1>
+        <p>Track every issue you've reported and file new ones here.</p>
+    </div>
+    <button type="button" class="btn-dash-primary" onclick="openComplaintModal()">
+        <i class="bi bi-plus-circle-fill"></i> File New Complaint
+    </button>
+</div>
+
+<div id="alertContainer" class="mb-3"></div>
+
+<div class="dash-card">
+    @if (Model.Complaints.Count == 0)
+    {
+        <div class="text-center py-5" style="color:var(--tx3);">
+            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+            No complaints filed yet. Click <strong>File New Complaint</strong> to report your first issue.
+        </div>
+    }
+    else
+    {
+        <table class="dash-table">
+            <thead>
+                <tr>
+                    <th>Complaint #</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Filed On</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model.Complaints)
+                {
+                    <tr>
+                        <td class="complaint-num">@c.ComplaintNumber</td>
+                        <td>@c.Title</td>
+                        <td>@c.CategoryName</td>
+                        <td><span class="priority-badge @c.PriorityName.ToLower()">@c.PriorityName</span></td>
+                        <td><span class="status-badge @c.StatusName.ToLower().Replace(" ", "")">@c.StatusName</span></td>
+                        <td>@c.CreatedAt.ToString("dd MMM yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<!-- File Complaint Modal -->
+<div id="complaintModalOverlay" class="dash-modal-overlay" style="display:none;" onclick="closeComplaintModal(event)">
+    <div class="dash-modal" onclick="event.stopPropagation()">
+        <div class="dash-modal-header">
+            <h5>File a New Complaint</h5>
+            <button type="button" class="dash-modal-close" onclick="closeComplaintModal()">&times;</button>
+        </div>
+        @using (Html.BeginForm("FileComplaint", "Complaint", FormMethod.Post, new { id = "complaintForm" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="dash-modal-body">
+                <div class="dash-form-group">
+                    <label class="dash-label">Title *</label>
+                    <input type="text" name="Title" class="dash-input" maxlength="150" placeholder="e.g. Broken streetlight near park" required />
+                </div>
+                <div class="dash-form-group">
+                    <label class="dash-label">Description *</label>
+                    <textarea name="Description" rows="3" class="dash-input" maxlength="1000" placeholder="Describe the issue in detail" required></textarea>
+                </div>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="dash-label">Category *</label>
+                        <select name="CategoryId" class="dash-input" required>
+                            <option value="">-- Select --</option>
+                            @foreach (var cat in Model.Categories)
+                            {
+                                <option value="@cat.CategoryId">@cat.CategoryName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="dash-label">Priority *</label>
+                        <select name="PriorityId" class="dash-input" required>
+                            <option value="">-- Select --</option>
+                            @foreach (var p in Model.Priorities)
+                            {
+                                <option value="@p.PriorityId">@p.PriorityName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="row g-2 mt-1">
+                    <div class="col-6">
+                        <label class="dash-label">City *</label>
+                        <select name="CityId" id="complaintCityId" class="dash-input" required>
+                            <option value="">-- Select --</option>
+                            @foreach (var city in Model.Cities)
+                            {
+                                <option value="@city.CityId">@city.CityName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="dash-label">Ward *</label>
+                        <select name="WardId" id="complaintWardId" class="dash-input" required>
+                            <option value="">-- Select City First --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="dash-form-group mt-2">
+                    <label class="dash-label">Address *</label>
+                    <input type="text" name="AddressLine" class="dash-input" maxlength="250" placeholder="House/Street/Area" required />
+                </div>
+                <div class="dash-form-group">
+                    <label class="dash-label">Landmark</label>
+                    <input type="text" name="Landmark" class="dash-input" maxlength="150" placeholder="Optional" />
+                </div>
+            </div>
+            <div class="dash-modal-footer">
+                <button type="button" class="btn-dash-outline" onclick="closeComplaintModal()">Cancel</button>
+                <button type="submit" class="btn-dash-primary" id="complaintSubmitBtn">
+                    <span class="spinner-border spinner-border-sm d-none" id="complaintSpinner"></span>
+                    Submit Complaint
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        function openComplaintModal() { document.getElementById('complaintModalOverlay').style.display = 'flex'; }
+        function closeComplaintModal(e) {
+            if (e) e.stopPropagation();
+            document.getElementById('complaintModalOverlay').style.display = 'none';
+        }
+
+        $('#complaintCityId').on('change', function () {
+            var cityId = $(this).val();
+            var wardSelect = $('#complaintWardId');
+            wardSelect.empty().append('<option value="">-- Select Ward --</option>');
+            if (cityId) {
+                $.ajax({
+                    url: '/Account/GetWards',
+                    type: 'GET',
+                    data: { cityId: cityId },
+                    success: function (data) {
+                        $.each(data, function (i, item) {
+                            wardSelect.append($('<option></option>').val(item.id).text(item.name));
+                        });
+                    }
+                });
+            }
+        });
+
+        $('#complaintForm').on('submit', function (e) {
+            e.preventDefault();
+            var submitBtn = $('#complaintSubmitBtn');
+            var spinner = $('#complaintSpinner');
+            submitBtn.prop('disabled', true);
+            spinner.removeClass('d-none');
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function (res) {
+                    submitBtn.prop('disabled', false);
+                    spinner.addClass('d-none');
+                    if (res.success) {
+                        window.location.reload();
+                    } else {
+                        alert(res.message || 'Failed to file complaint.');
+                    }
+                },
+                error: function () {
+                    submitBtn.prop('disabled', false);
+                    spinner.addClass('d-none');
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+    </script>
+}

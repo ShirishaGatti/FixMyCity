@@ -1,6 +1,6 @@
 using System;
 
-namespace FixMyCity.Model
+namespace FixMyCityModel.Model
 {
     // Maps Complaint.ConsumerCredential
     // NOTE: unlike a design with a separate OTP table, this schema keeps

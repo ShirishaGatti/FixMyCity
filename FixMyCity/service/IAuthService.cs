@@ -1,8 +1,8 @@
 ﻿
-using FixMyCity.Model;
-using FixMyCity.ViewModel;
 using FixMyCityModel;
+using FixMyCityModel.Model;
 using FixMyCityModel.ViewModel;
+using System.Collections.Generic;
 
 namespace FixMyCity.Service
 {
@@ -26,5 +26,8 @@ namespace FixMyCity.Service
         TokenPair IssueTokenPair(int consumerId, int roleId, string email, bool rememberMe);
         TokenPair TryRefresh(string rawRefreshToken);
         void RevokeByRawRefreshToken(string rawRefreshToken);
+        List<City> GetCities();
+
+        List<Ward> GetWardsByCity(int cityId);
     }
 }
