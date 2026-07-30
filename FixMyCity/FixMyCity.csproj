@@ -79,9 +79,8 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.IdentityModel.JsonWebTokens, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.IdentityModel.JsonWebTokens">
       <HintPath>..\packages\Microsoft.IdentityModel.JsonWebTokens.5.3.0\lib\net451\Microsoft.IdentityModel.JsonWebTokens.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.IdentityModel.Logging, Version=5.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.IdentityModel.Logging.5.3.0\lib\net451\Microsoft.IdentityModel.Logging.dll</HintPath>
@@ -130,8 +129,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.IdentityModel.Tokens.Jwt, Version=8.21.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="System.IdentityModel.Tokens.Jwt">
       <HintPath>..\packages\System.IdentityModel.Tokens.Jwt.5.3.0\lib\net45\System.IdentityModel.Tokens.Jwt.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
@@ -247,14 +245,17 @@
     <Compile Include="Infrastructure\FileLogger.cs" />
     <Compile Include="Infrastructure\JwtHelper.cs" />
     <Compile Include="Infrastructure\JwtSessionContext.cs" />
+    <Compile Include="Infrastructure\PdfBuilder.cs" />
     <Compile Include="Infrastructure\RoleIds.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="service\AdminService.cs" />
     <Compile Include="service\AuthService.cs" />
     <Compile Include="service\ComplaintService.cs" />
     <Compile Include="service\ConsumerService.cs" />
+    <Compile Include="service\IAdminService.cs" />
     <Compile Include="service\IComplaintService.cs" />
     <Compile Include="service\IConsumerService.cs" />
     <Compile Include="service\MailService.cs" />
@@ -264,6 +265,7 @@
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\css\admin.css" />
     <Content Include="Content\css\all.min.css" />
     <Content Include="Content\css\aos.css" />
     <Content Include="Content\css\auth.css" />
@@ -312,6 +314,7 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Compile Include="Infrastructure\ConplaintPdfBuilder.cs" />
     <Content Include="Scripts\ai.0.15.0-build58334.js" />
     <Content Include="Scripts\ai.0.15.0-build58334.min.js" />
     <Content Include="Scripts\bootstrap.js" />
@@ -371,6 +374,10 @@
     <Content Include="Views\Shared\_CitizenLayout.cshtml" />
     <Content Include="Views\Complaint\Profile.cshtml" />
     <Content Include="Views\Complaint\MyComplaints.cshtml" />
+    <Content Include="Views\Complaint\ComplaintDetails.cshtml" />
+    <Content Include="Views\Admin\Dashboard.cshtml" />
+    <Content Include="Views\Admin\MasterData.cshtml" />
+    <Content Include="Views\Admin\Users.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

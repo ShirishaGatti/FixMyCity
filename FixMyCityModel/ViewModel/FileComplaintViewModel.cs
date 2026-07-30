@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Web;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
 
@@ -35,5 +36,8 @@ namespace FixMyCityModel.ViewModel
 
         [Required(ErrorMessage = "Please select a ward.")]
         public int WardId { get; set; }
+        public IEnumerable<HttpPostedFileBase> Attachments { get; set; }
+        public int? ComplaintId { get; set; }
+
     }
 }

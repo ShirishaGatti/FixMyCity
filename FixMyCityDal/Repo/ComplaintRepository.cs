@@ -1,17 +1,21 @@
 ﻿using FixMyCity.Exceptions;
 using FixMyCityModel.Model;
+using FixMyCityModel.ViewModel;
 using Microsoft.Practices.EnterpriseLibrary.Data;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Linq;
+using System.Runtime.Caching;
 
 namespace FixMyCity.Repository
 {
     public class ComplaintRepository : IComplaintRepository
     {
         private readonly Database db;
+        private static readonly MemoryCache _cache = MemoryCache.Default;
 
         public ComplaintRepository()
         {
@@ -112,7 +116,223 @@ namespace FixMyCity.Repository
             }
             return list;
         }
+        public int CreateAttachment(int complaintId, string fileName, string contentType, long fileSizeBytes, int uploadedBy)
+        {
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.ComplaintAttachment_Create");
+                db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
+                db.AddInParameter(com, "FileName", DbType.String, fileName);
+                db.AddInParameter(com, "ContentType", DbType.String, contentType);
+                db.AddInParameter(com, "FileSizeBytes", DbType.Int64, fileSizeBytes);
+                db.AddInParameter(com, "UploadedBy", DbType.Int32, uploadedBy);
+                db.AddOutParameter(com, "NewAttachmentId", DbType.Int32, 4);
+                db.ExecuteNonQuery(com);
+                ClearComplaintCache(uploadedBy);
+                return Convert.ToInt32(db.GetParameterValue(com, "NewAttachmentId"));
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to save attachment record.", "ComplaintAttachment_Create", ex);
+            }
+        }
 
+        public List<Attachment> GetAttachmentsByComplaintId(int complaintId, int consumerId)
+        {
+            var list = new List<Attachment>();
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.ComplaintAttachment_GetByComplaintId");
+                db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
+                db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
+                DataSet ds = db.ExecuteDataSet(com);
+                if (ds != null && ds.Tables.Count > 0)
+                    foreach (DataRow row in ds.Tables[0].Rows)
+                        list.Add(MapAttachment(row));
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to retrieve attachments.", "ComplaintAttachment_GetByComplaintId", ex);
+            }
+            return list;
+        }
+
+        public Attachment GetAttachmentById(int attachmentId, int consumerId)
+        {
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.ComplaintAttachment_GetById");
+                db.AddInParameter(com, "AttachmentId", DbType.Int32, attachmentId);
+                db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
+                DataSet ds = db.ExecuteDataSet(com);
+                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                    return MapAttachment(ds.Tables[0].Rows[0]);
+                return null;
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to retrieve attachment.", "ComplaintAttachment_GetById", ex);
+            }
+        }
+
+        public void DeleteAttachment(int attachmentId, int consumerId)
+        {
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.ComplaintAttachment_Delete");
+                db.AddInParameter(com, "AttachmentId", DbType.Int32, attachmentId);
+                db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
+                db.ExecuteNonQuery(com);
+                ClearComplaintCache(consumerId);
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to delete attachment.", "ComplaintAttachment_Delete", ex);
+            }
+        }
+        // ComplaintRepository.cs — cache field, same shape as ItemRepository
+
+        public int SaveComplaint(Complaint c)
+        {
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_Save");
+                db.AddInParameter(com, "ComplaintId", DbType.Int32, c.ComplaintId == 0 ? (object)DBNull.Value : c.ComplaintId);
+                db.AddInParameter(com, "Title", DbType.String, c.Title);
+                db.AddInParameter(com, "Description", DbType.String, c.Description);
+                db.AddInParameter(com, "CategoryId", DbType.Int32, c.CategoryId);
+                db.AddInParameter(com, "PriorityId", DbType.Int32, c.PriorityId);
+                db.AddInParameter(com, "RaisedBy", DbType.Int32, c.RaisedBy);
+                db.AddInParameter(com, "AddressLine", DbType.String, c.AddressLine);
+                db.AddInParameter(com, "Landmark", DbType.String, (object)c.Landmark ?? DBNull.Value);
+                db.AddInParameter(com, "WardId", DbType.Int32, c.WardId);
+                db.AddInParameter(com, "CityId", DbType.Int32, c.CityId);
+                db.AddOutParameter(com, "SavedComplaintId", DbType.Int32, 4);
+                db.ExecuteNonQuery(com);
+                int savedId = Convert.ToInt32(db.GetParameterValue(com, "SavedComplaintId"));
+                ClearComplaintCache(c.RaisedBy);
+                return savedId;
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to save complaint.", "Complaint_Save", ex);
+            }
+        }
+
+        public bool DeleteComplaint(int complaintId, int consumerId)
+        {
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_Delete");
+                db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
+                db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
+                int rows = db.ExecuteNonQuery(com);
+                ClearComplaintCache(consumerId);
+                return rows > 0;
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to delete complaint.", "Complaint_Delete", ex);
+            }
+        }
+
+        public ComplaintSearchResult Search(int consumerId, ComplaintListFilterViewModel filter)
+        {
+            string cacheKey = GenerateSearchCacheKey(consumerId, filter);
+
+            if (_cache.Contains(cacheKey))
+                return (ComplaintSearchResult)_cache.Get(cacheKey);
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_Search");
+                db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
+                db.AddInParameter(com, "Title", DbType.String, string.IsNullOrWhiteSpace(filter.Title) ? (object)DBNull.Value : filter.Title);
+                db.AddInParameter(com, "CategoryId", DbType.Int32, (object)filter.CategoryId ?? DBNull.Value);
+                db.AddInParameter(com, "StatusId", DbType.Int32, (object)filter.StatusId ?? DBNull.Value);
+                db.AddInParameter(com, "DateFrom", DbType.Date, (object)filter.DateFrom ?? DBNull.Value);
+                db.AddInParameter(com, "DateTo", DbType.Date, (object)filter.DateTo ?? DBNull.Value);
+                db.AddInParameter(com, "SortField", DbType.String, filter.SortField);
+                db.AddInParameter(com, "SortDirection", DbType.String, filter.SortDirection);
+                db.AddInParameter(com, "PageNumber", DbType.Int32, filter.PageNumber);
+                db.AddInParameter(com, "PageSize", DbType.Int32, filter.PageSize);
+
+                DataSet ds = db.ExecuteDataSet(com);
+                var list = new List<Complaint>();
+                int totalCount = 0;
+                if (ds != null && ds.Tables.Count > 0)
+                {
+                    foreach (DataRow row in ds.Tables[0].Rows)
+                        list.Add(MapComplaint(row));
+                    if (ds.Tables[0].Rows.Count > 0)
+                        totalCount = Convert.ToInt32(ds.Tables[0].Rows[0]["TotalCount"]);
+                }
+
+                var result = new ComplaintSearchResult
+                {
+                    Complaints = list,
+                    TotalCount = totalCount
+                };
+
+                _cache.Add(cacheKey, result,
+                    new CacheItemPolicy
+                    {
+                        AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(10)
+                    });
+
+                return result;
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to search complaints.", "Complaint_Search", ex);
+            }
+        }
+
+        public List<ComplaintStatus> GetStatuses()
+        {
+            var list = new List<ComplaintStatus>();
+            try
+            {
+                DataSet ds = db.ExecuteDataSet(db.GetStoredProcCommand("FixMyCity.Status_GetAll"));
+                if (ds != null && ds.Tables.Count > 0)
+                    foreach (DataRow row in ds.Tables[0].Rows)
+                        list.Add(new ComplaintStatus { StatusId = Convert.ToInt32(row["StatusId"]), StatusName = Convert.ToString(row["StatusName"]) });
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to retrieve statuses.", "Status_GetAll", ex);
+            }
+            return list;
+        }
+
+        private static string GenerateSearchCacheKey(int consumerId, ComplaintListFilterViewModel f) =>
+            $"ComplaintSearch_{consumerId}_{f.Title}_{f.CategoryId}_{f.StatusId}_{f.DateFrom:yyyyMMdd}_{f.DateTo:yyyyMMdd}_{f.SortField}_{f.SortDirection}_{f.PageNumber}_{f.PageSize}";
+
+        // Called after any write (save/delete/attachment upload/delete) for this
+        // consumer — a cached search result is now stale the moment their data
+        // changes, so sweep every cache entry keyed to them.
+        private static void ClearComplaintCache(int consumerId)
+        {
+            string prefix = $"ComplaintSearch_{consumerId}_";
+            var staleKeys = _cache.Where(kv => kv.Key.StartsWith(prefix)).Select(kv => kv.Key).ToList();
+            foreach (var key in staleKeys)
+                _cache.Remove(key);
+        }
+        private static Attachment MapAttachment(DataRow row)
+        {
+            var a = new Attachment
+            {
+                AttachmentId = Convert.ToInt32(row["AttachmentId"]),
+                ComplaintId = Convert.ToInt32(row["ComplaintId"]),
+                FileName = Convert.ToString(row["FileName"]),
+                ContentType = row["ContentType"] is DBNull ? null : Convert.ToString(row["ContentType"]),
+                FileSizeBytes = row["FileSizeBytes"] is DBNull ? 0 : Convert.ToInt64(row["FileSizeBytes"]),
+                UploadedBy = Convert.ToInt32(row["UploadedBy"]),
+                CreatedAt = Convert.ToDateTime(row["CreatedAt"])
+            };
+            if (row.Table.Columns.Contains("StatusName"))
+                a.ComplaintStatusName = Convert.ToString(row["StatusName"]);
+            return a;
+        }
         private static Complaint MapComplaint(DataRow row)
         {
             return new Complaint
@@ -142,5 +362,6 @@ namespace FixMyCity.Repository
                 CreatedAt = Convert.ToDateTime(row["CreatedAt"])
             };
         }
+
     }
 }

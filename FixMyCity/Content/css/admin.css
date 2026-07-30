@@ -1,0 +1,191 @@
+﻿/* =====================================================================
+   FixMyCity — Admin console styles.
+   Sits on top of Bootstrap 5 + the existing theme in Content/css/style.css
+   (which already defines --bg1 / --bg2 / --bd / --grad / .gt / .boc / .bgrd).
+   Everything scoped to `.admin-shell` so it never bleeds into citizen pages.
+   ===================================================================== */
+:root {
+    --admin-sidebar-w: 260px;
+    --admin-topbar-h: 66px;
+}
+
+.admin-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #0b1220;
+    color: #e2e8f0;
+}
+html.lm .admin-shell { background: #f5f7fb; color: #1a2233; }
+
+/* Sidebar ------------------------------------------------------------ */
+.admin-sidebar {
+    position: fixed;
+    top: 0; bottom: 0; left: 0;
+    width: var(--admin-sidebar-w);
+    background: rgba(11, 18, 32, 0.95);
+    backdrop-filter: blur(14px);
+    border-right: 1px solid var(--bd, rgba(148,163,184,0.15));
+    padding: 20px 14px;
+    z-index: 1030;
+    overflow-y: auto;
+    transition: transform .25s ease;
+}
+html.lm .admin-sidebar { background: #ffffff; border-right: 1px solid #e2e8f0; }
+
+.admin-brand {
+    display: flex; align-items: center; gap: .6rem;
+    font-weight: 700; font-size: 1.15rem; color: #fff;
+    padding: 6px 8px 18px; text-decoration: none;
+    border-bottom: 1px solid rgba(148,163,184,.12);
+    margin-bottom: 12px;
+}
+html.lm .admin-brand { color: #0b1220; }
+.admin-brand-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--grad, linear-gradient(135deg,#1574e0,#38bdf8));
+    display: flex; align-items: center; justify-content: center; color: #fff;
+}
+
+.admin-nav { list-style: none; padding: 0; margin: 0; }
+.admin-nav-label {
+    font-size: .72rem; text-transform: uppercase; letter-spacing: .1em;
+    color: #94a3b8; padding: 14px 12px 6px;
+}
+.admin-nav .nav-item { list-style: none; }
+.admin-nav .nav-link {
+    display: flex; align-items: center; gap: .75rem;
+    padding: 10px 12px; border-radius: 10px;
+    color: #cbd5e1; text-decoration: none; font-weight: 500;
+    transition: background .18s ease, color .18s ease, transform .18s ease;
+    margin-bottom: 2px;
+}
+.admin-nav .nav-link:hover { background: rgba(59,130,246,.12); color: #fff; transform: translateX(2px); }
+html.lm .admin-nav .nav-link { color: #334155; }
+html.lm .admin-nav .nav-link:hover { color: #0b1220; background: #eef2ff; }
+.admin-nav .nav-link.active {
+    background: var(--grad, linear-gradient(135deg,#1574e0,#38bdf8));
+    color: #fff; box-shadow: 0 4px 14px rgba(21,116,224,.35);
+}
+.admin-nav .nav-link i { font-size: 1.05rem; width: 20px; text-align: center; }
+
+/* Body ---------------------------------------------------------------- */
+.admin-body {
+    margin-left: var(--admin-sidebar-w);
+    padding: 24px 30px 40px;
+    min-height: 100vh;
+}
+@media (max-width: 991px) {
+    .admin-sidebar { transform: translateX(-100%); }
+    .admin-sidebar.open { transform: translateX(0); }
+    .admin-body { margin-left: 0; padding: 16px; }
+}
+
+.admin-topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px; margin-bottom: 22px;
+    background: rgba(30, 41, 59, .55); border: 1px solid rgba(148,163,184,.12);
+    border-radius: 14px; backdrop-filter: blur(10px);
+}
+html.lm .admin-topbar { background: #fff; border: 1px solid #e2e8f0; }
+.admin-topbar h4 { color: inherit; margin: 0; font-weight: 700; letter-spacing: -.01em; }
+
+/* Stat cards --------------------------------------------------------- */
+.stat-card {
+    background: rgba(30,41,59,.55);
+    border: 1px solid rgba(148,163,184,.14);
+    border-radius: 16px; padding: 18px 20px;
+    display: flex; align-items: center; gap: 14px;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+html.lm .stat-card { background: #fff; border-color: #e2e8f0; }
+.stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+.stat-card .icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 1.4rem; flex-shrink: 0;
+}
+.stat-card .value { font-size: 1.75rem; font-weight: 800; margin: 0; line-height: 1.1; color: inherit; }
+.stat-card .label  { color: #94a3b8; font-size: .82rem; margin: 0; }
+
+/* Master data cards -------------------------------------------------- */
+.master-card {
+    background: rgba(30,41,59,.55); border: 1px solid rgba(148,163,184,.14);
+    border-radius: 18px; padding: 22px; cursor: pointer;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+html.lm .master-card { background: #fff; border-color: #e2e8f0; }
+.master-card:hover { transform: translateY(-4px); border-color: #38bdf8; box-shadow: 0 14px 40px rgba(56,189,248,.15); }
+.master-card .icon {
+    width: 54px; height: 54px; border-radius: 14px; margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.5rem;
+}
+.master-card h5 { margin: 0 0 4px; color: inherit; font-weight: 700; }
+.master-card p  { margin: 0; color: #94a3b8; font-size: .85rem; }
+
+/* Blurred modal backdrop --------------------------------------------- */
+.master-modal { display: none; position: fixed; inset: 0; z-index: 1050; }
+.master-modal.active { display: block; }
+.master-modal-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(15,23,42,.55); backdrop-filter: blur(6px);
+    /* pointer-events auto so clicks are captured by backdrop and NOT the
+       elements behind — matches the requirement that background must not
+       be clickable while modal is open. */
+}
+.master-modal-panel {
+    position: relative; z-index: 2;
+    background: #101a2e; border: 1px solid rgba(148,163,184,.2);
+    border-radius: 18px; padding: 26px;
+    width: min(520px, 92vw);
+    margin: 8vh auto 0;
+    box-shadow: 0 30px 80px rgba(0,0,0,.5);
+}
+html.lm .master-modal-panel { background: #fff; border-color: #e2e8f0; }
+.master-modal-panel h5 { color: inherit; font-weight: 700; margin-bottom: 4px; }
+.master-modal-panel .subtitle { color: #94a3b8; font-size: .85rem; margin-bottom: 18px; }
+.master-modal-close {
+    position: absolute; top: 14px; right: 14px; background: transparent;
+    border: 0; color: #94a3b8; font-size: 1.4rem; line-height: 1; cursor: pointer;
+}
+.master-modal-close:hover { color: #f43f5e; }
+
+/* Filter card + table wrapper --------------------------------------- */
+.admin-filter-card {
+    background: rgba(30,41,59,.55); border: 1px solid rgba(148,163,184,.14);
+    border-radius: 16px; padding: 18px 20px; margin-bottom: 20px;
+}
+html.lm .admin-filter-card { background: #fff; border-color: #e2e8f0; }
+
+.admin-table-wrap { background: rgba(30,41,59,.55); border: 1px solid rgba(148,163,184,.14);
+    border-radius: 16px; padding: 4px; overflow: hidden; }
+html.lm .admin-table-wrap { background: #fff; border-color: #e2e8f0; }
+.admin-table-wrap table { color: inherit; margin: 0; }
+.admin-table-wrap thead th {
+    background: rgba(148,163,184,.08); color: #cbd5e1; font-weight: 600;
+    border: 0; cursor: pointer; user-select: none; padding: 14px 12px; white-space: nowrap;
+}
+html.lm .admin-table-wrap thead th { background: #f8fafc; color: #334155; }
+.admin-table-wrap tbody td { border-color: rgba(148,163,184,.08); padding: 12px; vertical-align: middle; }
+.admin-table-wrap .action-btn {
+    background: transparent; border: 0; padding: 4px 8px;
+    color: #94a3b8; font-size: 1rem; cursor: pointer;
+    transition: color .18s ease, transform .18s ease;
+}
+.admin-table-wrap .action-btn:hover { transform: scale(1.15); }
+.admin-table-wrap .action-btn.edit:hover { color: #38bdf8; }
+.admin-table-wrap .action-btn.del:hover  { color: #f43f5e; }
+
+.sort-indicator { font-size: .75rem; opacity: .55; margin-left: 4px; }
+th.sort-active .sort-indicator { opacity: 1; color: #38bdf8; }
+
+/* Small helpers ------------------------------------------------------ */
+.role-badge { padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 600; }
+.role-1 { background: rgba(244,63,94,.18); color: #f43f5e; }   /* Admin */
+.role-2 { background: rgba(56,189,248,.18); color: #38bdf8; }  /* Citizen */
+.role-3 { background: rgba(234,179,8,.20);  color: #eab308; }  /* Officer */
+
+.status-pill { padding: 3px 10px; border-radius: 999px; font-size: .72rem; font-weight: 600;
+    background: rgba(148,163,184,.15); color: #cbd5e1; }
+
+.empty-row { text-align: center; color: #94a3b8; padding: 40px !important; }

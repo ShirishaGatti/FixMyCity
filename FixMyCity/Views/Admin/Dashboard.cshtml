@@ -1,0 +1,253 @@
+﻿@{
+    ViewBag.Title = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";   // Change if you have AdminLayout
+}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+
+<style>
+    .sidebar {
+        min-height: 100vh;
+        background: #212529;
+    }
+
+        .sidebar a {
+            color: white;
+            display: block;
+            padding: 14px 18px;
+            text-decoration: none;
+            transition: .3s;
+        }
+
+            .sidebar a:hover {
+                background: #0d6efd;
+            }
+
+    .stat-card {
+        border: none;
+        border-radius: 15px;
+        transition: .3s;
+        box-shadow: 0 5px 15px rgba(0,0,0,.08);
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        color: white;
+    }
+
+    .table-card {
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,.08);
+    }
+</style>
+
+<div class="container-fluid">
+
+    <div class="row">
+
+        <!-- Sidebar -->
+
+        <div class="col-md-2 sidebar p-0">
+
+            <h4 class="text-center text-white py-4">
+                Admin Panel
+            </h4>
+
+            <a href="@Url.Action("Dashboard","Admin")">
+                <i class="fa fa-chart-line"></i> Dashboard
+            </a>
+
+            <a href="@Url.Action("MasterData","Admin")">
+                <i class="fa fa-layer-group"></i> Master Data
+            </a>
+
+            <a href="@Url.Action("Users","Admin")">
+                <i class="fa fa-users"></i> Users
+            </a>
+
+            <a href="@Url.Action("Complaints","Admin")">
+                <i class="fa fa-file-alt"></i> Complaints
+            </a>
+
+            <a href="@Url.Action("Officers","Admin")">
+                <i class="fa fa-user-shield"></i> Officers
+            </a>
+
+        </div>
+
+        <!-- Content -->
+
+        <div class="col-md-10">
+
+            <h2 class="my-4">
+                Dashboard
+            </h2>
+
+            <div class="row">
+
+                <div class="col-md-3 mb-4">
+                    <div class="card stat-card">
+                        <div class="card-body d-flex justify-content-between">
+                            <div>
+                                <h5>Total Users</h5>
+                                <h2>150</h2>
+                            </div>
+
+                            <div class="icon-circle bg-primary">
+                                <i class="fa fa-users"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-4">
+                    <div class="card stat-card">
+                        <div class="card-body d-flex justify-content-between">
+                            <div>
+                                <h5>Complaints</h5>
+                                <h2>86</h2>
+                            </div>
+
+                            <div class="icon-circle bg-danger">
+                                <i class="fa fa-file-circle-exclamation"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-4">
+                    <div class="card stat-card">
+                        <div class="card-body d-flex justify-content-between">
+                            <div>
+                                <h5>Resolved</h5>
+                                <h2>54</h2>
+                            </div>
+
+                            <div class="icon-circle bg-success">
+                                <i class="fa fa-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 mb-4">
+                    <div class="card stat-card">
+                        <div class="card-body d-flex justify-content-between">
+                            <div>
+                                <h5>Officers</h5>
+                                <h2>18</h2>
+                            </div>
+
+                            <div class="icon-circle bg-warning">
+                                <i class="fa fa-user-shield"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-8">
+
+                    <div class="card table-card">
+
+                        <div class="card-header bg-primary text-white">
+                            Recent Complaints
+                        </div>
+
+                        <div class="card-body">
+
+                            <table class="table table-bordered">
+
+                                <thead>
+
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Citizen</th>
+                                        <th>Category</th>
+                                        <th>Status</th>
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <tr>
+                                        <td>101</td>
+                                        <td>John</td>
+                                        <td>Road Damage</td>
+                                        <td><span class="badge badge-warning">Pending</span></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>102</td>
+                                        <td>Smith</td>
+                                        <td>Garbage</td>
+                                        <td><span class="badge badge-success">Resolved</span></td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="card table-card">
+
+                        <div class="card-header bg-success text-white">
+                            Recent Users
+                        </div>
+
+                        <div class="card-body">
+
+                            <ul class="list-group">
+
+                                <li class="list-group-item">
+                                    Rahul
+                                </li>
+
+                                <li class="list-group-item">
+                                    Priya
+                                </li>
+
+                                <li class="list-group-item">
+                                    Amit
+                                </li>
+
+                                <li class="list-group-item">
+                                    Sneha
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

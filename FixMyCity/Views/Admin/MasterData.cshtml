@@ -1,0 +1,200 @@
+﻿@{
+    ViewBag.Title = "Master Data";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+
+<style>
+      .sidebar {
+        min-height: 100vh;
+        background: #212529;
+    }
+
+        .sidebar a {
+            color: white;
+            display: block;
+            padding: 14px 18px;
+            text-decoration: none;
+            transition: .3s;
+        }
+
+            .sidebar a:hover {
+                background: #0d6efd;
+            }
+
+    .master-card {
+        cursor: pointer;
+        transition: .3s;
+        border-radius: 15px;
+    }
+
+        .master-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,.15);
+        }
+
+    #modalBackground {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+        backdrop-filter: blur(5px);
+        background: rgba(0,0,0,.3);
+        z-index: 1040;
+    }
+
+    #popup {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        width: 80%;
+        max-height: 85%;
+        overflow: auto;
+        background: white;
+        border-radius: 10px;
+        z-index: 1050;
+        padding: 20px;
+    }
+</style>
+
+
+    <div class="container-fluid">
+
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar p-0">
+                <h4 class="text-center text-white py-4">
+                    Admin Panel
+                </h4>
+                <a href="@Url.Action("Dashboard","Admin")">
+                    <i class="fa fa-chart-line"></i> Dashboard
+                </a>
+                <a href="@Url.Action("MasterData","Admin")">
+                    <i class="fa fa-layer-group"></i> Master Data
+                </a>
+                <a href="@Url.Action("Users","Admin")">
+                    <i class="fa fa-users"></i> Users
+                </a>
+                <a href="@Url.Action("Complaints","Admin")">
+                    <i class="fa fa-file-alt"></i> Complaints
+                </a>
+                <a href="@Url.Action("Officers","Admin")">
+                    <i class="fa fa-user-shield"></i> Officers
+                </a>
+            </div>
+            <!-- Main Content -->
+            <div class="col-md-10">
+                <h2 class="my-4">Master Data</h2>
+                <div class="row">
+
+                    <div class="col-md-3 mb-4">
+                        <div class="card master-card" onclick="loadPartial('/Admin/States')">
+                            <div class="card-body text-center">
+                                <i class="fa fa-map fa-3x text-primary"></i>
+                                <h5 class="mt-3">States</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 mb-4">
+                        <div class="card master-card" onclick="loadPartial('/Admin/Districts')">
+                            <div class="card-body text-center">
+                                <i class="fa fa-location-dot fa-3x text-success"></i>
+                                <h5 class="mt-3">Districts</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 mb-4">
+                        <div class="card master-card" onclick="loadPartial('/Admin/Categories')">
+                            <div class="card-body text-center">
+                                <i class="fa fa-list fa-3x text-danger"></i>
+                                <h5 class="mt-3">Categories</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 mb-4">
+                        <div class="card master-card" onclick="loadPartial('/Admin/Departments')">
+                            <div class="card-body text-center">
+                                <i class="fa fa-building fa-3x text-warning"></i>
+                                <h5 class="mt-3">Departments</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 mb-4">
+                        <div class="card master-card" onclick="loadPartial('/Admin/Priorities')">
+                            <div class="card-body text-center">
+                                <i class="fa fa-flag fa-3x text-info"></i>
+                                <h5 class="mt-3">Priorities</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 mb-4">
+                        <div class="card master-card" onclick="loadPartial('/Admin/Statuses')">
+                            <div class="card-body text-center">
+                                <i class="fa fa-circle-check fa-3x text-success"></i>
+                                <h5 class="mt-3">Statuses</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 mb-4">
+                        <div class="card master-card" onclick="loadPartial('/Admin/Roles')">
+                            <div class="card-body text-center">
+                                <i class="fa fa-user-shield fa-3x text-secondary"></i>
+                                <h5 class="mt-3">Roles</h5>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div id="modalBackground"></div>
+
+            <div id="popup">
+
+                <button class="btn btn-danger float-right mb-3" onclick="closePopup()">
+                    Close
+                </button>
+
+                <div id="popupContent"></div>
+
+            </div>
+
+            @section scripts{
+
+                <script>
+
+                    function loadPartial(url) {
+
+                        $("#modalBackground").show();
+
+                        $("#popup").show();
+
+                        $("#popupContent").load(url);
+
+                    }
+
+                    function closePopup() {
+
+                        $("#modalBackground").hide();
+
+                        $("#popup").hide();
+
+                        $("#popupContent").html("");
+
+                    }
+
+                </script>
+
+            }

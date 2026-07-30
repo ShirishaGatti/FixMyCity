@@ -1,0 +1,75 @@
+﻿@model FixMyCityModel.ViewModel.ComplaintDetailsViewModel
+
+<div class="drawer-card-header">
+    <div>
+        <h4>@Model.Complaint.ComplaintNumber</h4>
+        <span class="status-badge @Model.Complaint.StatusName.ToLower().Replace(" ", "")">@Model.Complaint.StatusName</span>
+    </div>
+    <button type="button" class="dash-modal-close" onclick="closeDetailsDrawer()">&times;</button>
+</div>
+
+<div class="drawer-card-body">
+    <h5>@Model.Complaint.Title</h5>
+    <p>@Model.Complaint.Description</p>
+
+    <div class="row g-3 mt-1">
+        <div class="col-md-4"><strong>Category:</strong> @Model.Complaint.CategoryName</div>
+        <div class="col-md-4"><strong>Priority:</strong> <span class="priority-badge @Model.Complaint.PriorityName.ToLower()">@Model.Complaint.PriorityName</span></div>
+        <div class="col-md-4"><strong>Filed:</strong> @Model.Complaint.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")</div>
+        <div class="col-md-4"><strong>Ward:</strong> @Model.Complaint.WardName</div>
+        <div class="col-md-4"><strong>City:</strong> @Model.Complaint.CityName</div>
+        <div class="col-md-4"><strong>Assigned:</strong> @(Model.Complaint.AssigneeName ?? "Not yet assigned")</div>
+    </div>
+
+    <h5 class="mt-4">Attachments</h5>
+    @if (Model.Attachments.Count == 0)
+    {
+        <p style="color:var(--tx3);">No attachments uploaded for this complaint.</p>
+    }
+    else
+    {
+        <div class="attachment-grid">
+            @foreach (var a in Model.Attachments)
+            {
+                <div class="attachment-card" data-attachment-id="@a.AttachmentId">
+                    @if (a.IsImage)
+                    {
+                        <img src="@Url.Action("DownloadAttachment", "Complaint", new { id = a.AttachmentId })" class="attachment-card-thumb" alt="@a.FileName" />
+                    }
+                    else
+                    {
+                        <i class="bi @a.IconClass attachment-card-icon"></i>
+                    }
+                    <div class="attachment-card-name" title="@a.FileName">@a.FileName</div>
+                    <div class="attachment-card-size">@a.FileSizeDisplay</div>
+                    <div class="attachment-card-actions">
+                        <a href="@Url.Action("DownloadAttachment", "Complaint", new { id = a.AttachmentId })" class="btn-dash-outline btn-sm"><i class="bi bi-download"></i></a>
+                        @if (Model.Complaint.StatusName == "Open")
+                        {
+                            <button type="button" class="btn-dash-outline btn-sm text-danger drawer-delete-attachment-btn" data-id="@a.AttachmentId"><i class="bi bi-trash"></i></button>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<script>
+    // Delegated (not $(document).ready-bound) because this markup is
+    // injected via AJAX after the page has already loaded.
+    $('.drawer-delete-attachment-btn').off('click').on('click', function () {
+        var btn = $(this);
+        if (!confirm('Remove this attachment? This cannot be undone.')) return;
+        $.ajax({
+            url: '/Complaint/DeleteAttachment/' + btn.data('id'),
+            type: 'POST',
+            headers: { 'RequestVerificationToken': window.antiForgeryToken },
+            success: function (res) {
+                if (res.success) btn.closest('.attachment-card').fadeOut(200, function () { $(this).remove(); });
+                else alert(res.message);
+            },
+            error: function () { alert('Failed to remove attachment.'); }
+        });
+    });
+</script>

@@ -1,0 +1,278 @@
+﻿@model FixMyCityModel.ViewModel.AdminUserListViewModel
+
+@{
+    ViewBag.Title = "Manage Users";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+
+<style>
+    .sidebar {
+        min-height: 100vh;
+        background: #212529;
+    }
+
+        .sidebar a {
+            color: #fff;
+            display: block;
+            padding: 14px 18px;
+            text-decoration: none;
+            transition: .3s;
+        }
+
+            .sidebar a:hover,
+            .sidebar a.active {
+                background: #0d6efd;
+            }
+
+    .page-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 3px 10px rgba(0,0,0,.1);
+    }
+
+    .table th {
+        background: #0d6efd;
+        color: #fff;
+    }
+
+    .action-btn {
+        margin-right: 5px;
+    }
+</style>
+
+<div class="container-fluid">
+
+    <div class="row">
+
+        <!-- Sidebar -->
+
+        <div class="col-md-2 sidebar p-0">
+
+            <h4 class="text-center text-white py-4">
+                Admin Panel
+            </h4>
+
+            <a href="@Url.Action("Dashboard","Admin")">
+                <i class="fa fa-chart-line"></i> Dashboard
+            </a>
+
+            <a href="@Url.Action("MasterData","Admin")">
+                <i class="fa fa-layer-group"></i> Master Data
+            </a>
+
+            <a class="active" href="@Url.Action("Users","Admin")">
+                <i class="fa fa-users"></i> Users
+            </a>
+
+            <a href="@Url.Action("Complaints","Admin")">
+                <i class="fa fa-file"></i> Complaints
+            </a>
+
+            <a href="@Url.Action("Officers","Admin")">
+                <i class="fa fa-user-shield"></i> Officers
+            </a>
+
+        </div>
+
+        <!-- Main Content -->
+
+        <div class="col-md-10">
+
+            <div class="page-card mt-4">
+
+                <h3 class="mb-4">
+                    Manage Users
+                </h3>
+
+                @using (Html.BeginForm("Users", "Admin", FormMethod.Get, new { id = "searchForm" }))
+                {
+
+                    <div class="row">
+
+                        <div class="col-md-3">
+                            @Html.TextBoxFor(m => m.Filter.Name,
+                        new
+                        {
+                            @class = "form-control",
+                            placeholder = "Name"
+                        })
+                        </div>
+
+                        <div class="col-md-2">
+                            @Html.TextBoxFor(m => m.Filter.Designation,
+                        new
+                        {
+                            @class = "form-control",
+                            placeholder = "Designation"
+                        })
+                        </div>
+
+                        <div class="col-md-2">
+                           @Html.TextBoxFor(m => m.Filter.CityId,
+                            new
+                            {
+                                @class = "form-control",
+                                placeholder = "City Id"
+                            })
+                        </div>
+
+                        <div class="col-md-2">
+                            @Html.TextBoxFor(m => m.Filter.WardId,
+                            new
+                            {
+                                @class = "form-control",
+                                placeholder = "ward Id"
+                            })
+                       
+                        </div>
+
+                        <div class="col-md-2">
+                            @Html.DropDownListFor(m => m.Filter.SortBy,
+                        new SelectList(new[]{
+                        "ConsumerId",
+                        "Name",
+                        "DOB"
+                        }),
+                        new { @class = "form-control" })
+                        </div>
+
+                        <div class="col-md-1">
+
+                            <button class="btn btn-primary w-100">
+                                <i class="fa fa-search"></i>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                }
+
+                <hr />
+
+                <table class="table table-bordered table-hover">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Contact</th>
+                            <th>DOB</th>
+                            <th>Role</th>
+                            <th>City</th>
+                            <th>Ward</th>
+                            <th>Department</th>
+                            <th>Designation</th>
+                            <th>Status</th>
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @if (Model.Rows.Any())
+                        {
+                            foreach (var item in Model.Rows)
+                            {
+                                <tr>
+
+                                    <td>@item.ConsumerId</td>
+
+                                    <td>@item.Name</td>
+
+                                    <td>@item.Email</td>
+
+                                    <td>@item.Contact</td>
+
+                                    <td>
+                                        @(item.DOB.HasValue ? item.DOB.Value.ToString("dd/MM/yyyy") : "")
+                                    </td>
+
+                                    <td>@item.RoleName</td>
+
+                                    <td>@item.CityName</td>
+
+                                    <td>@item.WardName</td>
+
+                                    <td>@item.DepartmentName</td>
+
+                                    <td>@item.Designation</td>
+
+                                    <td>
+
+                                        @if (item.IsActive)
+                                        {
+                                            <span class="badge badge-success">
+                                                Active
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-danger">
+                                                Inactive
+                                            </span>
+                                        }
+
+                                    </td>
+
+                                    <td>
+
+                                        <a class="btn btn-warning btn-sm action-btn"
+                                           href="@Url.Action("EditUser","Admin",new{id=item.ConsumerId})">
+
+                                            <i class="fa fa-edit"></i>
+
+                                        </a>
+
+                                        <a class="btn btn-danger btn-sm"
+                                           onclick="return confirm('Delete user?')"
+                                           href="@Url.Action("DeleteUser","Admin",new{id=item.ConsumerId})">
+
+                                            <i class="fa fa-trash"></i>
+
+                                        </a>
+
+                                    </td>
+
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+
+                                <td colspan="12" class="text-center">
+                                    No users found.
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+                <div class="mt-3">
+
+                    Total Records :
+                    <strong>
+                        @Model.TotalCount
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

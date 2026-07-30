@@ -17,12 +17,49 @@
 
 <div id="alertContainer" class="mb-3"></div>
 
+<!-- Filter bar -->
+@using (Html.BeginForm("MyComplaints", "Complaint", FormMethod.Get, new { id = "filterForm" }))
+{
+    <div class="dash-card mb-3">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="dash-label">Title</label>
+                @Html.TextBoxFor(m => m.Filter.Title, new { @class = "dash-input", placeholder = "Search title..." })
+            </div>
+            <div class="col-md-2">
+                <label class="dash-label">Category</label>
+                @Html.DropDownListFor(m => m.Filter.CategoryId, new SelectList(Model.Categories, "CategoryId", "CategoryName", Model.Filter.CategoryId), "All", new { @class = "dash-input" })
+            </div>
+            <div class="col-md-2">
+                <label class="dash-label">Status</label>
+                @Html.DropDownListFor(m => m.Filter.StatusId, new SelectList(Model.Statuses, "StatusId", "StatusName", Model.Filter.StatusId), "All", new { @class = "dash-input" })
+            </div>
+            <div class="col-md-2">
+                <label class="dash-label">From</label>
+                @Html.TextBoxFor(m => m.Filter.DateFrom, "{0:yyyy-MM-dd}", new { type = "date", @class = "dash-input" })
+            </div>
+            <div class="col-md-2">
+                <label class="dash-label">To</label>
+                @Html.TextBoxFor(m => m.Filter.DateTo, "{0:yyyy-MM-dd}", new { type = "date", @class = "dash-input" })
+            </div>
+            <div class="col-md-1 d-flex gap-1">
+                <button type="submit" class="btn-dash-primary btn-sm" title="Search"><i class="bi bi-search"></i></button>
+                <a href="@Url.Action("MyComplaints", "Complaint")" class="btn-dash-outline btn-sm" title="Clear filters"><i class="bi bi-x-lg"></i></a>
+            </div>
+        </div>
+        @Html.HiddenFor(m => m.Filter.SortField)
+        @Html.HiddenFor(m => m.Filter.SortDirection)
+        <input type="hidden" name="PageNumber" value="1" />
+        @Html.HiddenFor(m => m.Filter.PageSize)
+    </div>
+}
+
 <div class="dash-card">
     @if (Model.Complaints.Count == 0)
     {
         <div class="text-center py-5" style="color:var(--tx3);">
             <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-            No complaints filed yet. Click <strong>File New Complaint</strong> to report your first issue.
+            No complaints match your filters.
         </div>
     }
     else
@@ -30,69 +67,94 @@
         <table class="dash-table">
             <thead>
                 <tr>
-                    <th>Complaint #</th>
+                    @Html.Raw(SortHeader("ComplaintId", "Complaint #", Model.Filter))
                     <th>Title</th>
-                    <th>Category</th>
-                    <th>Priority</th>
+                    @Html.Raw(SortHeader("CategoryName", "Category", Model.Filter))
+                    @Html.Raw(SortHeader("PriorityId", "Priority", Model.Filter))
                     <th>Status</th>
-                    <th>Filed On</th>
+                    @Html.Raw(SortHeader("CreatedAt", "Filed On", Model.Filter))
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var c in Model.Complaints)
                 {
+                    bool isOpen = c.StatusName == "Open";
                     <tr>
-                        <td class="complaint-num">@c.ComplaintNumber</td>
+                        <td><a href="javascript:void(0)" class="complaint-num-link" onclick="openDetailsDrawer(@c.ComplaintId)">@c.ComplaintNumber</a></td>
                         <td>@c.Title</td>
                         <td>@c.CategoryName</td>
                         <td><span class="priority-badge @c.PriorityName.ToLower()">@c.PriorityName</span></td>
                         <td><span class="status-badge @c.StatusName.ToLower().Replace(" ", "")">@c.StatusName</span></td>
                         <td>@c.CreatedAt.ToString("dd MMM yyyy")</td>
+                        <td class="row-actions">
+                            <button type="button" class="row-action-btn" title="Edit" @(isOpen ? "" : "disabled") onclick="openEditComplaint(@c.ComplaintId)"><i class="bi bi-pencil-square"></i></button>
+                            <button type="button" class="row-action-btn text-danger" title="Delete" @(isOpen ? "" : "disabled") onclick="deleteComplaint(@c.ComplaintId)"><i class="bi bi-trash"></i></button>
+                            <a class="row-action-btn" title="Export PDF" href="@Url.Action("ExportComplaintPdf", "Complaint", new { id = c.ComplaintId })"><i class="bi bi-file-earmark-pdf"></i></a>
+                        </td>
                     </tr>
                 }
             </tbody>
         </table>
+
+        <!-- Pager -->
+        <div class="dash-pager">
+            <span>Showing @((Model.Filter.PageNumber - 1) * Model.Filter.PageSize + 1)–@(Math.Min(Model.Filter.PageNumber * Model.Filter.PageSize, Model.TotalCount)) of @Model.TotalCount</span>
+            <div class="dash-pager-controls">
+                @Html.Raw(PagerLink(1, "«", Model.Filter, Model.Filter.PageNumber > 1))
+                @Html.Raw(PagerLink(Model.Filter.PageNumber - 1, "‹", Model.Filter, Model.Filter.PageNumber > 1))
+                <span class="dash-pager-current">Page @Model.Filter.PageNumber of @Model.TotalPages</span>
+                @Html.Raw(PagerLink(Model.Filter.PageNumber + 1, "›", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
+                @Html.Raw(PagerLink(Model.TotalPages, "»", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
+            </div>
+        </div>
     }
 </div>
 
-<!-- File Complaint Modal -->
+<!-- Details drawer (blocking overlay) -->
+<div id="detailsDrawerOverlay" class="dash-modal-overlay" style="display:none;" onclick="closeDetailsDrawer(event)">
+    <div class="dash-modal drawer-card" onclick="event.stopPropagation()" id="detailsDrawerContent">
+        <div class="text-center py-5"><span class="spinner-border"></span></div>
+    </div>
+</div>
+
+<!-- File / Edit Complaint Modal -->
 <div id="complaintModalOverlay" class="dash-modal-overlay" style="display:none;" onclick="closeComplaintModal(event)">
     <div class="dash-modal" onclick="event.stopPropagation()">
         <div class="dash-modal-header">
-            <h5>File a New Complaint</h5>
+            <h5 id="complaintModalTitle">File a New Complaint</h5>
             <button type="button" class="dash-modal-close" onclick="closeComplaintModal()">&times;</button>
         </div>
-        @using (Html.BeginForm("FileComplaint", "Complaint", FormMethod.Post, new { id = "complaintForm" }))
+        @using (Html.BeginForm("SaveComplaint", "Complaint", FormMethod.Post, new { id = "complaintForm", enctype = "multipart/form-data" }))
         {
             @Html.AntiForgeryToken()
+            <input type="hidden" name="ComplaintId" id="complaintIdField" value="" />
             <div class="dash-modal-body">
                 <div class="dash-form-group">
                     <label class="dash-label">Title *</label>
-                    <input type="text" name="Title" class="dash-input" maxlength="150" placeholder="e.g. Broken streetlight near park" required />
+                    <input type="text" name="Title" id="fldTitle" class="dash-input" maxlength="150" required />
                 </div>
                 <div class="dash-form-group">
                     <label class="dash-label">Description *</label>
-                    <textarea name="Description" rows="3" class="dash-input" maxlength="1000" placeholder="Describe the issue in detail" required></textarea>
+                    <textarea name="Description" id="fldDescription" rows="3" class="dash-input" maxlength="1000" required></textarea>
                 </div>
                 <div class="row g-2">
                     <div class="col-6">
                         <label class="dash-label">Category *</label>
-                        <select name="CategoryId" class="dash-input" required>
+                        <select name="CategoryId" id="fldCategoryId" class="dash-input" required>
                             <option value="">-- Select --</option>
                             @foreach (var cat in Model.Categories)
                             {
-                                <option value="@cat.CategoryId">@cat.CategoryName</option>
-                            }
+                            <option value="@cat.CategoryId">@cat.CategoryName</option> }
                         </select>
                     </div>
                     <div class="col-6">
                         <label class="dash-label">Priority *</label>
-                        <select name="PriorityId" class="dash-input" required>
+                        <select name="PriorityId" id="fldPriorityId" class="dash-input" required>
                             <option value="">-- Select --</option>
                             @foreach (var p in Model.Priorities)
                             {
-                                <option value="@p.PriorityId">@p.PriorityName</option>
-                            }
+                            <option value="@p.PriorityId">@p.PriorityName</option> }
                         </select>
                     </div>
                 </div>
@@ -103,8 +165,7 @@
                             <option value="">-- Select --</option>
                             @foreach (var city in Model.Cities)
                             {
-                                <option value="@city.CityId">@city.CityName</option>
-                            }
+                            <option value="@city.CityId">@city.CityName</option> }
                         </select>
                     </div>
                     <div class="col-6">
@@ -116,30 +177,134 @@
                 </div>
                 <div class="dash-form-group mt-2">
                     <label class="dash-label">Address *</label>
-                    <input type="text" name="AddressLine" class="dash-input" maxlength="250" placeholder="House/Street/Area" required />
+                    <input type="text" name="AddressLine" id="fldAddressLine" class="dash-input" maxlength="250" required />
                 </div>
                 <div class="dash-form-group">
                     <label class="dash-label">Landmark</label>
-                    <input type="text" name="Landmark" class="dash-input" maxlength="150" placeholder="Optional" />
+                    <input type="text" name="Landmark" id="fldLandmark" class="dash-input" maxlength="150" />
+                </div>
+                <div class="dash-form-group mt-2">
+                    <label class="dash-label">Attachments (optional)</label>
+                    <input type="file" name="Attachments" id="complaintAttachments" class="dash-input" multiple
+                           data-max-size-mb="@Model.MaxAttachmentSizeMB" data-allowed-ext="@Model.AllowedExtensionsCsv" />
+                    <small style="color:var(--tx3);">jpg, jpeg, png, pdf, doc, docx — up to @Model.MaxAttachmentSizeMB MB each.</small>
+                    <div id="attachmentPreviewList" class="attachment-preview-list mt-2"></div>
                 </div>
             </div>
             <div class="dash-modal-footer">
                 <button type="button" class="btn-dash-outline" onclick="closeComplaintModal()">Cancel</button>
                 <button type="submit" class="btn-dash-primary" id="complaintSubmitBtn">
                     <span class="spinner-border spinner-border-sm d-none" id="complaintSpinner"></span>
-                    Submit Complaint
+                    <span id="complaintSubmitLabel">Submit Complaint</span>
                 </button>
             </div>
         }
     </div>
 </div>
 
+@functions {
+    string SortHeader(string field, string label, FixMyCityModel.ViewModel.ComplaintListFilterViewModel filter)
+    {
+        string dir = (filter.SortField == field && filter.SortDirection == "ASC") ? "DESC" : "ASC";
+        string icon = filter.SortField == field ? (filter.SortDirection == "ASC" ? "▲" : "▼") : "";
+        var url = new UrlHelper(HttpContext.Current.Request.RequestContext);
+        string href = url.Action("MyComplaints", "Complaint", new
+        {
+            Filter_Title = filter.Title,
+            Filter_CategoryId = filter.CategoryId,
+            Filter_StatusId = filter.StatusId,
+            Filter_DateFrom = filter.DateFrom,
+            Filter_DateTo = filter.DateTo,
+            Filter_SortField = field,
+            Filter_SortDirection = dir,
+            Filter_PageNumber = 1,
+            Filter_PageSize = filter.PageSize
+        });
+        return $"<th><a href='{href}' class='sort-header'>{label} {icon}</a></th>";
+    }
+
+    string PagerLink(int page, string label, FixMyCityModel.ViewModel.ComplaintListFilterViewModel filter, bool enabled)
+    {
+        if (!enabled) return $"<span class='dash-pager-link disabled'>{label}</span>";
+        var url = new UrlHelper(HttpContext.Current.Request.RequestContext);
+        string href = url.Action("MyComplaints", "Complaint", new
+        {
+            Filter_Title = filter.Title,
+            Filter_CategoryId = filter.CategoryId,
+            Filter_StatusId = filter.StatusId,
+            Filter_DateFrom = filter.DateFrom,
+            Filter_DateTo = filter.DateTo,
+            Filter_SortField = filter.SortField,
+            Filter_SortDirection = filter.SortDirection,
+            Filter_PageNumber = page,
+            Filter_PageSize = filter.PageSize
+        });
+        return $"<a href='{href}' class='dash-pager-link'>{label}</a>";
+    }
+}
+
 @section scripts {
     <script>
-        function openComplaintModal() { document.getElementById('complaintModalOverlay').style.display = 'flex'; }
+        var isEditMode = false;
+
+        function openComplaintModal() {
+            isEditMode = false;
+            $('#complaintForm')[0].reset();
+            $('#complaintIdField').val('');
+            $('#complaintModalTitle').text('File a New Complaint');
+            $('#complaintSubmitLabel').text('Submit Complaint');
+            $('#attachmentPreviewList').empty();
+            document.getElementById('complaintModalOverlay').style.display = 'flex';
+        }
+
+        function openEditComplaint(id) {
+            $.get('/Complaint/GetComplaintForEdit/' + id, function (res) {
+                if (!res.success) { alert(res.message); return; }
+                isEditMode = true;
+                $('#complaintIdField').val(res.complaintId);
+                $('#fldTitle').val(res.title);
+                $('#fldDescription').val(res.description);
+                $('#fldCategoryId').val(res.categoryId);
+                $('#fldPriorityId').val(res.priorityId);
+                $('#fldAddressLine').val(res.addressLine);
+                $('#fldLandmark').val(res.landmark);
+                $('#complaintCityId').val(res.cityId).trigger('change');
+                setTimeout(function () { $('#complaintWardId').val(res.wardId); }, 400); // wait for AJAX ward list to populate
+                $('#complaintModalTitle').text('Edit Complaint');
+                $('#complaintSubmitLabel').text('Save Changes');
+                document.getElementById('complaintModalOverlay').style.display = 'flex';
+            });
+        }
+
         function closeComplaintModal(e) {
             if (e) e.stopPropagation();
             document.getElementById('complaintModalOverlay').style.display = 'none';
+        }
+
+        function deleteComplaint(id) {
+            if (!confirm('Delete this complaint? This cannot be undone.')) return;
+            $.ajax({
+                url: '/Complaint/DeleteComplaint/' + id, type: 'POST',
+                headers: { 'RequestVerificationToken': window.antiForgeryToken },
+                success: function (res) {
+                    if (res.success) window.location.reload();
+                    else alert(res.message);
+                },
+                error: function () { alert('Failed to delete complaint.'); }
+            });
+        }
+
+        function openDetailsDrawer(id) {
+            document.getElementById('detailsDrawerOverlay').style.display = 'flex';
+            document.getElementById('detailsDrawerContent').innerHTML = '<div class="text-center py-5"><span class="spinner-border"></span></div>';
+            $.get('/Complaint/ComplaintDetailsPartial/' + id, function (html) {
+                document.getElementById('detailsDrawerContent').innerHTML = html;
+            });
+        }
+
+        function closeDetailsDrawer(e) {
+            if (e) e.stopPropagation();
+            document.getElementById('detailsDrawerOverlay').style.display = 'none';
         }
 
         $('#complaintCityId').on('change', function () {
@@ -148,13 +313,9 @@
             wardSelect.empty().append('<option value="">-- Select Ward --</option>');
             if (cityId) {
                 $.ajax({
-                    url: '/Account/GetWards',
-                    type: 'GET',
-                    data: { cityId: cityId },
+                    url: '/Account/GetWards', type: 'GET', data: { cityId: cityId },
                     success: function (data) {
-                        $.each(data, function (i, item) {
-                            wardSelect.append($('<option></option>').val(item.id).text(item.name));
-                        });
+                        $.each(data, function (i, item) { wardSelect.append($('<option></option>').val(item.id).text(item.name)); });
                     }
                 });
             }
@@ -162,23 +323,19 @@
 
         $('#complaintForm').on('submit', function (e) {
             e.preventDefault();
+            var formData = new FormData(this);
             var submitBtn = $('#complaintSubmitBtn');
             var spinner = $('#complaintSpinner');
             submitBtn.prop('disabled', true);
             spinner.removeClass('d-none');
 
             $.ajax({
-                url: $(this).attr('action'),
-                type: 'POST',
-                data: $(this).serialize(),
+                url: $(this).attr('action'), type: 'POST', data: formData, processData: false, contentType: false,
                 success: function (res) {
                     submitBtn.prop('disabled', false);
                     spinner.addClass('d-none');
-                    if (res.success) {
-                        window.location.reload();
-                    } else {
-                        alert(res.message || 'Failed to file complaint.');
-                    }
+                    if (res.success) window.location.reload();
+                    else alert(res.message || 'Failed to save complaint.');
                 },
                 error: function () {
                     submitBtn.prop('disabled', false);
@@ -187,5 +344,59 @@
                 }
             });
         });
+
+        (function () {
+            var input = document.getElementById('complaintAttachments');
+            var previewList = document.getElementById('attachmentPreviewList');
+            if (!input) return;
+            var allowedExt = (input.dataset.allowedExt || '').split(',').map(function (e) { return e.trim().toLowerCase(); });
+            var maxSizeBytes = parseFloat(input.dataset.maxSizeMb) * 1024 * 1024;
+
+            input.addEventListener('change', function () {
+                var dt = new DataTransfer(); var errors = []; var seenNames = {};
+                Array.prototype.forEach.call(input.files, function (file) {
+                    var ext = '.' + file.name.split('.').pop().toLowerCase();
+                    var key = file.name.toLowerCase();
+                    if (allowedExt.indexOf(ext) === -1) { errors.push(file.name + ' — not allowed.'); return; }
+                    if (file.size > maxSizeBytes) { errors.push(file.name + ' — too large.'); return; }
+                    if (seenNames[key]) { errors.push(file.name + ' — duplicate.'); return; }
+                    seenNames[key] = true; dt.items.add(file);
+                });
+                input.files = dt.files;
+                if (errors.length) alert(errors.join('\n'));
+                renderPreview();
+            });
+
+            function renderPreview() {
+                previewList.innerHTML = '';
+                Array.prototype.forEach.call(input.files, function (file, index) {
+                    var item = document.createElement('div');
+                    item.className = 'attachment-chip';
+                    if (file.type.indexOf('image/') === 0) {
+                        var img = document.createElement('img'); img.className = 'attachment-thumb';
+                        var reader = new FileReader();
+                        reader.onload = function (e) { img.src = e.target.result; };
+                        reader.readAsDataURL(file);
+                        item.appendChild(img);
+                    } else {
+                        var icon = document.createElement('i');
+                        icon.className = 'bi ' + (file.name.toLowerCase().endsWith('.pdf') ? 'bi-file-earmark-pdf-fill' : 'bi-file-earmark-word-fill');
+                        item.appendChild(icon);
+                    }
+                    var name = document.createElement('span'); name.textContent = file.name; item.appendChild(name);
+                    var removeBtn = document.createElement('button'); removeBtn.type = 'button'; removeBtn.innerHTML = '&times;';
+                    removeBtn.onclick = function () { removeFile(index); };
+                    item.appendChild(removeBtn);
+                    previewList.appendChild(item);
+                });
+            }
+
+            function removeFile(index) {
+                var dt = new DataTransfer();
+                Array.prototype.forEach.call(input.files, function (file, i) { if (i !== index) dt.items.add(file); });
+                input.files = dt.files;
+                renderPreview();
+            }
+        })();
     </script>
 }
