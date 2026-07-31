@@ -22,7 +22,7 @@ namespace FixMyCity.Service
 
         MasterDataViewModel GetMasterData();
         int SaveMaster(MasterEntitySaveViewModel vm, int actorId);
-
+        List<MasterEntityViewModel> GetMasterList(string entityType, int? parentId, bool includeInactive);
         // Handy lookup accessors used by controllers/JSON endpoints.
         List<District> GetDistricts(int? stateId);
         List<Ward> GetWardsByCity(int cityId);

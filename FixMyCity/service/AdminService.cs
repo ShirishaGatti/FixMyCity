@@ -156,16 +156,28 @@ namespace FixMyCity.service
                 case "ward":
                     if (!vm.ParentId.HasValue || vm.ParentId.Value <= 0)
                         throw new BusinessException("Please select a City.", "PARENT_REQUIRED");
-                    return _repo.SaveWard(vm.Id, name, vm.ParentId.Value, vm.IsActive, actorId);
+                    if (string.IsNullOrWhiteSpace(vm.WardNo))
+                        throw new BusinessException("Ward Number is required.", "WARD_NO_REQUIRED");
+                    return _repo.SaveWard(vm.Id, name, vm.ParentId.Value, vm.IsActive, vm.WardNo.Trim(), actorId);
                 case "category":
-                    return _repo.SaveCategory(vm.Id, name, vm.IsActive, actorId);
+                    if (vm.DepartmentId==null || vm.DepartmentId<=0)
+                        throw new BusinessException("Department is required.", "DepartmentId_REQUIRED");
+                    return _repo.SaveCategory(vm.Id, name, vm.IsActive, actorId,vm.DepartmentId);
                 case "department":
                     return _repo.SaveDepartment(vm.Id, name, vm.IsActive, actorId);
+                case "role":                                                        // <-- NEW
+                    return _repo.SaveRole(vm.Id, name, vm.IsActive, actorId);
                 default:
                     throw new BusinessException("Unknown entity type.", "INVALID_ENTITY");
             }
         }
+        public List<MasterEntityViewModel> GetMasterList(string entityType, int? parentId, bool includeInactive)
+        {
+            if (string.IsNullOrWhiteSpace(entityType))
+                throw new BusinessException("Entity type is required.", "ENTITY_REQUIRED");
 
+            return _repo.GetMasterList(entityType.Trim().ToLowerInvariant(), parentId, includeInactive);
+        }
         public List<District> GetDistricts(int? stateId) => _repo.GetDistricts(stateId);
         public List<Ward> GetWardsByCity(int cityId)
         {

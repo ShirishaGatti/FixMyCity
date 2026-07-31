@@ -37,7 +37,7 @@ namespace FixMyCity.Service
             if (consumerId <= 0)
                 throw new BusinessException("You must be logged in to update your profile.", "NOT_AUTHENTICATED");
 
-            if (!Regex.IsMatch(contact ?? "", @"^\d{10}$"))
+            if (!Regex.IsMatch(contact ?? "", @"^(\+91|91)?\d{10}$"))
                 throw new BusinessException("Contact number must be exactly 10 digits.", "INVALID_CONTACT");
 
             if (cityId.HasValue && wardId.HasValue)

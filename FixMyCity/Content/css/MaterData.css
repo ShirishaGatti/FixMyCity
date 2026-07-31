@@ -1,0 +1,72 @@
+﻿/* masterdata.css — Master Data tab content (sidebar styling now lives
+   in admin-shell.css since the sidebar moved into _AdminLayout.cshtml) */
+
+#masterTabs {
+    margin-bottom: 0;
+}
+
+#masterTabs .nav-link {
+    color: #adb5bd;
+}
+
+#masterTabs .nav-link.active {
+    background-color: transparent;
+    border-bottom: 2px solid #ffc107;
+    color: #ffc107;
+}
+
+.tab-content {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--bd, #2a2d34);
+    border-top: none;
+    padding: 20px;
+}
+
+.master-toolbar {
+    margin-bottom: 15px;
+    text-align: right;
+}
+
+.master-table {
+    margin-bottom: 0;
+    color: inherit;
+}
+
+.master-table th.col-index { width: 50px; }
+.master-table th.col-status { width: 100px; }
+.master-table th.col-actions { width: 130px; }
+
+.master-loading {
+    text-align: center;
+    padding: 40px 0;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.master-loading i {
+    margin-right: 6px;
+}
+
+#masterFormError {
+    display: none;
+    color: #ea868f;
+    background-color: rgba(220, 53, 69, 0.15);
+    border: 1px solid rgba(220, 53, 69, 0.4);
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+
+#masterToastContainer {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 2000;
+    width: 300px;
+}
+
+.master-toast {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
+    margin-bottom: 10px;
+}

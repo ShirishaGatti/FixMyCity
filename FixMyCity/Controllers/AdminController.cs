@@ -57,7 +57,23 @@ namespace FixMyCity.Controllers
             catch (BusinessException ex) { return Json(new { success = false, message = ex.Message, code = ex.ErrorCode }); }
             catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }
         }
-
+        [HttpGet]
+        public JsonResult GetMasterList(string entityType, int? parentId, bool includeInactive = false)
+        {
+            try
+            {
+                var list = _adminService.GetMasterList(entityType, parentId, includeInactive);
+                return Json(new { success = true, data = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (BusinessException ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+            catch (DataAccessException ex)
+            {
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
         [HttpGet]
         public JsonResult GetDistricts(int? stateId)
         {

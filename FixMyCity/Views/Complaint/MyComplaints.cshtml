@@ -98,16 +98,30 @@
         </table>
 
         <!-- Pager -->
-        <div class="dash-pager">
-            <span>Showing @((Model.Filter.PageNumber - 1) * Model.Filter.PageSize + 1)–@(Math.Min(Model.Filter.PageNumber * Model.Filter.PageSize, Model.TotalCount)) of @Model.TotalCount</span>
-            <div class="dash-pager-controls">
-                @Html.Raw(PagerLink(1, "«", Model.Filter, Model.Filter.PageNumber > 1))
-                @Html.Raw(PagerLink(Model.Filter.PageNumber - 1, "‹", Model.Filter, Model.Filter.PageNumber > 1))
-                <span class="dash-pager-current">Page @Model.Filter.PageNumber of @Model.TotalPages</span>
-                @Html.Raw(PagerLink(Model.Filter.PageNumber + 1, "›", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
-                @Html.Raw(PagerLink(Model.TotalPages, "»", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
+        if (Model.TotalPages > 1)
+        {
+            <div class="dash-pager">
+                <span>
+                    Showing
+                    @((Model.Filter.PageNumber - 1) * Model.Filter.PageSize + 1)
+                    –
+                    @(Math.Min(Model.Filter.PageNumber * Model.Filter.PageSize, Model.TotalCount))
+                    of @Model.TotalCount
+                </span>
+
+                <div class="dash-pager-controls">
+                    @Html.Raw(PagerLink(1, "«", Model.Filter, Model.Filter.PageNumber > 1))
+                    @Html.Raw(PagerLink(Model.Filter.PageNumber - 1, "‹", Model.Filter, Model.Filter.PageNumber > 1))
+
+                    <span class="dash-pager-current">
+                        Page @Model.Filter.PageNumber of @Model.TotalPages
+                    </span>
+
+                    @Html.Raw(PagerLink(Model.Filter.PageNumber + 1, "›", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
+                    @Html.Raw(PagerLink(Model.TotalPages, "»", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
+                </div>
             </div>
-        </div>
+        }
     }
 </div>
 
@@ -294,14 +308,39 @@
             });
         }
 
+        //function openDetailsDrawer(id) {
+        //    document.getElementById('detailsDrawerOverlay').style.display = 'flex';
+        //    document.getElementById('detailsDrawerContent').innerHTML = '<div class="text-center py-5"><span class="spinner-border"></span></div>';
+        //    $.get('/Complaint/ComplaintDetailsPartial/' + id, function (html) {
+        //        document.getElementById('detailsDrawerContent').innerHTML = html;
+        //    });
+        //    //$.get('/Complaint/ComplaintDetailsPartial', { id: id }, function (html) {
+        //    //    $('#detailsDrawerContent').html(html);
+        //    //});
+        //}
         function openDetailsDrawer(id) {
-            document.getElementById('detailsDrawerOverlay').style.display = 'flex';
-            document.getElementById('detailsDrawerContent').innerHTML = '<div class="text-center py-5"><span class="spinner-border"></span></div>';
-            $.get('/Complaint/ComplaintDetailsPartial/' + id, function (html) {
-                document.getElementById('detailsDrawerContent').innerHTML = html;
+
+            $('#detailsDrawerOverlay').show();
+            $('#detailsDrawerContent').html(
+                '<div class="text-center py-5"><span class="spinner-border"></span></div>'
+            );
+            $.ajax({
+                url: '/Complaint/ComplaintDetailsPartial',
+                type: 'GET',
+                data: { id },
+
+                success: function (html) {
+                    $('#detailsDrawerContent').html(html);
+                },
+
+                error: function (xhr) {
+                    $('#detailsDrawerContent').html(
+                        '<div class="text-danger p-4">Unable to load complaint details.</div>'
+                    );
+                    console.log(xhr);
+                }
             });
         }
-
         function closeDetailsDrawer(e) {
             if (e) e.stopPropagation();
             document.getElementById('detailsDrawerOverlay').style.display = 'none';

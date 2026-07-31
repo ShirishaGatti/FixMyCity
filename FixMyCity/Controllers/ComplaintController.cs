@@ -367,7 +367,7 @@ namespace FixMyCity.Controllers
                     Complaint = _complaintService.GetComplaintDetails(id, _session.ConsumerId),
                     Attachments = _complaintService.GetAttachments(id, _session.ConsumerId)
                 };
-                return PartialView("_ComplaintDetailsCard", vm);
+                return PartialView("ComplaintDetails", vm);
             }
             catch (NotFoundException)
             {

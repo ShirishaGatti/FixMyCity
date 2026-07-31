@@ -1,4 +1,4 @@
-﻿using FixMyCityModel.Model;
+using FixMyCityModel.Model;
 using System.Collections.Generic;
 
 namespace FixMyCityModel.ViewModel
@@ -14,6 +14,8 @@ namespace FixMyCityModel.ViewModel
         public List<Ward> Wards { get; set; } = new List<Ward>();
         public List<ComplaintCategory> Categories { get; set; } = new List<ComplaintCategory>();
         public List<Department> Departments { get; set; } = new List<Department>();
+        public List<Role> Roles { get; set; } = new List<Role>();
+
     }
 
     // Single POST DTO for every master save (State/District/City/Ward/Category/Department).
@@ -28,5 +30,16 @@ namespace FixMyCityModel.ViewModel
         public string Name { get; set; }
         public int? ParentId { get; set; } // District→StateId, City→DistrictId, Ward→CityId
         public bool IsActive { get; set; } = true;
+        public string WardNo { get; set; }
+        public int DepartmentId { get; set; }
+    }
+     public class MasterEntityViewModel
+   {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int? ParentId { get; set; }
+        public string ParentName { get; set; }
+        public bool IsActive { get; set; }
+        public string WardNo { get; set; }
     }
 }

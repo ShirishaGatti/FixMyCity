@@ -1,0 +1,108 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section styles {
+    <link href="~/Content/css/admin-shell.css" rel="stylesheet" />
+    @RenderSection("adminStyles", required: false)
+}
+
+<div class="admin-shell d-flex">
+
+    <!-- ── Sidebar ──────────────────────────────────────────── -->
+    <aside class="admin-sidebar">
+
+        <!-- Brand -->
+        <div class="admin-brand px-3 py-3 d-flex align-items-center gap-2 border-bottom">
+            <div class="admin-brand-icon">
+                <i class="bi bi-building-fill"></i>
+            </div>
+            <span class="fw-bold text-white">Admin<span style="color:#38bdf8">Panel</span></span>
+        </div>
+
+        <!-- Nav -->
+        <nav class="admin-nav-wrap pt-3">
+            <p class="admin-nav-label">Main Menu</p>
+            <ul class="admin-nav list-unstyled">
+
+                <li>
+                    <a href="@Url.Action("Dashboard","Admin")"
+                       class="admin-nav-link @(ViewBag.ActivePage == "Dashboard" ? "active" : "")">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="@Url.Action("MasterData","Admin")"
+                       class="admin-nav-link @(ViewBag.ActivePage == "MasterData" ? "active" : "")">
+                        <i class="bi bi-diagram-3-fill"></i>
+                        <span>Master Data</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="@Url.Action("Users","Admin")"
+                       class="admin-nav-link @(ViewBag.ActivePage == "Users" ? "active" : "")">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Users</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="@Url.Action("Complaints","Admin")"
+                       class="admin-nav-link @(ViewBag.ActivePage == "Complaints" ? "active" : "")">
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                        <span>Complaints</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="@Url.Action("Officers","Admin")"
+                       class="admin-nav-link @(ViewBag.ActivePage == "Officers" ? "active" : "")">
+                        <i class="bi bi-shield-fill-check"></i>
+                        <span>Officers</span>
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+
+    </aside>
+    <!-- /Sidebar -->
+
+    <!-- ── Content wrapper ──────────────────────────────────── -->
+    <div class="admin-content flex-grow-1">
+
+        <!-- Topbar -->
+        <div class="admin-topbar d-flex align-items-center justify-content-between px-4 py-2">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-grid-1x2-fill text-primary"></i>
+                <span class="fw-semibold text-white">
+                    @(ViewBag.Title ?? "Admin")
+                </span>
+            </div>
+            <div class="d-flex align-items-center gap-2 text-white-50 small">
+                <i class="bi bi-person-circle me-1"></i>
+                @if (Request.IsAuthenticated) {
+                    <span>@User.Identity.Name</span>
+                }
+                <span class="mx-2 text-muted">|</span>
+                <i class="bi bi-circle-fill text-success" style="font-size:.5rem"></i>
+                <span>Admin</span>
+            </div>
+        </div>
+
+        <!-- Page body -->
+        <div class="p-4">
+            @RenderBody()
+        </div>
+
+    </div>
+    <!-- /Content wrapper -->
+
+</div>
+
+@section scripts {
+    @RenderSection("adminScripts", required: false)
+}

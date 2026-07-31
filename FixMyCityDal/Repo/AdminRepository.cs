@@ -265,8 +265,8 @@ namespace FixMyCity.Repository
                     foreach (DataRow r in ds.Tables[0].Rows)
                         list.Add(new State
                         {
-                            StateId = ToInt(r["StateId"]),
-                            StateName = r["StateName"].ToString(),
+                            StateId = ToInt(r["Id"]),
+                            StateName = r["Name"].ToString(),
                             IsActive = Convert.ToBoolean(r["IsActive"])
                         });
             }
@@ -280,16 +280,16 @@ namespace FixMyCity.Repository
             try
             {
                 DbCommand com = db.GetStoredProcCommand("FixMyCity.District_GetAll");
-                db.AddInParameter(com, "StateId", DbType.Int32, stateId.HasValue ? (object)stateId.Value : DBNull.Value);
+                db.AddInParameter(com, "ParentId", DbType.Int32, stateId.HasValue ? (object)stateId.Value : DBNull.Value);
                 DataSet ds = db.ExecuteDataSet(com);
                 if (ds.Tables.Count > 0)
                     foreach (DataRow r in ds.Tables[0].Rows)
                         list.Add(new District
                         {
-                            DistrictId = ToInt(r["DistrictId"]),
-                            DistrictName = r["DistrictName"].ToString(),
-                            StateId = ToInt(r["StateId"]),
-                            StateName = r.Table.Columns.Contains("StateName") && !(r["StateName"] is DBNull) ? r["StateName"].ToString() : null,
+                            DistrictId = ToInt(r["Id"]),
+                            DistrictName = r["Name"].ToString(),
+                            StateId = ToInt(r["ParentId"]),
+                            StateName = r.Table.Columns.Contains("ParentName") && !(r["ParentName"] is DBNull) ? r["ParentName"].ToString() : null,
                             IsActive = Convert.ToBoolean(r["IsActive"])
                         });
             }
@@ -302,11 +302,11 @@ namespace FixMyCity.Repository
             var list = new List<City>();
             try
             {
-                DbCommand com = db.GetStoredProcCommand("FixMyCity.City_GetAll");
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.City_GetByDistrict");
                 DataSet ds = db.ExecuteDataSet(com);
                 if (ds.Tables.Count > 0)
                     foreach (DataRow r in ds.Tables[0].Rows)
-                        list.Add(new City { CityId = ToInt(r["CityId"]), CityName = r["CityName"].ToString() });
+                        list.Add(new City { CityId = ToInt(r["Id"]), CityName = r["Name"].ToString() });
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to load cities.", "City_GetAll", ex); }
             return list;
@@ -323,9 +323,10 @@ namespace FixMyCity.Repository
                     foreach (DataRow r in ds.Tables[0].Rows)
                         list.Add(new Ward
                         {
-                            WardId = ToInt(r["WardId"]),
-                            WardName = r["WardName"].ToString(),
-                            CityId = ToInt(r["CityId"])
+                            WardId = ToInt(r["Id"]),
+                            WardName = r["Name"].ToString(),
+                            WardNo = ToInt( r["WardNo"]),
+                            CityId = ToInt(r["ParentId"])
                         });
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to load wards.", "Ward_GetAll", ex); }
@@ -337,11 +338,15 @@ namespace FixMyCity.Repository
             var list = new List<ComplaintCategory>();
             try
             {
-                DbCommand com = db.GetStoredProcCommand("FixMyCity.Category_GetAll");
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.GetCategory");
                 DataSet ds = db.ExecuteDataSet(com);
                 if (ds.Tables.Count > 0)
                     foreach (DataRow r in ds.Tables[0].Rows)
-                        list.Add(new ComplaintCategory { CategoryId = ToInt(r["CategoryId"]), CategoryName = r["CategoryName"].ToString() });
+                        list.Add(new ComplaintCategory { CategoryId = ToInt(r["Id"]),
+                            CategoryName = r["Name"].ToString(),
+                            DepartmentName = r["DepartmentName"].ToString(),
+                            DepartmentId = ToInt(r["DepartmentId"])
+                        });
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to load categories.", "Category_GetAll", ex); }
             return list;
@@ -358,8 +363,8 @@ namespace FixMyCity.Repository
                     foreach (DataRow r in ds.Tables[0].Rows)
                         list.Add(new Department
                         {
-                            DepartmentId = ToInt(r["DepartmentId"]),
-                            DepartmentName = r["DepartmentName"].ToString(),
+                            DepartmentId = ToInt(r["Id"]),
+                            DepartmentName = r["Name"].ToString(),
                             IsActive = Convert.ToBoolean(r["IsActive"])
                         });
             }
@@ -408,12 +413,74 @@ namespace FixMyCity.Repository
                     foreach (DataRow r in ds.Tables[0].Rows)
                         list.Add(new Role
                         {
-                            RoleId = ToInt(r["RoleId"]),
-                            RoleName = r["RoleName"].ToString(),
+                            RoleId = ToInt(r["Id"]),
+                            RoleName = r["Name"].ToString(),
                             IsActive = Convert.ToBoolean(r["IsActive"])
                         });
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to load roles.", "Role_GetAll", ex); }
+            return list;
+        }
+        public int SaveRole(int id, string name, bool isActive, int actorId) =>
+    SaveSimpleMaster("FixMyCity.Role_Save", id, name, null, isActive, actorId);
+
+
+        // ---------------------------------------------------------------
+        // LIST — one generic method for all 7 entities instead of 7 near-
+        // duplicate ones, because every *_GetAll SP now returns the same
+        // 5 aliased columns (see MasterDataProcs.sql). Only entities with
+        // a parent (district/city/ward) pass @ParentId.
+        // ---------------------------------------------------------------
+        private static readonly Dictionary<string, string> MasterListProcs = new Dictionary<string, string>
+{
+    { "state",      "FixMyCity.State_GetAll" },
+    { "district",   "FixMyCity.District_GetAll" },
+    { "city",       "FixMyCity.City_GetByDistrict" },
+    { "ward",       "FixMyCity.Ward_GetAll" },
+    { "category",   "FixMyCity.GetCategory" },
+    { "department", "FixMyCity.Department_GetAll" },
+    { "role",       "FixMyCity.Role_GetAll" },
+};
+
+        private static readonly HashSet<string> EntitiesWithParent = new HashSet<string> { "district", "city", "ward" };
+
+        public List<MasterEntityViewModel> GetMasterList(string entityType, int? parentId, bool includeInactive)
+        {
+            string sproc;
+
+            if (!MasterListProcs.TryGetValue(entityType, out sproc))
+                throw new BusinessException("Unknown entity type.", "INVALID_ENTITY");
+
+            var list = new List<MasterEntityViewModel>();
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand(sproc);
+
+                if (EntitiesWithParent.Contains(entityType))
+                    db.AddInParameter(com, "ParentId", DbType.Int32, parentId.HasValue ? (object)parentId.Value : DBNull.Value);
+
+                db.AddInParameter(com, "IncludeInactive", DbType.Boolean, includeInactive);
+
+                using (IDataReader reader = db.ExecuteReader(com))
+                {
+                    while (reader.Read())
+                    {
+                        list.Add(new MasterEntityViewModel
+                        {
+                            Id = Convert.ToInt32(reader["Id"]),
+                            Name = reader["Name"].ToString(),
+                            ParentId = reader["ParentId"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["ParentId"]),
+                            ParentName = reader["ParentName"] == DBNull.Value ? null : reader["ParentName"].ToString(),
+                            IsActive = Convert.ToBoolean(reader["IsActive"]),
+                            WardNo = HasColumn(reader, "WardNo") && reader["WardNo"] != DBNull.Value ? reader["WardNo"].ToString() : null
+                        });
+                    }
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to load master data.", sproc, ex);
+            }
             return list;
         }
 
@@ -430,11 +497,53 @@ namespace FixMyCity.Repository
         public int SaveCity(int id, string name, int? districtId, bool isActive, int actorId) =>
             SaveSimpleMaster("FixMyCity.City_Save", id, name, districtId, isActive, actorId);
 
-        public int SaveWard(int id, string name, int cityId, bool isActive, int actorId) =>
-            SaveSimpleMaster("FixMyCity.Ward_Save", id, name, cityId, isActive, actorId);
+        public int SaveWard(int id, string name, int cityId, bool isActive, string wardNo, int actorId)
+        {
+            int newId = id;
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Ward_Save");
+                db.AddInParameter(com, "Id", DbType.Int32, id);
+                db.AddInParameter(com, "Name", DbType.String, name);
+                db.AddInParameter(com, "ParentId", DbType.Int32, cityId);
+                db.AddInParameter(com, "IsActive", DbType.Boolean, isActive);
+                db.AddInParameter(com, "WardNo", DbType.String, string.IsNullOrWhiteSpace(wardNo) ? DBNull.Value : (object)wardNo);
+                db.AddInParameter(com, "ActorId", DbType.Int32, actorId);
+                db.AddOutParameter(com, "NewId", DbType.Int32, 4);
+                db.ExecuteNonQuery(com);
+                newId = Convert.ToInt32(db.GetParameterValue(com, "NewId"));
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Number == 50000 || ex.Number == 2627 || ex.Number == 2601)
+                    throw new DataAccessException(ex.Message, "Ward_Save", ex);
+                throw new DataAccessException("Failed to save ward.", "Ward_Save", ex);
+            }
+            return newId;
+        }
 
-        public int SaveCategory(int id, string name, bool isActive, int actorId) =>
-            SaveSimpleMaster("FixMyCity.Category_Save", id, name, null, isActive, actorId);
+        public int SaveCategory(int id, string name, bool isActive, int actorId, int departmentId) { 
+            int newId = id;
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Category_Save");
+                db.AddInParameter(com, "Id", DbType.Int32, id);
+                db.AddInParameter(com, "Name", DbType.String, name);              
+                db.AddInParameter(com, "IsActive", DbType.Boolean, isActive);
+                db.AddInParameter(com, "DepartmentId", DbType.Int32, departmentId);
+                db.AddInParameter(com, "ActorId", DbType.Int32, actorId);
+                db.AddOutParameter(com, "NewId", DbType.Int32, 4);
+                db.ExecuteNonQuery(com);
+                newId = Convert.ToInt32(db.GetParameterValue(com, "NewId"));
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Number == 50000 || ex.Number == 2627 || ex.Number == 2601)
+                    throw new DataAccessException(ex.Message, "Category_Save", ex);
+                throw new DataAccessException("Failed to save category.", "Category_Save", ex);
+            }
+            return newId;
+        }
 
         public int SaveDepartment(int id, string name, bool isActive, int actorId) =>
             SaveSimpleMaster("FixMyCity.Department_Save", id, name, null, isActive, actorId);
@@ -468,5 +577,15 @@ namespace FixMyCity.Repository
         }
 
         private static int ToInt(object o) => o is DBNull ? 0 : Convert.ToInt32(o);
+
+        private static bool HasColumn(IDataReader reader, string columnName)
+        {
+            for (int i = 0; i < reader.FieldCount; i++)
+            {
+                if (reader.GetName(i).Equals(columnName, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+            return false;
+        }
     }
 }

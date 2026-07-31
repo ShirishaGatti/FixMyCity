@@ -1,4 +1,4 @@
-﻿using FixMyCityModel.Model;
+using FixMyCityModel.Model;
 using FixMyCityModel.ViewModel;
 using System.Collections.Generic;
 
@@ -30,12 +30,13 @@ namespace FixMyCity.Repository
         List<ComplaintPriority> GetPriorities();
         List<ComplaintStatus> GetStatuses();
         List<Role> GetRoles();
-
+        List<MasterEntityViewModel> GetMasterList(string entityType, int? parentId, bool includeInactive);
+        int SaveRole(int id, string name, bool isActive, int actorId);
         int SaveState(int id, string name, bool isActive, int actorId);
         int SaveDistrict(int id, string name, int stateId, bool isActive, int actorId);
         int SaveCity(int id, string name, int? districtId, bool isActive, int actorId);
-        int SaveWard(int id, string name, int cityId, bool isActive, int actorId);
-        int SaveCategory(int id, string name, bool isActive, int actorId);
+        int SaveWard(int id, string name, int cityId, bool isActive, string wardNo, int actorId);
+        int SaveCategory(int id, string name, bool isActive, int actorId,int DepartmentId);
         int SaveDepartment(int id, string name, bool isActive, int actorId);
     }
 }

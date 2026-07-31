@@ -5,5 +5,6 @@ namespace FixMyCityModel.Model
         public int WardId { get; set; }
         public string WardName { get; set; }
         public int CityId { get; set; }
+        public int WardNo { get; set; }
     }
 }

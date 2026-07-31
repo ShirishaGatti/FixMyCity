@@ -1,0 +1,566 @@
+/* =============================================================
+   MasterData.css  –  7-card + slide-panel design
+   Sits on top of Bootstrap 5 + admin-shell.css
+   ============================================================= */
+
+/* ── Page layout ─────────────────────────────────────────────── */
+.md-page {
+    max-width: 1200px;
+}
+
+.md-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.md-title {
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin: 0 0 4px;
+    letter-spacing: -.02em;
+}
+
+.md-subtitle {
+    color: #64748b;
+    font-size: .875rem;
+    margin: 0;
+}
+
+/* ── 7-card grid ─────────────────────────────────────────────── */
+.md-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.md-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 16px;
+    border-radius: 16px;
+    background: rgba(30, 41, 59, .55);
+    border: 1.5px solid rgba(148, 163, 184, .12);
+    cursor: pointer;
+    user-select: none;
+    transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+    outline: none;
+}
+
+.md-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(56, 189, 248, .5);
+    box-shadow: 0 10px 32px rgba(56, 189, 248, .12);
+}
+
+.md-card:focus-visible {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, .25);
+}
+
+.md-card.active {
+    border-color: #38bdf8;
+    box-shadow: 0 8px 30px rgba(56, 189, 248, .2);
+    background: rgba(30, 41, 59, .75);
+}
+
+.md-card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+}
+
+.md-card-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.md-card-body h5 {
+    margin: 0 0 2px;
+    font-size: .95rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.md-card-body p {
+    margin: 0;
+    font-size: .76rem;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.md-card-arrow {
+    color: #475569;
+    font-size: .85rem;
+    flex-shrink: 0;
+    transition: transform .2s ease, color .2s ease;
+}
+
+.md-card:hover .md-card-arrow,
+.md-card.active .md-card-arrow {
+    color: #38bdf8;
+    transform: rotate(90deg);
+}
+
+/* ── Slide-in panel ──────────────────────────────────────────── */
+.md-panel {
+    border-radius: 18px;
+    background: rgba(15, 23, 42, .75);
+    border: 1px solid rgba(148, 163, 184, .18);
+    backdrop-filter: blur(14px);
+    overflow: hidden;
+    animation: panelSlide .28s cubic-bezier(.22, .68, 0, 1.2);
+}
+
+@keyframes panelSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.md-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(148, 163, 184, .1);
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.md-panel-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.md-panel-header h4 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #f1f5f9;
+}
+
+.md-panel-close {
+    background: transparent;
+    border: 0;
+    color: #64748b;
+    font-size: 1.05rem;
+    line-height: 1;
+    padding: 6px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: color .15s, background .15s;
+}
+
+.md-panel-close:hover {
+    color: #f87171;
+    background: rgba(248, 113, 113, .1);
+}
+
+.md-panel-body {
+    padding: 20px 22px;
+}
+
+/* ── Add button ──────────────────────────────────────────────── */
+.md-btn-add {
+    background: linear-gradient(135deg, #1574e0, #38bdf8);
+    color: #fff;
+    border: 0;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-size: .85rem;
+    font-weight: 600;
+    transition: opacity .18s, transform .18s;
+}
+
+.md-btn-add:hover {
+    opacity: .9;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+/* ── Loading spinner ─────────────────────────────────────────── */
+.md-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 0;
+    color: #64748b;
+    font-size: .9rem;
+}
+
+.md-spinner {
+    width: 22px;
+    height: 22px;
+    border: 3px solid rgba(148, 163, 184, .2);
+    border-top-color: #38bdf8;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ── Data table ──────────────────────────────────────────────── */
+.md-table-wrap {
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, .1);
+    overflow: hidden;
+}
+
+.md-table {
+    color: #e2e8f0;
+    margin: 0;
+    width: 100%;
+}
+
+.md-table thead th {
+    background: rgba(148, 163, 184, .07);
+    color: #94a3b8;
+    font-size: .78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: 12px 14px;
+    border: 0;
+    white-space: nowrap;
+}
+
+.md-table tbody td {
+    padding: 12px 14px;
+    border-color: rgba(148, 163, 184, .07);
+    vertical-align: middle;
+    font-size: .875rem;
+}
+
+.md-table tbody tr:hover td {
+    background: rgba(126, 158, 172, 0.04);
+}
+
+.md-empty {
+    text-align: center;
+    color: #475569;
+    padding: 48px !important;
+}
+
+/* Action buttons */
+.md-action {
+    background: transparent;
+    border: 1px solid rgba(148, 163, 184, .18);
+    border-radius: 8px;
+    padding: 5px 9px;
+    color: #94a3b8;
+    font-size: .8rem;
+    cursor: pointer;
+    transition: color .15s, border-color .15s, background .15s, transform .15s;
+}
+
+.md-action:hover {
+    transform: scale(1.08);
+}
+
+.md-action.edit:hover {
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, .4);
+    background: rgba(56, 189, 248, .08);
+}
+
+.md-action.toggle:hover {
+    color: #fbbf24;
+    border-color: rgba(251, 191, 36, .4);
+    background: rgba(251, 191, 36, .08);
+}
+
+.md-action.toggle.deactivate:hover {
+    color: #f87171;
+    border-color: rgba(248, 113, 113, .4);
+    background: rgba(248, 113, 113, .08);
+}
+
+/* Status badges */
+.md-badge-active {
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 600;
+    background: rgba(52, 211, 153, .15);
+    color: #34d399;
+}
+
+.md-badge-inactive {
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 600;
+    background: rgba(148, 163, 184, .12);
+    color: #64748b;
+}
+
+/* ── Modal ───────────────────────────────────────────────────── */
+.md-modal-content {
+    background: #0f1c2e;
+    border: 1px solid rgba(148, 163, 184, .18);
+    border-radius: 18px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .55);
+    color: #e2e8f0;
+}
+
+.md-modal-header {
+    border-bottom: 1px solid rgba(148, 163, 184, .1);
+    padding: 18px 22px;
+}
+
+.md-modal-header .modal-title {
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.md-modal-body {
+    padding: 22px;
+}
+
+.md-modal-footer {
+    border-top: 1px solid rgba(148, 163, 184, .1);
+    padding: 16px 22px;
+    gap: 10px;
+}
+
+.md-label {
+    color: #94a3b8;
+    font-size: .82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 6px;
+}
+
+.md-input {
+    background: rgba(30, 41, 59, .7) !important;
+    border: 1px solid rgba(148, 163, 184, .2) !important;
+    border-radius: 10px !important;
+    color: #e2e8f0 !important;
+    padding: 10px 14px !important;
+    transition: border-color .18s, box-shadow .18s;
+}
+
+.md-input:focus {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, .15) !important;
+    outline: none;
+}
+
+.md-input option {
+    background: #0f1c2e;
+    color: #e2e8f0;
+}
+
+.md-check {
+    padding: 10px 14px;
+    border-radius: 10px;
+    background: rgba(30, 41, 59, .4);
+    border: 1px solid rgba(148, 163, 184, .12);
+}
+
+.md-check .form-check-input {
+    background-color: rgba(30, 41, 59, .7);
+    border-color: rgba(148, 163, 184, .3);
+}
+
+.md-check .form-check-input:checked {
+    background-color: #1574e0;
+    border-color: #1574e0;
+}
+
+.md-check .form-check-label {
+    color: #cbd5e1;
+}
+
+.md-form-error {
+    background: rgba(248, 113, 113, .1);
+    border: 1px solid rgba(248, 113, 113, .3);
+    border-radius: 10px;
+    color: #fca5a5;
+    padding: 10px 14px;
+    font-size: .85rem;
+    margin-bottom: 16px;
+}
+
+.md-btn-cancel {
+    background: rgba(30, 41, 59, .6);
+    border: 1px solid rgba(148, 163, 184, .2);
+    color: #94a3b8;
+    border-radius: 10px;
+    padding: 9px 18px;
+    font-weight: 600;
+}
+
+.md-btn-cancel:hover {
+    color: #e2e8f0;
+    background: rgba(30, 41, 59, .9);
+}
+
+.md-btn-save {
+    background: linear-gradient(135deg, #1574e0, #38bdf8);
+    border: 0;
+    color: #fff;
+    border-radius: 10px;
+    padding: 9px 20px;
+    font-weight: 600;
+    transition: opacity .18s, transform .18s;
+}
+
+.md-btn-save:hover {
+    opacity: .9;
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.md-btn-save:disabled,
+.md-btn-cancel:disabled {
+    opacity: .55;
+}
+
+/* ── Toast ───────────────────────────────────────────────────── */
+#mdToastContainer {
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 300px;
+}
+
+.md-toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: .85rem;
+    font-weight: 500;
+    color: #fff;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .35);
+    animation: toastIn .25s ease;
+}
+
+@keyframes toastIn {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.md-toast.success {
+    background: linear-gradient(135deg, #059669, #34d399);
+}
+
+.md-toast.danger {
+    background: linear-gradient(135deg, #dc2626, #f87171);
+}
+
+.md-toast i {
+    font-size: 1rem;
+}
+
+/* ── Light-mode overrides ────────────────────────────────────── */
+html.lm .md-title {
+    color: #0f172a;
+}
+
+html.lm .md-card {
+    background: #fff;
+    border-color: #e2e8f0;
+}
+
+html.lm .md-card-body h5 {
+    color: #0f172a;
+}
+
+html.lm .md-card-body p {
+    color: #64748b;
+}
+
+html.lm .md-panel {
+    background: #fff;
+    border-color: #e2e8f0;
+}
+
+html.lm .md-panel-header h4 {
+    color: #0f172a;
+}
+
+html.lm .md-table {
+    color: #1e293b;
+}
+
+html.lm .md-table thead th {
+    background: #f8fafc;
+    color: #475569;
+}
+
+html.lm .md-modal-content {
+    background: #fff;
+    border-color: #e2e8f0;
+    color: #1e293b;
+}
+
+html.lm .md-input {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: #1e293b !important;
+}
+
+html.lm .md-check {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+html.lm .md-check .form-check-label {
+    color: #334155;
+}
+
+html.lm .md-badge-active {
+    background: rgba(5, 150, 105, .12);
+}
+
+html.lm .md-badge-inactive {
+    background: rgba(148, 163, 184, .15);
+}

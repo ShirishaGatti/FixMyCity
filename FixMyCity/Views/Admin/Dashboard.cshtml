@@ -1,253 +1,172 @@
-﻿@{
+@model FixMyCityModel.ViewModel.AdminDashboardViewModel
+
+@{
     ViewBag.Title = "Admin Dashboard";
-    Layout = "~/Views/Shared/_Layout.cshtml";   // Change if you have AdminLayout
+    ViewBag.ActivePage = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
-
-<style>
-    .sidebar {
-        min-height: 100vh;
-        background: #212529;
-    }
-
-        .sidebar a {
-            color: white;
-            display: block;
+@section adminStyles {
+    <style>
+        .dash-stat {
+            background: rgba(30,41,59,.55);
+            border: 1px solid rgba(148,163,184,.12);
+            border-radius: 16px;
+            padding: 20px 22px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform .2s, box-shadow .2s;
+        }
+        .dash-stat:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.2); }
+        .dash-stat .ds-icon {
+            width: 54px; height: 54px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.4rem; flex-shrink: 0;
+        }
+        .dash-stat .ds-val { font-size: 1.8rem; font-weight: 800; color: #f1f5f9; line-height: 1; }
+        .dash-stat .ds-lbl { font-size: .8rem; color: #64748b; margin-top: 2px; }
+        .dash-card {
+            background: rgba(30,41,59,.55);
+            border: 1px solid rgba(148,163,184,.12);
+            border-radius: 16px; overflow: hidden;
+        }
+        .dash-card-header {
             padding: 14px 18px;
-            text-decoration: none;
-            transition: .3s;
+            font-weight: 700; font-size: .9rem;
+            border-bottom: 1px solid rgba(148,163,184,.1);
+            color: #f1f5f9;
         }
-
-            .sidebar a:hover {
-                background: #0d6efd;
-            }
-
-    .stat-card {
-        border: none;
-        border-radius: 15px;
-        transition: .3s;
-        box-shadow: 0 5px 15px rgba(0,0,0,.08);
-    }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
+        .dash-card-body { padding: 16px 18px; }
+        .dash-table { color: #e2e8f0; margin: 0; }
+        .dash-table thead th {
+            background: rgba(148,163,184,.07); color: #94a3b8;
+            font-size: .75rem; text-transform: uppercase; letter-spacing: .05em;
+            padding: 10px 12px; border: 0; font-weight: 600;
         }
+        .dash-table tbody td { padding: 10px 12px; border-color: rgba(148,163,184,.07); font-size: .875rem; vertical-align: middle; }
+        html.lm .dash-stat { background: #fff; border-color: #e2e8f0; }
+        html.lm .dash-stat .ds-val { color: #0f172a; }
+        html.lm .dash-card { background: #fff; border-color: #e2e8f0; }
+        html.lm .dash-card-header { color: #0f172a; border-color: #e2e8f0; }
+        html.lm .dash-table { color: #1e293b; }
+        html.lm .dash-table thead th { background: #f8fafc; color: #475569; }
+    </style>
+}
 
-    .icon-circle {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 24px;
-        color: white;
-    }
-
-    .table-card {
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0,0,0,.08);
-    }
-</style>
-
-<div class="container-fluid">
-
-    <div class="row">
-
-        <!-- Sidebar -->
-
-        <div class="col-md-2 sidebar p-0">
-
-            <h4 class="text-center text-white py-4">
-                Admin Panel
-            </h4>
-
-            <a href="@Url.Action("Dashboard","Admin")">
-                <i class="fa fa-chart-line"></i> Dashboard
-            </a>
-
-            <a href="@Url.Action("MasterData","Admin")">
-                <i class="fa fa-layer-group"></i> Master Data
-            </a>
-
-            <a href="@Url.Action("Users","Admin")">
-                <i class="fa fa-users"></i> Users
-            </a>
-
-            <a href="@Url.Action("Complaints","Admin")">
-                <i class="fa fa-file-alt"></i> Complaints
-            </a>
-
-            <a href="@Url.Action("Officers","Admin")">
-                <i class="fa fa-user-shield"></i> Officers
-            </a>
-
-        </div>
-
-        <!-- Content -->
-
-        <div class="col-md-10">
-
-            <h2 class="my-4">
-                Dashboard
-            </h2>
-
-            <div class="row">
-
-                <div class="col-md-3 mb-4">
-                    <div class="card stat-card">
-                        <div class="card-body d-flex justify-content-between">
-                            <div>
-                                <h5>Total Users</h5>
-                                <h2>150</h2>
-                            </div>
-
-                            <div class="icon-circle bg-primary">
-                                <i class="fa fa-users"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3 mb-4">
-                    <div class="card stat-card">
-                        <div class="card-body d-flex justify-content-between">
-                            <div>
-                                <h5>Complaints</h5>
-                                <h2>86</h2>
-                            </div>
-
-                            <div class="icon-circle bg-danger">
-                                <i class="fa fa-file-circle-exclamation"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3 mb-4">
-                    <div class="card stat-card">
-                        <div class="card-body d-flex justify-content-between">
-                            <div>
-                                <h5>Resolved</h5>
-                                <h2>54</h2>
-                            </div>
-
-                            <div class="icon-circle bg-success">
-                                <i class="fa fa-check"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-3 mb-4">
-                    <div class="card stat-card">
-                        <div class="card-body d-flex justify-content-between">
-                            <div>
-                                <h5>Officers</h5>
-                                <h2>18</h2>
-                            </div>
-
-                            <div class="icon-circle bg-warning">
-                                <i class="fa fa-user-shield"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+<div class="row g-3 mb-4">
+    <div class="col-lg-3 col-sm-6">
+        <div class="dash-stat">
+            <div class="ds-icon" style="background:linear-gradient(135deg,#1574e0,#38bdf8)"><i class="bi bi-people-fill"></i></div>
+            <div>
+                <div class="ds-val">@(Model?.TotalUsers ?? 0)</div>
+                <div class="ds-lbl">Total Users</div>
             </div>
-
-            <div class="row">
-
-                <div class="col-md-8">
-
-                    <div class="card table-card">
-
-                        <div class="card-header bg-primary text-white">
-                            Recent Complaints
-                        </div>
-
-                        <div class="card-body">
-
-                            <table class="table table-bordered">
-
-                                <thead>
-
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Citizen</th>
-                                        <th>Category</th>
-                                        <th>Status</th>
-                                    </tr>
-
-                                </thead>
-
-                                <tbody>
-
-                                    <tr>
-                                        <td>101</td>
-                                        <td>John</td>
-                                        <td>Road Damage</td>
-                                        <td><span class="badge badge-warning">Pending</span></td>
-                                    </tr>
-
-                                    <tr>
-                                        <td>102</td>
-                                        <td>Smith</td>
-                                        <td>Garbage</td>
-                                        <td><span class="badge badge-success">Resolved</span></td>
-                                    </tr>
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="col-md-4">
-
-                    <div class="card table-card">
-
-                        <div class="card-header bg-success text-white">
-                            Recent Users
-                        </div>
-
-                        <div class="card-body">
-
-                            <ul class="list-group">
-
-                                <li class="list-group-item">
-                                    Rahul
-                                </li>
-
-                                <li class="list-group-item">
-                                    Priya
-                                </li>
-
-                                <li class="list-group-item">
-                                    Amit
-                                </li>
-
-                                <li class="list-group-item">
-                                    Sneha
-                                </li>
-
-                            </ul>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
         </div>
+    </div>
+    <div class="col-lg-3 col-sm-6">
+        <div class="dash-stat">
+            <div class="ds-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"><i class="bi bi-file-earmark-exclamation-fill"></i></div>
+            <div>
+                <div class="ds-val">@(Model?.TotalComplaints ?? 0)</div>
+                <div class="ds-lbl">Total Complaints</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-sm-6">
+        <div class="dash-stat">
+            <div class="ds-icon" style="background:linear-gradient(135deg,#059669,#34d399)"><i class="bi bi-check-circle-fill"></i></div>
+            <div>
+                <div class="ds-val">@(Model?.ResolvedComplaints ?? 0)</div>
+                <div class="ds-lbl">Resolved</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-sm-6">
+        <div class="dash-stat">
+            <div class="ds-icon" style="background:linear-gradient(135deg,#be185d,#f472b6)"><i class="bi bi-shield-fill-check"></i></div>
+            <div>
+                <div class="ds-val">@(Model?.TotalOfficers ?? 0)</div>
+                <div class="ds-lbl">Officers</div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<div class="row g-3">
+    <!-- Recent Complaints -->
+    <div class="col-lg-8">
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <i class="bi bi-file-earmark-text-fill me-2 text-primary"></i>Recent Complaints
+            </div>
+            <div class="dash-card-body">
+                @if (Model != null && Model.RecentComplaints != null && Model.RecentComplaints.Any())
+                {
+                    <table class="table dash-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Number</th>
+                                <th>Title</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model.RecentComplaints)
+                            {
+                                <tr>
+                                    <td>@c.ComplaintId</td>
+                                    <td><code style="color:#38bdf8">@c.ComplaintNumber</code></td>
+                                    <td>@c.Title</td>
+                                    <td><span class="badge bg-secondary rounded-pill">@c.StatusName</span></td>
+                                    <td class="text-muted" style="font-size:.8rem">@c.CreatedAt.ToString("dd MMM yy")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted text-center py-4 mb-0">No complaints yet.</p>
+                }
+            </div>
+        </div>
     </div>
 
+    <!-- Mini stats column -->
+    <div class="col-lg-4">
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <i class="bi bi-bar-chart-fill me-2 text-info"></i>Quick Stats
+            </div>
+            <div class="dash-card-body">
+                <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:rgba(148,163,184,.08)!important">
+                    <span class="text-muted small">Open</span>
+                    <strong class="text-warning">@(Model?.OpenComplaints ?? 0)</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:rgba(148,163,184,.08)!important">
+                    <span class="text-muted small">In Progress</span>
+                    <strong class="text-info">@(Model?.InProgressComplaints ?? 0)</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:rgba(148,163,184,.08)!important">
+                    <span class="text-muted small">Resolved</span>
+                    <strong class="text-success">@(Model?.ResolvedComplaints ?? 0)</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:rgba(148,163,184,.08)!important">
+                    <span class="text-muted small">Closed</span>
+                    <strong style="color:#94a3b8">@(Model?.ClosedComplaints ?? 0)</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:rgba(148,163,184,.08)!important">
+                    <span class="text-muted small">Total Cities</span>
+                    <strong class="text-white">@(Model?.TotalCities ?? 0)</strong>
+                </div>
+                <div class="d-flex justify-content-between py-2">
+                    <span class="text-muted small">Departments</span>
+                    <strong class="text-white">@(Model?.TotalDepartments ?? 0)</strong>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

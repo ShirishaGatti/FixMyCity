@@ -1,200 +1,391 @@
-﻿@{
+﻿@*@{
     ViewBag.Title = "Master Data";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.ActivePage = "MasterData";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+@section adminStyles {
+    <link href="~/Content/css/MasterData.css" rel="stylesheet" />
+}
 
-<style>
-      .sidebar {
-        min-height: 100vh;
-        background: #212529;
-    }
+<div class="md-page">
 
-        .sidebar a {
-            color: white;
-            display: block;
-            padding: 14px 18px;
-            text-decoration: none;
-            transition: .3s;
-        }
+    <!-- Page header -->
+    <div class="md-header mb-4">
+        <div>
+            <h2 class="md-title">Master Data Management</h2>
+            <p class="md-subtitle">Click any category to view and manage its records</p>
+        </div>
+    </div>
 
-            .sidebar a:hover {
-                background: #0d6efd;
-            }
+    <!-- 7 Entity Cards -->
+    <div class="md-cards-grid" id="mdCards">
 
-    .master-card {
-        cursor: pointer;
-        transition: .3s;
-        border-radius: 15px;
-    }
-
-        .master-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,.15);
-        }
-
-    #modalBackground {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: none;
-        backdrop-filter: blur(5px);
-        background: rgba(0,0,0,.3);
-        z-index: 1040;
-    }
-
-    #popup {
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%,-50%);
-        width: 80%;
-        max-height: 85%;
-        overflow: auto;
-        background: white;
-        border-radius: 10px;
-        z-index: 1050;
-        padding: 20px;
-    }
-</style>
-
-
-    <div class="container-fluid">
-
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-2 sidebar p-0">
-                <h4 class="text-center text-white py-4">
-                    Admin Panel
-                </h4>
-                <a href="@Url.Action("Dashboard","Admin")">
-                    <i class="fa fa-chart-line"></i> Dashboard
-                </a>
-                <a href="@Url.Action("MasterData","Admin")">
-                    <i class="fa fa-layer-group"></i> Master Data
-                </a>
-                <a href="@Url.Action("Users","Admin")">
-                    <i class="fa fa-users"></i> Users
-                </a>
-                <a href="@Url.Action("Complaints","Admin")">
-                    <i class="fa fa-file-alt"></i> Complaints
-                </a>
-                <a href="@Url.Action("Officers","Admin")">
-                    <i class="fa fa-user-shield"></i> Officers
-                </a>
+        <div class="md-card" id="card-state" data-entity="state" tabindex="0" role="button" aria-expanded="false">
+            <div class="md-card-icon" style="background:linear-gradient(135deg,#1574e0,#38bdf8)">
+                <i class="bi bi-geo-fill"></i>
             </div>
-            <!-- Main Content -->
-            <div class="col-md-10">
-                <h2 class="my-4">Master Data</h2>
-                <div class="row">
+            <div class="md-card-body">
+                <h5>States</h5>
+                <p>Manage state records</p>
+            </div>
+            <i class="bi bi-chevron-right md-card-arrow"></i>
+        </div>
 
-                    <div class="col-md-3 mb-4">
-                        <div class="card master-card" onclick="loadPartial('/Admin/States')">
-                            <div class="card-body text-center">
-                                <i class="fa fa-map fa-3x text-primary"></i>
-                                <h5 class="mt-3">States</h5>
-                            </div>
-                        </div>
-                    </div>
+        <div class="md-card" id="card-district" data-entity="district" tabindex="0" role="button" aria-expanded="false">
+            <div class="md-card-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
+                <i class="bi bi-map-fill"></i>
+            </div>
+            <div class="md-card-body">
+                <h5>Districts</h5>
+                <p>Manage district records</p>
+            </div>
+            <i class="bi bi-chevron-right md-card-arrow"></i>
+        </div>
 
-                    <div class="col-md-3 mb-4">
-                        <div class="card master-card" onclick="loadPartial('/Admin/Districts')">
-                            <div class="card-body text-center">
-                                <i class="fa fa-location-dot fa-3x text-success"></i>
-                                <h5 class="mt-3">Districts</h5>
-                            </div>
-                        </div>
-                    </div>
+        <div class="md-card" id="card-city" data-entity="city" tabindex="0" role="button" aria-expanded="false">
+            <div class="md-card-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
+                <i class="bi bi-building-fill"></i>
+            </div>
+            <div class="md-card-body">
+                <h5>Cities</h5>
+                <p>Manage city records</p>
+            </div>
+            <i class="bi bi-chevron-right md-card-arrow"></i>
+        </div>
 
-                    <div class="col-md-3 mb-4">
-                        <div class="card master-card" onclick="loadPartial('/Admin/Categories')">
-                            <div class="card-body text-center">
-                                <i class="fa fa-list fa-3x text-danger"></i>
-                                <h5 class="mt-3">Categories</h5>
-                            </div>
-                        </div>
-                    </div>
+        <div class="md-card" id="card-ward" data-entity="ward" tabindex="0" role="button" aria-expanded="false">
+            <div class="md-card-icon" style="background:linear-gradient(135deg,#d97706,#fbbf24)">
+                <i class="bi bi-signpost-2-fill"></i>
+            </div>
+            <div class="md-card-body">
+                <h5>Wards</h5>
+                <p>Manage ward records</p>
+            </div>
+            <i class="bi bi-chevron-right md-card-arrow"></i>
+        </div>
 
-                    <div class="col-md-3 mb-4">
-                        <div class="card master-card" onclick="loadPartial('/Admin/Departments')">
-                            <div class="card-body text-center">
-                                <i class="fa fa-building fa-3x text-warning"></i>
-                                <h5 class="mt-3">Departments</h5>
-                            </div>
-                        </div>
-                    </div>
+        <div class="md-card" id="card-category" data-entity="category" tabindex="0" role="button" aria-expanded="false">
+            <div class="md-card-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
+                <i class="bi bi-tags-fill"></i>
+            </div>
+            <div class="md-card-body">
+                <h5>Categories</h5>
+                <p>Manage complaint categories</p>
+            </div>
+            <i class="bi bi-chevron-right md-card-arrow"></i>
+        </div>
 
-                    <div class="col-md-3 mb-4">
-                        <div class="card master-card" onclick="loadPartial('/Admin/Priorities')">
-                            <div class="card-body text-center">
-                                <i class="fa fa-flag fa-3x text-info"></i>
-                                <h5 class="mt-3">Priorities</h5>
-                            </div>
-                        </div>
-                    </div>
+        <div class="md-card" id="card-department" data-entity="department" tabindex="0" role="button" aria-expanded="false">
+            <div class="md-card-icon" style="background:linear-gradient(135deg,#be185d,#f472b6)">
+                <i class="bi bi-building-gear"></i>
+            </div>
+            <div class="md-card-body">
+                <h5>Departments</h5>
+                <p>Manage department records</p>
+            </div>
+            <i class="bi bi-chevron-right md-card-arrow"></i>
+        </div>
 
-                    <div class="col-md-3 mb-4">
-                        <div class="card master-card" onclick="loadPartial('/Admin/Statuses')">
-                            <div class="card-body text-center">
-                                <i class="fa fa-circle-check fa-3x text-success"></i>
-                                <h5 class="mt-3">Statuses</h5>
-                            </div>
-                        </div>
-                    </div>
+        <div class="md-card" id="card-role" data-entity="role" tabindex="0" role="button" aria-expanded="false">
+            <div class="md-card-icon" style="background:linear-gradient(135deg,#dc2626,#f87171)">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <div class="md-card-body">
+                <h5>Roles</h5>
+                <p>Manage system roles</p>
+            </div>
+            <i class="bi bi-chevron-right md-card-arrow"></i>
+        </div>
 
-                    <div class="col-md-3 mb-4">
-                        <div class="card master-card" onclick="loadPartial('/Admin/Roles')">
-                            <div class="card-body text-center">
-                                <i class="fa fa-user-shield fa-3x text-secondary"></i>
-                                <h5 class="mt-3">Roles</h5>
-                            </div>
-                        </div>
-                    </div>
+    </div><!-- /md-cards-grid -->
 
+    <!-- Slide-in Data Panel (shown below cards) -->
+    <div class="md-panel" id="mdPanel" style="display:none" aria-live="polite">
+        <!-- Panel header -->
+        <div class="md-panel-header">
+            <div class="d-flex align-items-center gap-3">
+                <div class="md-panel-icon" id="mdPanelIcon"></div>
+                <div>
+                    <h4 class="mb-0" id="mdPanelTitle">Entity</h4>
+                    <small class="text-muted" id="mdPanelSubtitle"></small>
                 </div>
-
             </div>
-
-            <div id="modalBackground"></div>
-
-            <div id="popup">
-
-                <button class="btn btn-danger float-right mb-3" onclick="closePopup()">
-                    Close
+            <div class="d-flex gap-2 align-items-center">
+                <button type="button" class="btn md-btn-add" id="btnAddRecord">
+                    <i class="bi bi-plus-lg me-1"></i> Add New
                 </button>
-
-                <div id="popupContent"></div>
-
+                <button type="button" class="md-panel-close" id="btnClosePanel" title="Close panel">
+                    <i class="bi bi-x-lg"></i>
+                </button>
             </div>
+        </div>
 
-            @section scripts{
+        <!-- Panel body: data table -->
+        <div class="md-panel-body" id="mdPanelBody">
+            <div class="md-loading">
+                <div class="md-spinner"></div>
+                <span>Loading records...</span>
+            </div>
+        </div>
+    </div><!-- /md-panel -->
 
-                <script>
+</div><!-- /md-page -->
 
-                    function loadPartial(url) {
+<!-- ── Add / Edit Modal ─────────────────────────────────────────── -->
+<div class="modal fade" id="masterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content md-modal-content">
+            <form id="masterForm">
+                @Html.AntiForgeryToken()
+                <div class="modal-header md-modal-header">
+                    <h5 class="modal-title" id="masterModalTitle">Add</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body md-modal-body">
+                    <div id="masterFormError" class="md-form-error" style="display:none"></div>
 
-                        $("#modalBackground").show();
+                    <input type="hidden" id="mId"         name="Id"         value="0" />
+                    <input type="hidden" id="mEntityType" name="EntityType" value="" />
 
-                        $("#popup").show();
+                    <div class="mb-3">
+                        <label for="mName" class="form-label md-label">Name</label>
+                        <input type="text" class="form-control md-input" id="mName" name="Name" maxlength="100" required placeholder="Enter name..." />
+                    </div>
 
-                        $("#popupContent").load(url);
+                    <div class="mb-3" id="mParentGroup" style="display:none;">
+                        <label for="mParentId" id="mParentLabel" class="form-label md-label">Parent</label>
+                        <select class="form-select md-input" id="mParentId" name="ParentId"></select>
+                    </div>
 
-                    }
+                    <div class="form-check md-check">
+                        <input type="checkbox" class="form-check-input" id="mIsActive" name="IsActive" value="true" checked />
+                        <label class="form-check-label" for="mIsActive">Active</label>
+                    </div>
+                </div>
+                <div class="modal-footer md-modal-footer">
+                    <button type="button" class="btn md-btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn md-btn-save" id="btnSave">
+                        <i class="bi bi-check-lg me-1"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-                    function closePopup() {
+<!-- Toast container -->
+<div id="mdToastContainer"></div>
 
-                        $("#modalBackground").hide();
+@section adminScripts {
+    <script src="~/Content/js/MasterData.js"></script>
+    <script>
+        $(function () {
+            MasterData.init({
+                urls: {
+                    list: '@Url.Action("GetMasterList", "Admin")',
+                    save: '@Url.Action("SaveMaster",    "Admin")'
+                }
+            });
+        });
+    </script>
+}*@
+@{
+    ViewBag.Title = "Master Data";
+    ViewBag.ActivePage = "MasterData";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
 
-                        $("#popup").hide();
+@section adminStyles {
+    <link href="~/Content/css/MasterData.css" rel="stylesheet" />
+}
 
-                        $("#popupContent").html("");
+<div class="md-page">
 
-                    }
+    <!-- Page header -->
+    <div class="md-header mb-4">
+        <div>
+            <h2 class="md-title">Master Data Management</h2>
+            <p class="md-subtitle">Click any category to view and manage its records</p>
+        </div>
+    </div>
 
-                </script>
+    <!-- 7 Entity Cards -->
+    <div class="md-cards-grid" id="mdCards">
 
-            }
+        <div class="md-card" id="card-state" data-entity="state" tabindex="0" role="button" aria-expanded="false">
+            <div class="md-card-icon" style="background:linear-gradient(135deg,#1574e0,#38bdf8)">
+                <i class="bi bi-geo-fill"></i>
+            </div>
+            <div class="md-card-body">
+                <h5>States</h5>
+                <p>Manage state records</p>
+            </div>
+            <i class="bi bi-chevron-right md-card-arrow"></i>
+        </div>
+
+        <div class="md-card" id="card-district" data-entity="district" tabindex="0" role="button" aria-expanded="false">
+            <div class="md-card-icon" style="background:linear-gradient(135deg,#7c3aed,#a78bfa)">
+                <i class="bi bi-map-fill"></i>
+            </div>
+            <div class="md-card-body">
+                <h5>Districts</h5>
+                <p>Manage district records</p>
+            </div>
+            <i class="bi bi-chevron-right md-card-arrow"></i>
+        </div>
+
+        <div class="md-card" id="card-city" data-entity="city" tabindex="0" role="button" aria-expanded="false">
+            <div class="md-card-icon" style="background:linear-gradient(135deg,#0891b2,#22d3ee)">
+                <i class="bi bi-building-fill"></i>
+            </div>
+            <div class="md-card-body">
+                <h5>Cities</h5>
+                <p>Manage city records</p>
+            </div>
+            <i class="bi bi-chevron-right md-card-arrow"></i>
+        </div>
+
+        <div class="md-card" id="card-ward" data-entity="ward" tabindex="0" role="button" aria-expanded="false">
+            <div class="md-card-icon" style="background:linear-gradient(135deg,#d97706,#fbbf24)">
+                <i class="bi bi-signpost-2-fill"></i>
+            </div>
+            <div class="md-card-body">
+                <h5>Wards</h5>
+                <p>Manage ward records</p>
+            </div>
+            <i class="bi bi-chevron-right md-card-arrow"></i>
+        </div>
+
+        <div class="md-card" id="card-category" data-entity="category" tabindex="0" role="button" aria-expanded="false">
+            <div class="md-card-icon" style="background:linear-gradient(135deg,#059669,#34d399)">
+                <i class="bi bi-tags-fill"></i>
+            </div>
+            <div class="md-card-body">
+                <h5>Categories</h5>
+                <p>Manage complaint categories</p>
+            </div>
+            <i class="bi bi-chevron-right md-card-arrow"></i>
+        </div>
+
+        <div class="md-card" id="card-department" data-entity="department" tabindex="0" role="button" aria-expanded="false">
+            <div class="md-card-icon" style="background:linear-gradient(135deg,#be185d,#f472b6)">
+                <i class="bi bi-building-gear"></i>
+            </div>
+            <div class="md-card-body">
+                <h5>Departments</h5>
+                <p>Manage department records</p>
+            </div>
+            <i class="bi bi-chevron-right md-card-arrow"></i>
+        </div>
+
+        <div class="md-card" id="card-role" data-entity="role" tabindex="0" role="button" aria-expanded="false">
+            <div class="md-card-icon" style="background:linear-gradient(135deg,#dc2626,#f87171)">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <div class="md-card-body">
+                <h5>Roles</h5>
+                <p>Manage system roles</p>
+            </div>
+            <i class="bi bi-chevron-right md-card-arrow"></i>
+        </div>
+
+    </div><!-- /md-cards-grid -->
+
+    <!-- Slide-in Data Panel (shown below cards) -->
+    <div class="md-panel" id="mdPanel" style="display:none" aria-live="polite">
+        <!-- Panel header -->
+        <div class="md-panel-header">
+            <div class="d-flex align-items-center gap-3">
+                <div class="md-panel-icon" id="mdPanelIcon"></div>
+                <div>
+                    <h4 class="mb-0" id="mdPanelTitle">Entity</h4>
+                    <small class="text-muted" id="mdPanelSubtitle"></small>
+                </div>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <button type="button" class="btn md-btn-add" id="btnAddRecord">
+                    <i class="bi bi-plus-lg me-1"></i> Add New
+                </button>
+                <button type="button" class="md-panel-close" id="btnClosePanel" title="Close panel">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel body: data table -->
+        <div class="md-panel-body" id="mdPanelBody">
+            <div class="md-loading">
+                <div class="md-spinner"></div>
+                <span>Loading records...</span>
+            </div>
+        </div>
+    </div><!-- /md-panel -->
+
+</div><!-- /md-page -->
+
+<!-- ── Add / Edit Modal ─────────────────────────────────────────── -->
+<div class="modal fade" id="masterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content md-modal-content">
+            <form id="masterForm">
+                @Html.AntiForgeryToken()
+                <div class="modal-header md-modal-header">
+                    <h5 class="modal-title" id="masterModalTitle">Add</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body md-modal-body">
+                    <div id="masterFormError" class="md-form-error" style="display:none"></div>
+
+                    <input type="hidden" id="mId"         name="Id"         value="0" />
+                    <input type="hidden" id="mEntityType" name="EntityType" value="" />
+                    
+                    <div class="mb-3" id="mParentGroup" style="display:none;">
+                        <label for="mParentId" id="mParentLabel" class="form-label md-label">Parent</label>
+                        <select class="form-select md-input" id="mParentId" name="ParentId"></select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mName" class="form-label md-label">Name</label>
+                        <input type="text" class="form-control md-input" id="mName" name="Name" maxlength="100" required placeholder="Enter name..." />
+                    </div>
+
+                    <div class="mb-3" id="mWardNoGroup" style="display:none;">
+                        <label for="mWardNo" class="form-label md-label">Ward No <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control md-input" id="mWardNo" name="WardNo" min="1" placeholder="Enter Ward No..." />
+                    </div>
+                    <div class="mb-3" id="mDepartmentIdGroup" style="display:none;">
+                        <label for="mDepartmentId" class="form-label md-label">Department Id<span class="text-danger">*</span></label>
+                        <select class="form-select md-input" id="mDepartmentId" name="DepartmentId"></select>
+                    </div>
+                    <div class="form-check md-check">
+                        <input type="checkbox" class="form-check-input" id="mIsActive" name="IsActive" value="true" checked />
+                        <label class="form-check-label" for="mIsActive">Active</label>
+                    </div>
+                </div>
+                <div class="modal-footer md-modal-footer">
+                    <button type="button" class="btn md-btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn md-btn-save" id="btnSave">
+                        <i class="bi bi-check-lg me-1"></i> Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast container -->
+<div id="mdToastContainer"></div>
+
+@section adminScripts {
+    <script src="~/Content/js/MasterData.js"></script>
+    <script>
+        $(function () {
+            MasterData.init({
+                urls: {
+                    list: '@Url.Action("GetMasterList", "Admin")',
+                    save: '@Url.Action("SaveMaster",    "Admin")'
+                }
+            });
+        });
+    </script>
+}
