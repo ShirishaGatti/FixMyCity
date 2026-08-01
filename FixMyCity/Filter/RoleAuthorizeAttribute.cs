@@ -88,6 +88,8 @@ namespace FixMyCity.Filters
             }
 
             filterContext.HttpContext.User = principal;
+            System.Web.HttpContext.Current.User = principal;
+            System.Threading.Thread.CurrentPrincipal = principal;
         }
 
         private ActionResult Unauthorized(HttpRequestBase request)

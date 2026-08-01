@@ -1,0 +1,50 @@
+@model FixMyCityModel.ViewModel.AdminComplaintEditViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">Edit Complaint — #@Model.ComplaintId</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <form id="editComplaintForm">
+        <input type="hidden" name="complaintId" value="@Model.ComplaintId" />
+
+        <div class="mb-3">
+            <label class="form-label">Title</label>
+            <input type="text" class="form-control" value="@Model.Title" disabled />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Category</label>
+            @Html.DropDownList("categoryId",
+                new SelectList(Model.Categories, "CategoryId", "CategoryName", Model.CategoryId),
+                new { @class = "form-control" })
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Priority</label>
+            @Html.DropDownList("priorityId",
+                new SelectList(Model.Priorities, "PriorityId", "PriorityName", Model.PriorityId),
+                new { @class = "form-control" })
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Status</label>
+            @Html.DropDownList("statusId",
+                new SelectList(Model.Statuses, "StatusId", "StatusName", Model.StatusId),
+                new { @class = "form-control" })
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Assigned To (Consumer Id)</label>
+            <input type="number" name="assignedTo" value="@Model.AssignedTo" class="form-control" placeholder="Leave blank for unassigned" />
+        </div>
+
+        <div id="editComplaintFormError" class="text-danger small"></div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="button" id="saveComplaintBtn" class="btn btn-primary" data-url="@Url.Action("SaveComplaint","Admin")">Save</button>
+</div>

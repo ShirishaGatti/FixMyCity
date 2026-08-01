@@ -51,5 +51,16 @@ namespace FixMyCityModel.ViewModel
         public List<ComplaintStatus> Statuses { get; set; } = new List<ComplaintStatus>();
         public List<City> Cities { get; set; } = new List<City>();
         public List<Ward> Wards { get; set; } = new List<Ward>();
-    }
+        public int TotalPages
+        {
+            get
+            {
+                if (Filter == null || Filter.PageSize <= 0)
+                    return 0;
+
+                return (int)Math.Ceiling(TotalCount / (double)Filter.PageSize);
+            }
+        }
+    
+}
 }

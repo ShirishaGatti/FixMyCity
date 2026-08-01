@@ -6,14 +6,9 @@ using FixMyCityModel.Model;
 using FixMyCityModel.ViewModel;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 
 namespace FixMyCity.service
 {
-
-    // Business layer for admin screens: enforces "who can do what" and
-    // "what a valid payload looks like" — the repository trusts inputs.
     public class AdminService : IAdminService
     {
         private readonly IAdminRepository _repo;
@@ -24,24 +19,38 @@ namespace FixMyCity.service
         public AdminDashboardViewModel GetDashboard() => _repo.GetDashboardStats();
 
         // ============================================================
-        // Users / Officers
+        // Users
         // ============================================================
+        private static readonly HashSet<string> AllowedUserSort = new HashSet<string> { "ConsumerId", "Name", "DOB" };
+
         public AdminUserListViewModel ListUsers(AdminUserListFilterViewModel filter)
         {
             filter = filter ?? new AdminUserListFilterViewModel();
+
             if (filter.PageNumber < 1) filter.PageNumber = 1;
             if (filter.PageSize < 1 || filter.PageSize > 100) filter.PageSize = 10;
 
-            // Normalise sort inputs — SP has a whitelist too, but doing it
-            // here means bad data never even reaches SQL.
-            var allowedSort = new HashSet<string> { "ConsumerId", "Name", "DOB" };
-            if (!allowedSort.Contains(filter.SortBy ?? "")) filter.SortBy = "ConsumerId";
-            filter.SortDir = string.Equals(filter.SortDir, "ASC", System.StringComparison.OrdinalIgnoreCase) ? "ASC" : "DESC";
+            if (!AllowedUserSort.Contains(filter.SortBy ?? string.Empty))
+                filter.SortBy = "ConsumerId";
 
-            int total;
+            filter.SortDir = string.Equals(filter.SortDir, "ASC", StringComparison.OrdinalIgnoreCase) ? "ASC" : "DESC";
 
-            var vm = _repo.ListUsers(filter, out total);
-            vm.TotalCount = total;
+            var vm = _repo.ListUsers(filter);
+
+            vm.Cities = _repo.GetCitiesFull();
+            vm.Wards = _repo.GetWardsFull();
+            vm.Roles = _repo.GetRoles();
+            vm.Departments = _repo.GetDepartments();
+
+            return vm;
+        }
+
+        public AdminUserEditViewModel GetUserById(int consumerId)
+        {
+            if (consumerId <= 0) throw new BusinessException("Invalid user.", "INVALID_USER");
+            var vm = _repo.GetUserById(consumerId);
+            if (vm == null) throw new BusinessException("User not found.", "NOT_FOUND");
+
             vm.Cities = _repo.GetCitiesFull();
             vm.Wards = _repo.GetWardsFull();
             vm.Roles = _repo.GetRoles();
@@ -54,85 +63,85 @@ namespace FixMyCity.service
             if (consumerId <= 0) throw new BusinessException("Invalid user.", "INVALID_USER");
             if (newRoleId <= 0) throw new BusinessException("Invalid role.", "INVALID_ROLE");
 
-            // Officer promotion demands a department; without it the officer
-            // screen can't route work — enforce it here so the DB isn't left
-            // with a half-configured row.
             if (newRoleId == RoleIds.SupportExecutive && (!deptId.HasValue || deptId.Value <= 0))
                 throw new BusinessException("Assigning Officer role requires a Department.", "DEPT_REQUIRED");
 
             _repo.UpdateUserRole(consumerId, newRoleId, deptId, wardId, designation, actorId);
         }
 
-        public void UpdateOfficer(int consumerId, string designation, int? wardId, int? deptId, int actorId)
-        {
-            if (consumerId <= 0) throw new BusinessException("Invalid officer.", "INVALID_USER");
-            if (!deptId.HasValue || deptId.Value <= 0)
-                throw new BusinessException("Department is required.", "DEPT_REQUIRED");
-            _repo.UpdateOfficer(consumerId, designation, wardId, deptId, actorId);
-        }
-
-        public void DeleteUser(int consumerId)
+        public void UpdateUserStatus(int consumerId, bool isActive, int actorId)
         {
             if (consumerId <= 0) throw new BusinessException("Invalid user.", "INVALID_USER");
-            _repo.DeleteUser(consumerId);
+            _repo.UpdateUserStatus(consumerId, isActive, actorId);
+        }
+
+        public void DeleteUser(int consumerId, int actorId)
+        {
+            if (consumerId <= 0) throw new BusinessException("Invalid user.", "INVALID_USER");
+            _repo.DeleteUser(consumerId, actorId);
         }
 
         // ============================================================
         // Complaints
         // ============================================================
+        private static readonly HashSet<string> AllowedComplaintSort =
+            new HashSet<string> { "ComplaintId", "CreatedAt", "CategoryName", "StatusName", "PriorityName" };
+
         public AdminComplaintListViewModel ListComplaints(AdminComplaintListFilterViewModel filter)
         {
             filter = filter ?? new AdminComplaintListFilterViewModel();
             if (filter.PageNumber < 1) filter.PageNumber = 1;
             if (filter.PageSize < 1 || filter.PageSize > 100) filter.PageSize = 10;
 
-            var allowedSort = new HashSet<string> { "ComplaintId", "CreatedAt", "CategoryName", "StatusName", "PriorityName" };
-            if (!allowedSort.Contains(filter.SortBy ?? "")) filter.SortBy = "ComplaintId";
-            filter.SortDir = string.Equals(filter.SortDir, "ASC", System.StringComparison.OrdinalIgnoreCase) ? "ASC" : "DESC";
+            if (!AllowedComplaintSort.Contains(filter.SortBy ?? string.Empty))
+                filter.SortBy = "ComplaintId";
 
-            int total;
-            var rows = _repo.ListComplaints(filter, out total);
-            return new AdminComplaintListViewModel
-            {
-                Rows = rows,
-                TotalCount = total,
-                Filter = filter,
-                Categories = _repo.GetCategories(),
-                Priorities = _repo.GetPriorities(),
-                Statuses = _repo.GetStatuses(),
-                Cities = _repo.GetCitiesFull(),
-                Wards = _repo.GetWardsFull()
-            };
+            filter.SortDir = string.Equals(filter.SortDir, "ASC", StringComparison.OrdinalIgnoreCase) ? "ASC" : "DESC";
+
+            var vm = _repo.ListComplaints(filter);
+            vm.Filter = filter;
+            vm.Categories = _repo.GetCategories();
+            vm.Priorities = _repo.GetPriorities();
+            vm.Statuses = _repo.GetStatuses();
+            vm.Cities = _repo.GetCitiesFull();
+            vm.Wards = _repo.GetWardsFull();
+            return vm;
         }
 
-        public void UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId)
+        public AdminComplaintEditViewModel GetComplaintById(int complaintId)
+        {
+            if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
+            var vm = _repo.GetComplaintById(complaintId);
+            if (vm == null) throw new BusinessException("Complaint not found.", "NOT_FOUND");
+
+            vm.Categories = _repo.GetCategories();
+            vm.Priorities = _repo.GetPriorities();
+            vm.Statuses = _repo.GetStatuses();
+            return vm;
+        }
+
+        public void UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId,int roleId)
         {
             if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
             if (categoryId <= 0 || priorityId <= 0 || statusId <= 0)
                 throw new BusinessException("Category, priority and status are required.", "INVALID_INPUT");
-            _repo.UpdateComplaint(complaintId, categoryId, priorityId, statusId, assignedTo, actorId);
+            _repo.UpdateComplaint(complaintId, categoryId, priorityId, statusId, assignedTo, actorId,roleId);
         }
 
-        public void DeleteComplaint(int complaintId)
+        public void DeleteComplaint(int complaintId, int actorId)
         {
             if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
-            _repo.DeleteComplaint(complaintId);
+            _repo.DeleteComplaint(complaintId, actorId);
         }
 
         // ============================================================
         // Master data
         // ============================================================
-        public MasterDataViewModel GetMasterData()
+        public List<MasterEntityViewModel> GetMasterList(string entityType, int? parentId, bool includeInactive)
         {
-            return new MasterDataViewModel
-            {
-                States = _repo.GetStates(),
-                Districts = _repo.GetDistricts(null),
-                Cities = _repo.GetCitiesFull(),
-                Wards = _repo.GetWardsFull(),
-                Categories = _repo.GetCategories(),
-                Departments = _repo.GetDepartments()
-            };
+            if (string.IsNullOrWhiteSpace(entityType))
+                throw new BusinessException("Entity type is required.", "ENTITY_REQUIRED");
+            return _repo.GetMasterList(entityType.Trim().ToLowerInvariant(), parentId, includeInactive);
         }
 
         public int SaveMaster(MasterEntitySaveViewModel vm, int actorId)
@@ -160,32 +169,72 @@ namespace FixMyCity.service
                         throw new BusinessException("Ward Number is required.", "WARD_NO_REQUIRED");
                     return _repo.SaveWard(vm.Id, name, vm.ParentId.Value, vm.IsActive, vm.WardNo.Trim(), actorId);
                 case "category":
-                    if (vm.DepartmentId==null || vm.DepartmentId<=0)
+                    if (vm.DepartmentId == null || vm.DepartmentId <= 0)
                         throw new BusinessException("Department is required.", "DepartmentId_REQUIRED");
-                    return _repo.SaveCategory(vm.Id, name, vm.IsActive, actorId,vm.DepartmentId);
+                    return _repo.SaveCategory(vm.Id, name, vm.IsActive, actorId, vm.DepartmentId);
                 case "department":
                     return _repo.SaveDepartment(vm.Id, name, vm.IsActive, actorId);
-                case "role":                                                        // <-- NEW
+                case "role":
                     return _repo.SaveRole(vm.Id, name, vm.IsActive, actorId);
                 default:
                     throw new BusinessException("Unknown entity type.", "INVALID_ENTITY");
             }
         }
-        public List<MasterEntityViewModel> GetMasterList(string entityType, int? parentId, bool includeInactive)
-        {
-            if (string.IsNullOrWhiteSpace(entityType))
-                throw new BusinessException("Entity type is required.", "ENTITY_REQUIRED");
 
-            return _repo.GetMasterList(entityType.Trim().ToLowerInvariant(), parentId, includeInactive);
-        }
         public List<District> GetDistricts(int? stateId) => _repo.GetDistricts(stateId);
+
         public List<Ward> GetWardsByCity(int cityId)
         {
-            // Reuse the full-list SP and filter in memory — cheap and one
-            // round-trip; keeps the Ward_GetByCityId SP free for citizen views.
             var all = _repo.GetWardsFull();
             return all.FindAll(w => w.CityId == cityId);
         }
+       /* public void UpdateOfficer(int consumerId, string designation, int? wardId, int? deptId, int actorId)
+        {
+            if (consumerId <= 0) throw new BusinessException("Invalid officer.", "INVALID_USER");
+            if (!deptId.HasValue || deptId.Value <= 0)
+                throw new BusinessException("Department is required.", "DEPT_REQUIRED");
+            _repo.UpdateOfficer(consumerId, designation, wardId, deptId, actorId);
+        }  */
+       public MasterDataViewModel GetMasterData()
+   {
+       return new MasterDataViewModel
+       {
+           States = _repo.GetStates(),
+           Districts = _repo.GetDistricts(null),
+           Cities = _repo.GetCitiesFull(),
+           Wards = _repo.GetWardsFull(),
+           Categories = _repo.GetCategories(),
+           Departments = _repo.GetDepartments()
+       };
+   }
+       /* public AdminUserListViewModel GetOfficers(AdminUserListFilterViewModel filter)
+        {
+            filter = filter ?? new AdminUserListFilterViewModel();
+
+            // Officer Role Id
+            filter.RoleId = 3;   // Replace with your actual Officer RoleId
+
+            return _adminRepository.GetUsers(filter);
+        }
+
+        public void UpdateOfficer(
+            int consumerId,
+            string designation,
+            int? wardId,
+            int? deptId,
+            int actorId)
+        {
+            if (consumerId <= 0)
+                throw new BusinessException("Invalid officer.");
+
+            _adminRepository.UpdateOfficer(
+                consumerId,
+                designation,
+                wardId,
+                deptId,
+                actorId);
+        }*/
+
         public List<Department> GetDepartments() => _repo.GetDepartments();
         public List<Role> GetRoles() => _repo.GetRoles();
     }

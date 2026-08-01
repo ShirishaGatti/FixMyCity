@@ -177,7 +177,7 @@ namespace FixMyCity.service
             string physicalPath = GetPhysicalPath(attachment);
             if (File.Exists(physicalPath)) File.Delete(physicalPath);
         }
-        public int SaveComplaint(FileComplaintViewModel vm, int consumerId)
+        public int SaveComplaint(FileComplaintViewModel vm, int consumerId,int roleId)
         {
             if (string.IsNullOrWhiteSpace(vm.Title)) throw new BusinessException("Title is required.");
             if (string.IsNullOrWhiteSpace(vm.Description)) throw new BusinessException("Description is required.");
@@ -195,7 +195,7 @@ namespace FixMyCity.service
                 WardId = vm.WardId,
                 CityId = vm.CityId
             };
-            return _complaintRepo.SaveComplaint(complaint);
+            return _complaintRepo.SaveComplaint(complaint, roleId);
         }
 
         public void DeleteComplaint(int complaintId, int consumerId)

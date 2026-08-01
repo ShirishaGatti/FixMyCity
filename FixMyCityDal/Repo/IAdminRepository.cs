@@ -10,15 +10,15 @@ namespace FixMyCity.Repository
         AdminDashboardViewModel GetDashboardStats();
 
         // Users / Officers
-        AdminUserListViewModel ListUsers(AdminUserListFilterViewModel filter, out int totalCount);
+        AdminUserListViewModel ListUsers(AdminUserListFilterViewModel filter);
         bool UpdateUserRole(int consumerId, int newRoleId, int? deptId, int? wardId, string designation, int actorId);
-        bool UpdateOfficer(int consumerId, string designation, int? wardId, int? deptId, int actorId);
-        bool DeleteUser(int consumerId);
+        //bool UpdateOfficer(int consumerId, string designation, int? wardId, int? deptId, int actorId);
+        bool DeleteUser(int consumerId, int actorId);
 
         // Complaints
-        List<AdminComplaintRow> ListComplaints(AdminComplaintListFilterViewModel filter, out int totalCount);
-        bool UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId);
-        bool DeleteComplaint(int complaintId);
+        AdminComplaintListViewModel ListComplaints(AdminComplaintListFilterViewModel filter);
+        bool UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId,int roleId);
+        bool DeleteComplaint(int complaintId, int actorId);
 
         // Master data
         List<State> GetStates();
@@ -38,5 +38,11 @@ namespace FixMyCity.Repository
         int SaveWard(int id, string name, int cityId, bool isActive, string wardNo, int actorId);
         int SaveCategory(int id, string name, bool isActive, int actorId,int DepartmentId);
         int SaveDepartment(int id, string name, bool isActive, int actorId);
+        AdminUserEditViewModel GetUserById(int consumerId);
+
+        bool UpdateUserStatus(int consumerId, bool isActive, int actorId);
+
+        AdminComplaintEditViewModel GetComplaintById(int complaintId);
+
     }
 }

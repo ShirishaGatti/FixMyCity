@@ -18,7 +18,7 @@ namespace FixMyCity.service
         string GetPhysicalPath(Attachment attachment);
         void DeleteAttachment(int attachmentId, int consumerId);
         // Interface additions
-        int SaveComplaint(FileComplaintViewModel vm, int consumerId);
+        int SaveComplaint(FileComplaintViewModel vm, int consumerId,int roleId);              // upsert — Complaint.ComplaintId null/0 = create
         void DeleteComplaint(int complaintId, int consumerId);
         MyComplaintsViewModel Search(int consumerId, ComplaintListFilterViewModel filter);
         ComplaintExportViewModel GetComplaintForExport(int complaintId, int consumerId);

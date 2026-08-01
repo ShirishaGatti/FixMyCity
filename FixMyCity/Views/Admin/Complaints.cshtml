@@ -1,7 +1,7 @@
-@model FixMyCityModel.ViewModel.AdminUserListViewModel
+@model FixMyCityModel.ViewModel.AdminComplaintListViewModel
 
 @{
-    ViewBag.Title = "Manage Users";
+    ViewBag.Title = "Manage Complaints";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
@@ -11,36 +11,29 @@
 <div class="container-fluid">
     <div class="row">
 
-        <!-- Sidebar -->
         <!-- Main Content -->
         <div class="col-md-10">
             <div class="page-card mt-4">
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h3 class="mb-0">Manage Users</h3>
-                    <span class="results-summary" id="usersSummary"></span>
+                    <h3 class="mb-0">Manage Complaints</h3>
+                    <span class="results-summary" id="complaintsSummary"></span>
                 </div>
 
-                <form id="usersFilterForm" data-grid-url="@Url.Action("UsersGrid","Admin")" class="filter-card mb-4">
+                <form id="complaintsFilterForm" data-grid-url="@Url.Action("ComplaintsGrid","Admin")" class="filter-card mb-4">
 
                     <div class="row g-2">
                         <div class="col-md-3">
-                            <input type="text" name="Filter.Name" value="@Model.Filter.Name" class="form-control" placeholder="Name" />
-                        </div>
-                        <div class="col-md-2">
-                            <input type="text" name="Filter.Designation" value="@Model.Filter.Designation" class="form-control" placeholder="Designation" />
+                            @Html.DropDownList("Filter.CategoryId",
+                                     new SelectList(Model.Categories, "CategoryId", "CategoryName", Model.Filter.CategoryId),
+                                     "All Categories",
+                                     new { @class = "form-control" })
                         </div>
                         <div class="col-md-2">
                             <input type="number" name="Filter.CityId" value="@Model.Filter.CityId" class="form-control" placeholder="City Id" />
                         </div>
                         <div class="col-md-2">
                             <input type="number" name="Filter.WardId" value="@Model.Filter.WardId" class="form-control" placeholder="Ward Id" />
-                        </div>
-                        <div class="col-md-2">
-                            @Html.DropDownList("Filter.RoleId",
-                                          new SelectList(Model.Roles, "RoleId", "RoleName", Model.Filter.RoleId),
-                                          "All Roles",
-                                          new { @class = "form-control" })
                         </div>
                         <div class="col-md-1 d-flex">
                             <button type="submit" class="btn btn-primary w-100" title="Search">
@@ -52,7 +45,7 @@
                     <div class="row g-2 mt-2 align-items-center">
                         <div class="col-md-2">
                             <select name="Filter.PageSize" class="form-control form-select">
-                                @foreach (var size in new[] { 2, 5, 10, 25, 50, 100 })
+                                @foreach (var size in new[] { 10, 25, 50, 100 })
                                 {
                                     <option value="@size" selected="@(Model.Filter.PageSize == size)">@size / page</option>
                                 }
@@ -64,7 +57,7 @@
                         <input type="hidden" name="Filter.PageNumber" value="1" />
 
                         <div class="col-md-auto ms-auto">
-                            <button type="button" id="usersClearFilters" class="btn btn-outline-secondary">
+                            <button type="button" id="complaintsClearFilters" class="btn btn-outline-secondary">
                                 <i class="fa fa-rotate-left"></i> Clear Filters
                             </button>
                         </div>
@@ -72,9 +65,8 @@
 
                 </form>
 
-                <!-- AJAX target: only this div is replaced on search / sort / page / delete -->
-                <div id="usersGridContainer">
-                    @Html.Partial("_UsersGrid", Model)
+                <div id="complaintsGridContainer">
+                    @Html.Partial("_ComplaintsGrid", Model)
                 </div>
 
             </div>
@@ -83,34 +75,21 @@
     </div>
 </div>
 
-<!-- Edit modal shell — filled via AJAX by admin-users.js -->
-<div class="modal fade" id="editUserModal" tabindex="-1">
+<div class="modal fade" id="editComplaintModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content" id="editUserModalContent">
-            <!-- injected by _EditUserModal partial -->
+        <div class="modal-content" id="editComplaintModalContent">
+            <!-- injected by _EditComplaintModal partial -->
         </div>
     </div>
 </div>
 
 @section adminScripts {
     <script>
-        window.adminUsersUrls = {
-            deleteUser: '@Url.Action("DeleteUser","Admin")',
-            editUser: '@Url.Action("EditUser","Admin")'
+        // Only URL constants — all logic lives in admin-complaints.js.
+        window.adminComplaintsUrls = {
+            deleteComplaint: '@Url.Action("DeleteComplaint","Admin")',
+            editComplaint: '@Url.Action("EditComplaint","Admin")'
         };
     </script>
-
-    <script src="~/Content/js/admin-users.js"></script>
+    <script src="~/Content/js/admin-complaints.js"></script>
 }
-@*_Layout.cshtml
-    ↑
-    renders: styles, scripts
-
-_AdminLayout.cshtml
-    ↑
-    defines: styles, scripts
-    renders: adminStyles, adminScripts
-
-Users.cshtml
-    ↑
-    defines: adminScripts*/*@

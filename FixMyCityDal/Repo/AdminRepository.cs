@@ -10,12 +10,6 @@ using System.Data.SqlClient;
 
 namespace FixMyCity.Repository
 {
-    // Data-access class for all Admin screens.
-    // Same Enterprise Library Data Application Block pattern used across
-    // the rest of the codebase (see AuthRepository / ComplaintRepository) —
-    // GetStoredProcCommand + AddInParameter, ExecuteDataSet / ExecuteNonQuery,
-    // SqlException → DataAccessException translation. Nothing here decides
-    // "is this allowed" — that's AdminService's job.
     public class AdminRepository : IAdminRepository
     {
         private readonly Database db;
@@ -24,6 +18,8 @@ namespace FixMyCity.Repository
         {
             db = DatabaseFactory.CreateDatabase();
         }
+
+        private static int ToInt(object value) => value is DBNull || value == null ? 0 : Convert.ToInt32(value);
 
         // ============================================================
         // Dashboard
@@ -73,27 +69,44 @@ namespace FixMyCity.Repository
         }
 
         // ============================================================
-        // Users / Officers list
+        // Users
         // ============================================================
-        public AdminUserListViewModel ListUsers(AdminUserListFilterViewModel filter, out int totalCount)
+        public AdminUserListViewModel ListUsers(AdminUserListFilterViewModel filter)
         {
-            totalCount = 0;
             var vm = new AdminUserListViewModel { Filter = filter };
+
             try
             {
                 DbCommand com = db.GetStoredProcCommand("FixMyCity.Admin_ListUsers");
-                db.AddInParameter(com, "Name", DbType.String, (object)filter.Name ?? DBNull.Value);
-                db.AddInParameter(com, "Designation", DbType.String, (object)filter.Designation ?? DBNull.Value);
-                db.AddInParameter(com, "CityId", DbType.Int32, filter.CityId.HasValue ? (object)filter.CityId.Value : DBNull.Value);
-                db.AddInParameter(com, "WardId", DbType.Int32, filter.WardId.HasValue ? (object)filter.WardId.Value : DBNull.Value);
-                db.AddInParameter(com, "RoleId", DbType.Int32, filter.RoleId);
+
+                db.AddInParameter(com, "Name", DbType.String,
+                    string.IsNullOrWhiteSpace(filter.Name) ? (object)DBNull.Value : filter.Name.Trim());
+
+                db.AddInParameter(com, "Designation", DbType.String,
+                    string.IsNullOrWhiteSpace(filter.Designation) ? (object)DBNull.Value : filter.Designation.Trim());
+
+                db.AddInParameter(com, "CityId", DbType.Int32,
+                    filter.CityId.HasValue ? (object)filter.CityId.Value : DBNull.Value);
+
+                db.AddInParameter(com, "WardId", DbType.Int32,
+                    filter.WardId.HasValue ? (object)filter.WardId.Value : DBNull.Value);
+
+                // FIX: was "filter.RoleId>0?filter.RoleId : 2" — that silently forced every
+                // request with no role picked into RoleId=2 (Citizen), so Admins/Officers
+                // could never show up unless the user explicitly picked their own role.
+                // RoleId is nullable end-to-end now: no selection => no filter => everyone.
+                db.AddInParameter(com, "RoleId", DbType.Int32,
+                    filter.RoleId.HasValue && filter.RoleId.Value > 0 ? (object)filter.RoleId.Value : DBNull.Value);
+
                 db.AddInParameter(com, "SortBy", DbType.String, filter.SortBy ?? "ConsumerId");
                 db.AddInParameter(com, "SortDir", DbType.String, filter.SortDir ?? "DESC");
                 db.AddInParameter(com, "PageNumber", DbType.Int32, filter.PageNumber);
                 db.AddInParameter(com, "PageSize", DbType.Int32, filter.PageSize);
-                db.AddOutParameter(com, "TotalCount", DbType.Int32, 4);
 
                 DataSet ds = db.ExecuteDataSet(com);
+
+                int total = 0;
+
                 if (ds.Tables.Count > 0)
                 {
                     foreach (DataRow row in ds.Tables[0].Rows)
@@ -106,7 +119,7 @@ namespace FixMyCity.Repository
                             Contact = row["Contact"] is DBNull ? null : row["Contact"].ToString(),
                             DOB = row["DOB"] is DBNull ? (DateTime?)null : Convert.ToDateTime(row["DOB"]),
                             RoleId = ToInt(row["RoleId"]),
-                            RoleName = row["RoleName"].ToString(),
+                            RoleName = row["RoleName"] is DBNull ? null : row["RoleName"].ToString(),
                             CityId = row["CityId"] is DBNull ? (int?)null : ToInt(row["CityId"]),
                             CityName = row["CityName"] is DBNull ? null : row["CityName"].ToString(),
                             WardId = row["WardId"] is DBNull ? (int?)null : ToInt(row["WardId"]),
@@ -117,12 +130,51 @@ namespace FixMyCity.Repository
                             IsActive = Convert.ToBoolean(row["IsActive"]),
                             CreatedDate = row["CreatedDate"] is DBNull ? DateTime.MinValue : Convert.ToDateTime(row["CreatedDate"])
                         });
+
+                        if (total == 0 && ds.Tables[0].Columns.Contains("TotalCount"))
+                            total = ToInt(row["TotalCount"]);
                     }
                 }
-                totalCount = Convert.ToInt32(db.GetParameterValue(com, "TotalCount"));
-                vm.TotalCount = totalCount;
+
+                vm.TotalCount = total;
             }
-            catch (SqlException ex) { throw new DataAccessException("Failed to load users list.", "Admin_ListUsers", ex); }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to load users list.", "Admin_ListUsers", ex);
+            }
+
+            return vm;
+        }
+
+        public AdminUserEditViewModel GetUserById(int consumerId)
+        {
+            AdminUserEditViewModel vm = null;
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Admin_GetUserById");
+                db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
+                DataSet ds = db.ExecuteDataSet(com);
+
+                if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    var r = ds.Tables[0].Rows[0];
+                    vm = new AdminUserEditViewModel
+                    {
+                        ConsumerId = ToInt(r["ConsumerId"]),
+                        Name = r["Name"].ToString(),
+                        Email = r["Email"].ToString(),
+                        Contact = r["Contact"] is DBNull ? null : r["Contact"].ToString(),
+                        DOB = r["DOB"] is DBNull ? (DateTime?)null : Convert.ToDateTime(r["DOB"]),
+                        RoleId = ToInt(r["RoleId"]),
+                        CityId = r["CityId"] is DBNull ? (int?)null : ToInt(r["CityId"]),
+                        WardId = r["WardId"] is DBNull ? (int?)null : ToInt(r["WardId"]),
+                        DeptId = r["DeptId"] is DBNull ? (int?)null : ToInt(r["DeptId"]),
+                        Designation = r["Designation"] is DBNull ? null : r["Designation"].ToString(),
+                        IsActive = Convert.ToBoolean(r["IsActive"])
+                    };
+                }
+            }
+            catch (SqlException ex) { throw new DataAccessException("Failed to load user.", "Admin_GetUserById", ex); }
             return vm;
         }
 
@@ -143,28 +195,27 @@ namespace FixMyCity.Repository
             return true;
         }
 
-        public bool UpdateOfficer(int consumerId, string designation, int? wardId, int? deptId, int actorId)
+        public bool UpdateUserStatus(int consumerId, bool isActive, int actorId)
         {
             try
             {
-                DbCommand com = db.GetStoredProcCommand("FixMyCity.Admin_UpdateOfficer");
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Admin_UpdateUserStatus");
                 db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
-                db.AddInParameter(com, "Designation", DbType.String, (object)designation ?? DBNull.Value);
-                db.AddInParameter(com, "WardId", DbType.Int32, wardId.HasValue ? (object)wardId.Value : DBNull.Value);
-                db.AddInParameter(com, "DeptId", DbType.Int32, deptId.HasValue ? (object)deptId.Value : DBNull.Value);
+                db.AddInParameter(com, "IsActive", DbType.Boolean, isActive);
                 db.AddInParameter(com, "ActorId", DbType.Int32, actorId);
                 db.ExecuteNonQuery(com);
             }
-            catch (SqlException ex) { throw new DataAccessException("Failed to update officer.", "Admin_UpdateOfficer", ex); }
+            catch (SqlException ex) { throw new DataAccessException("Failed to update user status.", "Admin_UpdateUserStatus", ex); }
             return true;
         }
 
-        public bool DeleteUser(int consumerId)
+        public bool DeleteUser(int consumerId, int actorId)
         {
             try
             {
                 DbCommand com = db.GetStoredProcCommand("FixMyCity.Admin_DeleteUser");
                 db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
+                db.AddInParameter(com, "ActorId", DbType.Int32, actorId);
                 db.ExecuteNonQuery(com);
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to delete user.", "Admin_DeleteUser", ex); }
@@ -174,10 +225,10 @@ namespace FixMyCity.Repository
         // ============================================================
         // Complaints
         // ============================================================
-        public List<AdminComplaintRow> ListComplaints(AdminComplaintListFilterViewModel filter, out int totalCount)
+        public AdminComplaintListViewModel ListComplaints(AdminComplaintListFilterViewModel filter)
         {
-            totalCount = 0;
-            var rows = new List<AdminComplaintRow>();
+            var vm = new AdminComplaintListViewModel { Filter = filter, Rows = new List<AdminComplaintRow>() };
+
             try
             {
                 DbCommand com = db.GetStoredProcCommand("FixMyCity.Admin_ListComplaints");
@@ -188,63 +239,99 @@ namespace FixMyCity.Repository
                 db.AddInParameter(com, "SortDir", DbType.String, filter.SortDir ?? "DESC");
                 db.AddInParameter(com, "PageNumber", DbType.Int32, filter.PageNumber);
                 db.AddInParameter(com, "PageSize", DbType.Int32, filter.PageSize);
-                db.AddOutParameter(com, "TotalCount", DbType.Int32, 4);
+
                 DataSet ds = db.ExecuteDataSet(com);
+                int total = 0;
+
                 if (ds.Tables.Count > 0)
                 {
                     foreach (DataRow row in ds.Tables[0].Rows)
                     {
-                        rows.Add(new AdminComplaintRow
+                        vm.Rows.Add(new AdminComplaintRow
                         {
                             ComplaintId = ToInt(row["ComplaintId"]),
                             ComplaintNumber = row["ComplaintNumber"].ToString(),
                             Title = row["Title"].ToString(),
                             CategoryId = ToInt(row["CategoryId"]),
-                            CategoryName = row["CategoryName"].ToString(),
+                            CategoryName = row["CategoryName"] is DBNull ? null : row["CategoryName"].ToString(),
                             PriorityId = ToInt(row["PriorityId"]),
-                            PriorityName = row["PriorityName"].ToString(),
+                            PriorityName = row["PriorityName"] is DBNull ? null : row["PriorityName"].ToString(),
                             StatusId = ToInt(row["StatusId"]),
-                            StatusName = row["StatusName"].ToString(),
-                            RaisedByName = row["RaisedByName"] is DBNull ? null : row["RaisedByName"].ToString(),
-                            AssigneeName = row["AssigneeName"] is DBNull ? null : row["AssigneeName"].ToString(),
+                            StatusName = row["StatusName"] is DBNull ? null : row["StatusName"].ToString(),
                             AssignedTo = row["AssignedTo"] is DBNull ? (int?)null : ToInt(row["AssignedTo"]),
-                            CityId = ToInt(row["CityId"]),
+                            CityId = row["CityId"] is DBNull ? 0 : ToInt(row["CityId"]),
                             CityName = row["CityName"] is DBNull ? null : row["CityName"].ToString(),
-                            WardId = ToInt(row["WardId"]),
+                            WardId = row["WardId"] is DBNull ? 0 : ToInt(row["WardId"]),
                             WardName = row["WardName"] is DBNull ? null : row["WardName"].ToString(),
                             CreatedAt = Convert.ToDateTime(row["CreatedAt"])
                         });
+
+                        if (total == 0 && ds.Tables[0].Columns.Contains("TotalCount"))
+                            total = ToInt(row["TotalCount"]);
                     }
                 }
-                totalCount = Convert.ToInt32(db.GetParameterValue(com, "TotalCount"));
+
+                vm.TotalCount = total;
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to load complaints list.", "Admin_ListComplaints", ex); }
-            return rows;
+            return vm;
         }
 
-        public bool UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId)
+        public AdminComplaintEditViewModel GetComplaintById(int complaintId)
+        {
+            AdminComplaintEditViewModel vm = null;
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Admin_GetComplaintById");
+                db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
+                DataSet ds = db.ExecuteDataSet(com);
+
+                if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    var r = ds.Tables[0].Rows[0];
+                    vm = new AdminComplaintEditViewModel
+                    {
+                        ComplaintId = ToInt(r["ComplaintId"]),
+                        Title = r["Title"].ToString(),
+                        Description = r["Description"] is DBNull ? null : r["Description"].ToString(),
+                        CategoryId = ToInt(r["CategoryId"]),
+                        PriorityId = ToInt(r["PriorityId"]),
+                        StatusId = ToInt(r["StatusId"]),
+                        AssignedTo = r["AssignedTo"] is DBNull ? (int?)null : ToInt(r["AssignedTo"]),
+                        CityId = ToInt(r["CityId"]),
+                        WardId = ToInt(r["WardId"])
+                    };
+                }
+            }
+            catch (SqlException ex) { throw new DataAccessException("Failed to load complaint.", "Admin_GetComplaintById", ex); }
+            return vm;
+        }
+
+        public bool UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId,int roleId)
         {
             try
             {
-                DbCommand com = db.GetStoredProcCommand("FixMyCity.Admin_UpdateComplaint");
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_Save");
                 db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
                 db.AddInParameter(com, "CategoryId", DbType.Int32, categoryId);
                 db.AddInParameter(com, "PriorityId", DbType.Int32, priorityId);
-                db.AddInParameter(com, "StatusId", DbType.Int32, statusId);
+                db.AddInParameter(com, "Status", DbType.Int32, statusId);
                 db.AddInParameter(com, "AssignedTo", DbType.Int32, assignedTo.HasValue ? (object)assignedTo.Value : DBNull.Value);
-                db.AddInParameter(com, "ActorId", DbType.Int32, actorId);
+                //db.AddInParameter(com, "RaisedBy", DbType.Int32, actorId);
+                db.AddInParameter(com, "RoleId", DbType.Int32, roleId); // Admin role
                 db.ExecuteNonQuery(com);
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to update complaint.", "Admin_UpdateComplaint", ex); }
             return true;
         }
 
-        public bool DeleteComplaint(int complaintId)
+        public bool DeleteComplaint(int complaintId, int actorId)
         {
             try
             {
-                DbCommand com = db.GetStoredProcCommand("FixMyCity.Admin_DeleteComplaint");
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.ComplaintDelete");
                 db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
+                db.AddInParameter(com, "ActorId", DbType.Int32, actorId);
                 db.ExecuteNonQuery(com);
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to delete complaint.", "Admin_DeleteComplaint", ex); }
@@ -252,7 +339,7 @@ namespace FixMyCity.Repository
         }
 
         // ============================================================
-        // Master lookups
+        // Master lookups (unchanged from before)
         // ============================================================
         public List<State> GetStates()
         {
@@ -263,12 +350,7 @@ namespace FixMyCity.Repository
                 DataSet ds = db.ExecuteDataSet(com);
                 if (ds.Tables.Count > 0)
                     foreach (DataRow r in ds.Tables[0].Rows)
-                        list.Add(new State
-                        {
-                            StateId = ToInt(r["Id"]),
-                            StateName = r["Name"].ToString(),
-                            IsActive = Convert.ToBoolean(r["IsActive"])
-                        });
+                        list.Add(new State { StateId = ToInt(r["Id"]), StateName = r["Name"].ToString(), IsActive = Convert.ToBoolean(r["IsActive"]) });
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to load states.", "State_GetAll", ex); }
             return list;
@@ -321,13 +403,7 @@ namespace FixMyCity.Repository
                 DataSet ds = db.ExecuteDataSet(com);
                 if (ds.Tables.Count > 0)
                     foreach (DataRow r in ds.Tables[0].Rows)
-                        list.Add(new Ward
-                        {
-                            WardId = ToInt(r["Id"]),
-                            WardName = r["Name"].ToString(),
-                            WardNo = ToInt( r["WardNo"]),
-                            CityId = ToInt(r["ParentId"])
-                        });
+                        list.Add(new Ward { WardId = ToInt(r["Id"]), WardName = r["Name"].ToString(), WardNo = ToInt(r["WardNo"]), CityId = ToInt(r["ParentId"]) });
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to load wards.", "Ward_GetAll", ex); }
             return list;
@@ -342,9 +418,11 @@ namespace FixMyCity.Repository
                 DataSet ds = db.ExecuteDataSet(com);
                 if (ds.Tables.Count > 0)
                     foreach (DataRow r in ds.Tables[0].Rows)
-                        list.Add(new ComplaintCategory { CategoryId = ToInt(r["Id"]),
+                        list.Add(new ComplaintCategory
+                        {
+                            CategoryId = ToInt(r["Id"]),
                             CategoryName = r["Name"].ToString(),
-                            DepartmentName = r["DepartmentName"].ToString(),
+                            DepartmentName = r["DepartmentName"] is DBNull ? null : r["DepartmentName"].ToString(),
                             DepartmentId = ToInt(r["DepartmentId"])
                         });
             }
@@ -361,12 +439,7 @@ namespace FixMyCity.Repository
                 DataSet ds = db.ExecuteDataSet(com);
                 if (ds.Tables.Count > 0)
                     foreach (DataRow r in ds.Tables[0].Rows)
-                        list.Add(new Department
-                        {
-                            DepartmentId = ToInt(r["Id"]),
-                            DepartmentName = r["Name"].ToString(),
-                            IsActive = Convert.ToBoolean(r["IsActive"])
-                        });
+                        list.Add(new Department { DepartmentId = ToInt(r["Id"]), DepartmentName = r["Name"].ToString(), IsActive = Convert.ToBoolean(r["IsActive"]) });
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to load departments.", "Department_GetAll", ex); }
             return list;
@@ -411,43 +484,31 @@ namespace FixMyCity.Repository
                 DataSet ds = db.ExecuteDataSet(com);
                 if (ds.Tables.Count > 0)
                     foreach (DataRow r in ds.Tables[0].Rows)
-                        list.Add(new Role
-                        {
-                            RoleId = ToInt(r["Id"]),
-                            RoleName = r["Name"].ToString(),
-                            IsActive = Convert.ToBoolean(r["IsActive"])
-                        });
+                        list.Add(new Role { RoleId = ToInt(r["Id"]), RoleName = r["Name"].ToString(), IsActive = Convert.ToBoolean(r["IsActive"]) });
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to load roles.", "Role_GetAll", ex); }
             return list;
         }
-        public int SaveRole(int id, string name, bool isActive, int actorId) =>
-    SaveSimpleMaster("FixMyCity.Role_Save", id, name, null, isActive, actorId);
 
-
-        // ---------------------------------------------------------------
-        // LIST — one generic method for all 7 entities instead of 7 near-
-        // duplicate ones, because every *_GetAll SP now returns the same
-        // 5 aliased columns (see MasterDataProcs.sql). Only entities with
-        // a parent (district/city/ward) pass @ParentId.
-        // ---------------------------------------------------------------
+        // ============================================================
+        // Generic master list/save (unchanged)
+        // ============================================================
         private static readonly Dictionary<string, string> MasterListProcs = new Dictionary<string, string>
-{
-    { "state",      "FixMyCity.State_GetAll" },
-    { "district",   "FixMyCity.District_GetAll" },
-    { "city",       "FixMyCity.City_GetByDistrict" },
-    { "ward",       "FixMyCity.Ward_GetAll" },
-    { "category",   "FixMyCity.GetCategory" },
-    { "department", "FixMyCity.Department_GetAll" },
-    { "role",       "FixMyCity.Role_GetAll" },
-};
+        {
+            { "state",      "FixMyCity.State_GetAll" },
+            { "district",   "FixMyCity.District_GetAll" },
+            { "city",       "FixMyCity.City_GetByDistrict" },
+            { "ward",       "FixMyCity.Ward_GetAll" },
+            { "category",   "FixMyCity.GetCategory" },
+            { "department", "FixMyCity.Department_GetAll" },
+            { "role",       "FixMyCity.Role_GetAll" },
+        };
 
         private static readonly HashSet<string> EntitiesWithParent = new HashSet<string> { "district", "city", "ward" };
 
         public List<MasterEntityViewModel> GetMasterList(string entityType, int? parentId, bool includeInactive)
         {
             string sproc;
-
             if (!MasterListProcs.TryGetValue(entityType, out sproc))
                 throw new BusinessException("Unknown entity type.", "INVALID_ENTITY");
 
@@ -455,10 +516,8 @@ namespace FixMyCity.Repository
             try
             {
                 DbCommand com = db.GetStoredProcCommand(sproc);
-
                 if (EntitiesWithParent.Contains(entityType))
                     db.AddInParameter(com, "ParentId", DbType.Int32, parentId.HasValue ? (object)parentId.Value : DBNull.Value);
-
                 db.AddInParameter(com, "IncludeInactive", DbType.Boolean, includeInactive);
 
                 using (IDataReader reader = db.ExecuteReader(com))
@@ -477,17 +536,10 @@ namespace FixMyCity.Repository
                     }
                 }
             }
-            catch (SqlException ex)
-            {
-                throw new DataAccessException("Failed to load master data.", sproc, ex);
-            }
+            catch (SqlException ex) { throw new DataAccessException("Failed to load master data.", sproc, ex); }
             return list;
         }
 
-        // ============================================================
-        // Master saves — one SP per entity keeps the schema-specific
-        // details (columns / audit columns / uniqueness) inside SQL.
-        // ============================================================
         public int SaveState(int id, string name, bool isActive, int actorId) =>
             SaveSimpleMaster("FixMyCity.State_Save", id, name, null, isActive, actorId);
 
@@ -522,13 +574,14 @@ namespace FixMyCity.Repository
             return newId;
         }
 
-        public int SaveCategory(int id, string name, bool isActive, int actorId, int departmentId) { 
+        public int SaveCategory(int id, string name, bool isActive, int actorId, int departmentId)
+        {
             int newId = id;
             try
             {
                 DbCommand com = db.GetStoredProcCommand("FixMyCity.Category_Save");
                 db.AddInParameter(com, "Id", DbType.Int32, id);
-                db.AddInParameter(com, "Name", DbType.String, name);              
+                db.AddInParameter(com, "Name", DbType.String, name);
                 db.AddInParameter(com, "IsActive", DbType.Boolean, isActive);
                 db.AddInParameter(com, "DepartmentId", DbType.Int32, departmentId);
                 db.AddInParameter(com, "ActorId", DbType.Int32, actorId);
@@ -548,10 +601,9 @@ namespace FixMyCity.Repository
         public int SaveDepartment(int id, string name, bool isActive, int actorId) =>
             SaveSimpleMaster("FixMyCity.Department_Save", id, name, null, isActive, actorId);
 
-        // Common shape for all master saves: Id (0=insert / >0=update),
-        // Name, optional ParentId (StateId/DistrictId/CityId), IsActive,
-        // ActorId. Each SP internally maps ParentId to the correct FK
-        // column, so this repo doesn't have to know the schema per entity.
+        public int SaveRole(int id, string name, bool isActive, int actorId) =>
+            SaveSimpleMaster("FixMyCity.Role_Save", id, name, null, isActive, actorId);
+
         private int SaveSimpleMaster(string sproc, int id, string name, int? parentId, bool isActive, int actorId)
         {
             int newId = id;
@@ -575,16 +627,29 @@ namespace FixMyCity.Repository
             }
             return newId;
         }
+        public void UpdateOfficer(
+    int consumerId,
+    string designation,
+    int? wardId,
+    int? deptId,
+    int actorId)
+        {
+            using (DbCommand cmd = db.GetStoredProcCommand("Admin_UpdateOfficer"))
+            {
+                db.AddInParameter(cmd, "@ConsumerId", DbType.Int32, consumerId);
+                db.AddInParameter(cmd, "@Designation", DbType.String, designation);
+                db.AddInParameter(cmd, "@WardId", DbType.Int32, wardId);
+                db.AddInParameter(cmd, "@DeptId", DbType.Int32, deptId);
+                db.AddInParameter(cmd, "@ActorId", DbType.Int32, actorId);
 
-        private static int ToInt(object o) => o is DBNull ? 0 : Convert.ToInt32(o);
-
+                db.ExecuteNonQuery(cmd);
+            }
+        }
         private static bool HasColumn(IDataReader reader, string columnName)
         {
             for (int i = 0; i < reader.FieldCount; i++)
-            {
                 if (reader.GetName(i).Equals(columnName, StringComparison.OrdinalIgnoreCase))
                     return true;
-            }
             return false;
         }
     }

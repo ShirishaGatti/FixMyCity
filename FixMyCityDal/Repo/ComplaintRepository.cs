@@ -192,7 +192,7 @@ namespace FixMyCity.Repository
         }
         // ComplaintRepository.cs — cache field, same shape as ItemRepository
 
-        public int SaveComplaint(Complaint c)
+        public int SaveComplaint(Complaint c,int roleId)
         {
             try
             {
@@ -207,7 +207,9 @@ namespace FixMyCity.Repository
                 db.AddInParameter(com, "Landmark", DbType.String, (object)c.Landmark ?? DBNull.Value);
                 db.AddInParameter(com, "WardId", DbType.Int32, c.WardId);
                 db.AddInParameter(com, "CityId", DbType.Int32, c.CityId);
+                db.AddInParameter(com, "RoleId", DbType.Int32, roleId);
                 db.AddOutParameter(com, "SavedComplaintId", DbType.Int32, 4);
+
                 db.ExecuteNonQuery(com);
                 int savedId = Convert.ToInt32(db.GetParameterValue(com, "SavedComplaintId"));
                 ClearComplaintCache(c.RaisedBy);

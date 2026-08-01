@@ -1,0 +1,146 @@
+@model FixMyCityModel.ViewModel.AdminComplaintListViewModel
+
+    @functions{
+        public static string Na(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? "N/A" : value;
+        }
+        public string Icon(string col)
+        {
+            if (Model.Filter.SortBy == col)
+            {
+                return Model.Filter.SortDir == "ASC"
+                    ? "fa-sort-up"
+                    : "fa-sort-down";
+            }
+
+            return "fa-sort text-white-50";
+        }
+}
+
+<div class="table-responsive"
+     data-sort-by="@Model.Filter.SortBy"
+     data-sort-dir="@Model.Filter.SortDir"
+     data-page="@Model.Filter.PageNumber"
+     data-page-size="@Model.Filter.PageSize"
+     data-total-pages="@Model.TotalPages"
+     data-total-count="@Model.TotalCount">
+
+    <table class="table table-bordered table-hover align-middle">
+
+        <thead>
+            <tr>
+                <th class="sortable-th @(Model.Filter.SortBy == "ComplaintId" ? "th-active" : "")" data-sort-col="ComplaintId">
+                    <span class="sort-link">ID <i class="fa @Icon("ComplaintId")"></i></span>
+                </th>
+                <th>Number</th>
+                <th>Title</th>
+                <th class="sortable-th @(Model.Filter.SortBy == "CategoryName" ? "th-active" : "")" data-sort-col="CategoryName">
+                    <span class="sort-link">Category <i class="fa @Icon("CategoryName")"></i></span>
+                </th>
+                <th class="sortable-th @(Model.Filter.SortBy == "PriorityName" ? "th-active" : "")" data-sort-col="PriorityName">
+                    <span class="sort-link">Priority <i class="fa @Icon("PriorityName")"></i></span>
+                </th>
+                <th class="sortable-th @(Model.Filter.SortBy == "StatusName" ? "th-active" : "")" data-sort-col="StatusName">
+                    <span class="sort-link">Status <i class="fa @Icon("StatusName")"></i></span>
+                </th>
+                <th>City</th>
+                <th>Ward</th>
+                <th class="sortable-th @(Model.Filter.SortBy == "CreatedAt" ? "th-active" : "")" data-sort-col="CreatedAt">
+                    <span class="sort-link">Created <i class="fa @Icon("CreatedAt")"></i></span>
+                </th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (Model.Rows.Any())
+            {
+                foreach (var item in Model.Rows)
+                {
+                    <tr data-complaint-id="@item.ComplaintId">
+                        <td>@item.ComplaintId</td>
+                        <td>@Na(item.ComplaintNumber)</td>
+                        <td>@Na(item.Title)</td>
+                        <td>@Na(item.CategoryName)</td>
+                        <td>@Na(item.PriorityName)</td>
+                        <td><span class="badge bg-info text-dark">@Na(item.StatusName)</span></td>
+                        <td>@Na(item.CityName)</td>
+                        <td>@Na(item.WardName)</td>
+                        <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
+                        <td>
+                            <button type="button" class="btn btn-warning btn-sm action-btn js-edit-complaint" data-id="@item.ComplaintId" title="Edit">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm js-delete-complaint" data-id="@item.ComplaintId" data-title="@item.Title" title="Delete">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="10" class="text-center py-4">
+                        <i class="fa fa-folder-open fa-lg text-muted"></i>
+                        <div class="mt-2 text-muted">No complaints found matching your filters.</div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+
+    </table>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Complaint list pages">
+            <ul class="pagination justify-content-center mt-3 mb-0">
+
+                <li class="page-item @(Model.Filter.PageNumber <= 1 ? "disabled" : "")">
+                    <a href="javascript:void(0)" class="page-link js-page" data-page="@(Model.Filter.PageNumber - 1)"><i class="fa fa-angle-left"></i></a>
+                </li>
+
+                @{
+                    int from = Math.Max(1, Model.Filter.PageNumber - 2);
+                    int to = Math.Min(Model.TotalPages, Model.Filter.PageNumber + 2);
+                }
+
+                @if (from > 1)
+                {
+                    <li class="page-item"><a href="javascript:void(0)" class="page-link js-page" data-page="1">1</a></li>
+                    if (from > 2)
+                    {
+                        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+                    }
+                }
+
+                @for (int p = from; p <= to; p++)
+                {
+                    <li class="page-item @(p == Model.Filter.PageNumber ? "active" : "")">
+                        <a href="javascript:void(0)" class="page-link js-page" data-page="@p">@p</a>
+                    </li>
+                }
+
+                @if (to < Model.TotalPages)
+                {
+                    if (to < Model.TotalPages - 1)
+                    {
+                        <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+                    }
+                    <li class="page-item"><a href="javascript:void(0)" class="page-link js-page" data-page="@Model.TotalPages">@Model.TotalPages</a></li>
+                }
+
+                <li class="page-item @(Model.Filter.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                    <a href="javascript:void(0)" class="page-link js-page" data-page="@(Model.Filter.PageNumber + 1)"><i class="fa fa-angle-right"></i></a>
+                </li>
+
+            </ul>
+        </nav>
+    }
+
+    <div class="mt-3">
+        Total Records : <strong>@Model.TotalCount</strong>
+    </div>
+
+</div>

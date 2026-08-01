@@ -6,9 +6,8 @@
 
 /* ── Shell wrapper ───────────────────────────────────────────── */
 .admin-shell {
-    min-height: calc(100vh - 56px);
-    /* subtract sticky navbar height */
-    align-items: stretch;
+    margin-top: 40px;
+    min-height: calc(100vh - 50px);
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────── */
@@ -97,7 +96,7 @@
 .admin-topbar {
     background: rgba(13, 21, 38, .8);
     border-bottom: 1px solid rgba(148, 163, 184, .1);
-    min-height: 50px;
+    min-height: 70px;
     backdrop-filter: blur(8px);
 }
 

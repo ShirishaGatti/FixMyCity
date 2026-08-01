@@ -1,0 +1,47 @@
+@model FixMyCityModel.ViewModel.AdminUserEditViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title">Edit User — @Model.Name</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+    <form id="editUserForm">
+        <input type="hidden" name="consumerId" value="@Model.ConsumerId" />
+
+        <div class="mb-3">
+            <label class="form-label">Role</label>
+            @Html.DropDownList("roleId",
+                new SelectList(Model.Roles, "RoleId", "RoleName", Model.RoleId),
+                new { @class = "form-control" })
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Department</label>
+            @Html.DropDownList("deptId",
+                new SelectList(Model.Departments, "DepartmentId", "DepartmentName", Model.DeptId),
+                "None",
+                new { @class = "form-control" })
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Ward</label>
+            @Html.DropDownList("wardId",
+                new SelectList(Model.Wards, "WardId", "WardName", Model.WardId),
+                "None",
+                new { @class = "form-control" })
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Designation</label>
+            <input type="text" name="designation" value="@Model.Designation" class="form-control" />
+        </div>
+
+        <div id="editUserFormError" class="text-danger small"></div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <button type="button" id="saveUserBtn" class="btn btn-primary" data-url="@Url.Action("SaveUserRole","Admin")">Save</button>
+</div>

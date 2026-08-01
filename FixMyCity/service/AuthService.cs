@@ -57,8 +57,6 @@ namespace FixMyCity.Service
                 throw new BusinessException("Contact number is required.", "CONTACT_REQUIRED");
 
             // Self-registration is restricted to Citizen; SupportExecutive/Admin
-            // accounts go through RegisterStaff() instead, which is only reachable
-            // from an endpoint gated by [RoleAuthorize(RoleIds.Admin)].
             vm.RoleId = RoleIds.Citizen;
             vm.DepartmentId = null;
             vm.Designation = null;
