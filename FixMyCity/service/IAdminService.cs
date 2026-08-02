@@ -12,7 +12,7 @@ namespace FixMyCity.Service
         AdminDashboardViewModel GetDashboard();
 
         AdminUserListViewModel ListUsers(AdminUserListFilterViewModel filter);
-        void UpdateUserRole(int consumerId, int newRoleId, int? deptId, int? wardId, string designation, int actorId);
+        void UpdateUser(int consumerId, int newRoleId, int? deptId, int actorId);
     //    void UpdateOfficer(int consumerId, string designation, int? wardId, int? deptId, int actorId);
         void DeleteUser(int consumerId, int actorId);
 

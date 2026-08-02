@@ -463,3 +463,20 @@ BEGIN
         UpdatedDate = GETDATE()
     WHERE ConsumerId = @ConsumerId;
 END
+
+
+CREATE OR ALTER PROCEDURE FixMyCity.UpdateUser
+    @ConsumerId INT,
+    @RoleId INT,
+    @DepartmentId INT=NULL,
+    @ActorId    INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE FixMyCity.Consumer
+    SET RoleId = @RoleId,
+    DeptId=@DepartmentId,
+        LastModifiedAt = GETUTCDATE()
+    WHERE ConsumerId = @ConsumerId;
+END
+GO

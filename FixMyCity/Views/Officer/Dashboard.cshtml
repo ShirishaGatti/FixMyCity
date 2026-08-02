@@ -1,0 +1,133 @@
+@model FixMyCityModel.ViewModel.OfficerDashboardViewModel
+@{
+    Layout = "~/Views/Shared/_OfficerLayout.cshtml";
+    ViewBag.Title = "Officer Dashboard";
+    ViewBag.ActivePage = "Home";
+}
+
+<div class="dash-page-header d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+    <div>
+        <h1>Officer Dashboard</h1>
+        <p>Review your assigned complaints, track priorities, and stay ahead of resolution deadlines.</p>
+    </div>
+</div>
+
+<div class="row g-3 mt-3">
+    <div class="col-sm-6 col-xl-3">
+        <div class="dash-card p-3">
+            <h6>Total Assigned</h6>
+            <p class="display-6 mb-0">@Model.TotalAssigned</p>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="dash-card p-3">
+            <h6>Open</h6>
+            <p class="display-6 mb-0">@Model.OpenCount</p>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="dash-card p-3">
+            <h6>In Progress</h6>
+            <p class="display-6 mb-0">@Model.InProgressCount</p>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="dash-card p-3">
+            <h6>Resolved / Closed</h6>
+            <p class="display-6 mb-0">@(Model.ResolvedCount + Model.ClosedCount)</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-3">
+    <div class="col-md-4">
+        <div class="dash-card p-3">
+            <h6>Today</h6>
+            <p class="fs-2 fw-bold mb-1">@Model.TodayCount</p>
+            <p class="text-muted small mb-0">Assigned complaints created today</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dash-card p-3">
+            <h6>Last 7 Days</h6>
+            <p class="fs-2 fw-bold mb-1">@Model.WeeklyCount</p>
+            <p class="text-muted small mb-0">Created in the last week</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dash-card p-3">
+            <h6>Last 30 Days</h6>
+            <p class="fs-2 fw-bold mb-1">@Model.MonthlyCount</p>
+            <p class="text-muted small mb-0">Created in the last month</p>
+        </div>
+    </div>
+</div>
+
+<div class="dash-card mt-4 p-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h5 class="mb-0">Complaints by Priority</h5>
+            <p class="text-muted small mb-0">Quick breakdown of your current workload.</p>
+        </div>
+    </div>
+    @if (Model.PriorityBreakdown.Any())
+    {
+        <div class="row g-3">
+            @foreach (var item in Model.PriorityBreakdown)
+            {
+                <div class="col-sm-4">
+                    <div class="p-3 rounded-3" style="background:rgba(255,255,255,.08);">
+                        <h6 class="mb-2">@item.Label</h6>
+                        <p class="fs-3 mb-0">@item.Count</p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-4 text-muted">No assigned complaints yet.</div>
+    }
+</div>
+
+<div class="dash-card mt-4 p-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h5 class="mb-0">Recent Assigned Complaints</h5>
+            <p class="text-muted small mb-0">Most recent tickets assigned to you.</p>
+        </div>
+        <a href="@Url.Action("Complaints", "Officer")" class="btn btn-sm btn-outline-primary">View all</a>
+    </div>
+    @if (Model.RecentComplaints.Any())
+    {
+        <div class="table-responsive">
+            <table class="dash-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Complaint #</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Filed On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var complaint in Model.RecentComplaints)
+                    {
+                        <tr>
+                            <td class="complaint-num">@complaint.ComplaintNumber</td>
+                            <td>@complaint.Title</td>
+                            <td><span class="status-badge @complaint.StatusName.ToLower().Replace(" ", "")">@complaint.StatusName</span></td>
+                            <td><span class="priority-badge @complaint.PriorityName.ToLower()">@complaint.PriorityName</span></td>
+                            <td>@complaint.CreatedAt.ToString("dd MMM yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-4 text-muted">You have no recent assigned complaints yet.</div>
+    }
+</div>

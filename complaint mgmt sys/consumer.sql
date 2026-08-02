@@ -53,7 +53,7 @@ BEGIN
     END CATCH
 END
 GO
-
+/*
 CREATE OR ALTER PROCEDURE FixMyCity.Complaint_GetByConsumerId 
 @ConsumerId INT
 /*
@@ -80,7 +80,7 @@ BEGIN
     WHERE c.RaisedBy = @ConsumerId AND c.IsActive = 1
     ORDER BY c.CreatedAt DESC;
 END
-GO
+GO*/
 
 CREATE OR ALTER PROCEDURE FixMyCity.Complaint_GetById 
 	@ComplaintId INT,

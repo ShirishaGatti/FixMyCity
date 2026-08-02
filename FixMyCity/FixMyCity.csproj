@@ -236,6 +236,7 @@
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="Controllers\OfficerController.cs" />
     <Compile Include="Filter\GlobalExceptionFilter.cs" />
     <Compile Include="Filter\RoleAuthorizeAttribute.cs" />
     <Compile Include="Global.asax.cs">
@@ -391,6 +392,13 @@
     <Content Include="Views\Admin\_EditComplaintModal.cshtml" />
     <Content Include="Views\Admin\_EditUserModal.cshtml" />
     <Content Include="Views\Admin\_UsersGrid.cshtml" />
+    <Content Include="Views\Officer\Complaints.cshtml" />
+    <Content Include="Views\Officer\Dashboard.cshtml" />
+    <Content Include="Views\Officer\Profile.cshtml" />
+    <Content Include="Views\Officer\_OfficerComplaintTable.cshtml" />
+    <Content Include="Views\Officer\_Sidebar.cshtml" />
+    <Content Include="Views\Shared\_OfficerLayout.cshtml" />
+    <Content Include="Views\Shared\_ProfileForm.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

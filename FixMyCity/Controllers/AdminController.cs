@@ -40,7 +40,10 @@ namespace FixMyCity.Controllers
             var vm = _adminService.GetDashboard();
             return View(vm);
         }
-          [HttpGet]
+
+      
+     
+        [HttpGet]
         public ActionResult MasterData()
         {
             return View(_adminService.GetMasterData());
@@ -134,11 +137,11 @@ namespace FixMyCity.Controllers
         }
 
         [HttpPost]
-        public JsonResult SaveUserRole(int consumerId, int roleId, int? deptId, int? wardId, string designation)
+        public JsonResult SaveUserRole(int consumerId, int roleId, int? deptId)
         {
             try
             {
-                _adminService.UpdateUserRole(consumerId, roleId, deptId, wardId, designation, CurrentActorId);
+                _adminService.UpdateUser(consumerId, roleId, deptId, CurrentActorId);
                 return Json(new { success = true });
             }
             catch (BusinessException ex)

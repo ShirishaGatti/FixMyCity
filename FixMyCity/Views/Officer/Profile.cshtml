@@ -1,13 +1,13 @@
-﻿@model FixMyCityModel.ViewModel.ProfileViewModel
+@model FixMyCityModel.ViewModel.ProfileViewModel
 @{
-    Layout = "~/Views/Shared/_CitizenLayout.cshtml";
+    Layout = "~/Views/Shared/_OfficerLayout.cshtml";
     ViewBag.Title = "Profile Settings";
     ViewBag.ActivePage = "Profile";
 }
 
 <div class="dash-page-header">
     <h1>Profile Settings</h1>
-    <p>Update your personal and contact details.</p>
+    <p>Review and update your officer contact and profile details.</p>
 </div>
 
 @Html.Partial("~/Views/Shared/_ProfileForm.cshtml", Model)

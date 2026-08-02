@@ -584,3 +584,80 @@ END
 select * from FixMyCity.Complaint
 update FixMyCity.Complaint set IsActive =1 where ComplaintId=6
 EXEC SP_HELPTEXT'FIXMYCITY.Complaint_Delete'
+CREATE OR ALTER PROCEDURE FixMyCity.ComplaintGetById
+(
+    @RoleId INT,
+    @ConsumerId INT = NULL,
+    @AssignedTo INT = NULL
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @Sql NVARCHAR(MAX);
+
+    SET @Sql = N'
+    SELECT
+        c.ComplaintId,
+        c.ComplaintNumber,
+        c.Title,
+        c.Description,
+        c.CategoryId,
+        cat.CategoryName,
+        c.PriorityId,
+        pr.PriorityName,
+        c.StatusId,
+        st.StatusName,
+        c.RaisedBy,
+        c.AssignedTo,
+        asg.Name AS AssigneeName,
+        c.AddressLine,
+        c.Landmark,
+        c.WardId,
+        w.WardName,
+        c.CityId,
+        ci.CityName,
+        c.ResolvedDate,
+        c.ClosedDate,
+        c.ReopenCount,
+        c.CreatedAt
+    FROM FixMyCity.Complaint c
+        INNER JOIN FixMyCity.ComplaintCategory cat
+            ON cat.CategoryId = c.CategoryId
+        INNER JOIN FixMyCity.ComplaintPriority pr
+            ON pr.PriorityId = c.PriorityId
+        INNER JOIN FixMyCity.ComplaintStatus st
+            ON st.StatusId = c.StatusId
+        INNER JOIN FixMyCity.Ward w
+            ON w.WardId = c.WardId
+        INNER JOIN FixMyCity.City ci
+            ON ci.CityId = c.CityId
+        LEFT JOIN FixMyCity.Consumer asg
+            ON asg.ConsumerId = c.AssignedTo
+    WHERE c.IsActive = 1';
+
+    IF (@RoleId = 2)
+    BEGIN
+        SET @Sql += N'
+        AND c.RaisedBy = @ConsumerId';
+    END
+    ELSE IF (@RoleId = 3)
+    BEGIN
+        SET @Sql += N'
+        AND c.AssignedTo = @AssignedTo';
+    END
+
+    SET @Sql += N'
+    ORDER BY c.CreatedAt DESC;';
+
+    EXEC sp_executesql
+        @Sql,
+        N'@ConsumerId INT, @AssignedTo INT',
+        @ConsumerId = @ConsumerId,
+        @AssignedTo = @AssignedTo;
+END
+GO
+
+select * from fixmycity.complaintStatus
+select * from fixmycity.complaint
+update fixmycity.complaint set assignedto =13 where complaintid=6

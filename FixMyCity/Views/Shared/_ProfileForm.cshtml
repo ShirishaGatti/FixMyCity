@@ -1,0 +1,84 @@
+@model FixMyCityModel.ViewModel.ProfileViewModel
+@{
+    // Posts back to whichever controller rendered the page (Complaint for
+    // citizens, Officer for officers) so one form works for both roles.
+    string formController = ViewContext.RouteData.Values["controller"].ToString();
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="dash-alert" style="background:rgba(16,185,129,0.12);color:#10b981;">@TempData["SuccessMessage"]</div>
+}
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="dash-alert" style="background:rgba(239,68,68,0.12);color:#ef4444;">
+        @Html.ValidationSummary(false, "", new { })
+    </div>
+}
+
+<div class="dash-card">
+    @using (Html.BeginForm("Profile", formController, FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.ConsumerId)
+
+        <div class="row g-3">
+            <div class="col-md-6 dash-form-group">
+                <label class="dash-label">Full Name *</label>
+                @Html.TextBoxFor(m => m.Name, new { @class = "dash-input" })
+                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-6 dash-form-group">
+                <label class="dash-label">Email (read-only)</label>
+                @Html.TextBoxFor(m => m.Email, new { @class = "dash-input", @readonly = "readonly", style = "opacity:0.6;" })
+            </div>
+            <div class="col-md-6 dash-form-group">
+                <label class="dash-label">Contact Number *</label>
+                @Html.TextBoxFor(m => m.Contact, new { @class = "dash-input" })
+                @Html.ValidationMessageFor(m => m.Contact, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-6 dash-form-group">
+                <label class="dash-label">Date of Birth</label>
+                @Html.TextBoxFor(m => m.DOB, "{0:yyyy-MM-dd}", new { type = "date", @class = "dash-input" })
+            </div>
+            <div class="col-md-6 dash-form-group">
+                <label class="dash-label">Designation</label>
+                @Html.TextBoxFor(m => m.Designation, new { @class = "dash-input", placeholder = "e.g. Resident, Shop Owner" })
+            </div>
+            <div class="col-md-6 dash-form-group">
+                <label class="dash-label">City</label>
+                @Html.DropDownListFor(m => m.CityId, new SelectList(Model.Cities, "CityId", "CityName", Model.CityId), "-- Select City --", new { @class = "dash-input", id = "ProfileCityId" })
+            </div>
+            <div class="col-md-6 dash-form-group">
+                <label class="dash-label">Ward</label>
+                @Html.DropDownListFor(m => m.WardId, new SelectList(Model.Wards, "WardId", "WardName", Model.WardId), "-- Select Ward --", new { @class = "dash-input", id = "ProfileWardId" })
+            </div>
+            <div class="col-12 dash-form-group">
+                <label class="dash-label">Address</label>
+                @Html.TextAreaFor(m => m.AddressLine, new { rows = 2, @class = "dash-input" })
+            </div>
+        </div>
+
+        <button type="submit" class="btn-dash-primary mt-2">
+            <i class="bi bi-check-circle-fill"></i> Save Changes
+        </button>
+    }
+</div>
+
+<script>
+    $('#ProfileCityId').on('change', function () {
+        var cityId = $(this).val();
+        var wardSelect = $('#ProfileWardId');
+        wardSelect.empty().append('<option value="">-- Select Ward --</option>');
+        if (cityId) {
+            $.ajax({
+                url: '/Account/GetWards', type: 'GET', data: { cityId: cityId },
+                success: function (data) {
+                    $.each(data, function (i, item) {
+                        wardSelect.append($('<option></option>').val(item.id).text(item.name));
+                    });
+                }
+            });
+        }
+    });
+</script>

@@ -58,7 +58,7 @@ namespace FixMyCity.service
             return vm;
         }
 
-        public void UpdateUserRole(int consumerId, int newRoleId, int? deptId, int? wardId, string designation, int actorId)
+        public void UpdateUser(int consumerId, int newRoleId, int? deptId, int actorId)
         {
             if (consumerId <= 0) throw new BusinessException("Invalid user.", "INVALID_USER");
             if (newRoleId <= 0) throw new BusinessException("Invalid role.", "INVALID_ROLE");
@@ -66,7 +66,7 @@ namespace FixMyCity.service
             if (newRoleId == RoleIds.SupportExecutive && (!deptId.HasValue || deptId.Value <= 0))
                 throw new BusinessException("Assigning Officer role requires a Department.", "DEPT_REQUIRED");
 
-            _repo.UpdateUserRole(consumerId, newRoleId, deptId, wardId, designation, actorId);
+            _repo.UpdateUser(consumerId, newRoleId, deptId, actorId);
         }
 
         public void UpdateUserStatus(int consumerId, bool isActive, int actorId)
@@ -108,21 +108,6 @@ namespace FixMyCity.service
             return vm;
         }
 
-        public AdminComplaintEditViewModel GetComplaintById(int complaintId)
-        {
-            if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
-            var vm = _repo.GetComplaintById(complaintId);
-            if (vm == null) throw new BusinessException("Complaint not found.", "NOT_FOUND");
-
-            vm.Categories = _repo.GetCategories();
-            vm.Priorities = _repo.GetPriorities();
-            vm.Statuses = _repo.GetStatuses();
-            return vm;
-        }
-
-        public void UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId,int roleId)
-        {
-            if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
             if (categoryId <= 0 || priorityId <= 0 || statusId <= 0)
                 throw new BusinessException("Category, priority and status are required.", "INVALID_INPUT");
             _repo.UpdateComplaint(complaintId, categoryId, priorityId, statusId, assignedTo, actorId,roleId);

@@ -36,8 +36,11 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Assigned To (Consumer Id)</label>
-            <input type="number" name="assignedTo" value="@Model.AssignedTo" class="form-control" placeholder="Leave blank for unassigned" />
+            <label class="form-label">Assigned To</label>
+            @Html.DropDownList("assignedTo",
+                new SelectList(Model.Officers, "ConsumerId", "Name", Model.AssignedTo),
+                "Unassigned",
+                new { @class = "form-control" })
         </div>
 
         <div id="editComplaintFormError" class="text-danger small"></div>

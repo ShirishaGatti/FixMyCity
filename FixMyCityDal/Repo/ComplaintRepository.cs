@@ -22,14 +22,17 @@ namespace FixMyCity.Repository
             db = DatabaseFactory.CreateDatabase();
         }
 
-        public List<Complaint> GetByConsumerId(int consumerId)
+        public List<Complaint> GetComplaints(int? consumerId , int ? assignedTo, int roleId)
         {
             var list = new List<Complaint>();
             try
             {
-                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_GetByConsumerId");
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.ComplaintGetById");
                 db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
+                db.AddInParameter(com, "AssignedTo", DbType.Int32, assignedTo);
+                db.AddInParameter(com, "RoleId", DbType.Int32, roleId);
                 DataSet ds = db.ExecuteDataSet(com);
+
                 if (ds != null && ds.Tables.Count > 0)
                     foreach (DataRow row in ds.Tables[0].Rows)
                         list.Add(MapComplaint(row));
@@ -218,6 +221,87 @@ namespace FixMyCity.Repository
             catch (SqlException ex)
             {
                 throw new DataAccessException("Failed to save complaint.", "Complaint_Save", ex);
+            }
+        }
+        public bool UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId, int roleId)
+        {
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_Save");
+                db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
+                db.AddInParameter(com, "CategoryId", DbType.Int32, categoryId);
+                db.AddInParameter(com, "PriorityId", DbType.Int32, priorityId);
+                db.AddInParameter(com, "Status", DbType.Int32, statusId);
+                db.AddInParameter(com, "AssignedTo", DbType.Int32, assignedTo.HasValue ? (object)assignedTo.Value : DBNull.Value);
+                //db.AddInParameter(com, "RaisedBy", DbType.Int32, actorId);
+                db.AddInParameter(com, "RoleId", DbType.Int32, roleId); // Admin role
+                db.ExecuteNonQuery(com);
+            }
+            catch (SqlException ex) { throw new DataAccessException("Failed to update complaint.", "Admin_UpdateComplaint", ex); }
+            return true;
+        }
+
+        public List<Complaint> GetAssignedByOfficerId(int officerId)
+        {
+            var list = new List<Complaint>();
+            try
+            {
+                const string sql = @"SELECT c.ComplaintId, c.ComplaintNumber, c.Title, c.Description,
+                                           c.CategoryId, cat.CategoryName, c.PriorityId, pr.PriorityName,
+                                           c.StatusId, st.StatusName, c.RaisedBy, c.AssignedTo, asg.Name AS AssigneeName,
+                                           c.AddressLine, c.Landmark, c.WardId, w.WardName, c.CityId, ci.CityName,
+                                           c.ResolvedDate, c.ClosedDate, c.ReopenCount, c.CreatedAt
+                                    FROM FixMyCity.Complaint c
+                                    JOIN FixMyCity.ComplaintCategory cat ON cat.CategoryId = c.CategoryId
+                                    JOIN FixMyCity.ComplaintPriority pr ON pr.PriorityId = c.PriorityId
+                                    JOIN FixMyCity.ComplaintStatus st ON st.StatusId = c.StatusId
+                                    JOIN FixMyCity.Ward w ON w.WardId = c.WardId
+                                    JOIN FixMyCity.City ci ON ci.CityId = c.CityId
+                                    LEFT JOIN FixMyCity.Consumer asg ON asg.ConsumerId = c.AssignedTo
+                                    WHERE c.AssignedTo = @OfficerId AND c.IsActive = 1";
+
+                DbCommand com = db.GetSqlStringCommand(sql);
+                db.AddInParameter(com, "OfficerId", DbType.Int32, officerId);
+                DataSet ds = db.ExecuteDataSet(com);
+                if (ds != null && ds.Tables.Count > 0)
+                    foreach (DataRow row in ds.Tables[0].Rows)
+                        list.Add(MapComplaint(row));
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to retrieve assigned complaints.", "Complaint_GetAssignedByOfficerId", ex);
+            }
+            return list;
+        }
+          public Complaint GetAssignedComplaintById(int complaintId, int officerId)
+        {
+            try
+            {
+                const string sql = @"SELECT c.ComplaintId, c.ComplaintNumber, c.Title, c.Description,
+                                           c.CategoryId, cat.CategoryName, c.PriorityId, pr.PriorityName,
+                                           c.StatusId, st.StatusName, c.RaisedBy, c.AssignedTo, asg.Name AS AssigneeName,
+                                           c.AddressLine, c.Landmark, c.WardId, w.WardName, c.CityId, ci.CityName,
+                                           c.ResolvedDate, c.ClosedDate, c.ReopenCount, c.CreatedAt
+                                    FROM FixMyCity.Complaint c
+                                    JOIN FixMyCity.ComplaintCategory cat ON cat.CategoryId = c.CategoryId
+                                    JOIN FixMyCity.ComplaintPriority pr ON pr.PriorityId = c.PriorityId
+                                    JOIN FixMyCity.ComplaintStatus st ON st.StatusId = c.StatusId
+                                    JOIN FixMyCity.Ward w ON w.WardId = c.WardId
+                                    JOIN FixMyCity.City ci ON ci.CityId = c.CityId
+                                    LEFT JOIN FixMyCity.Consumer asg ON asg.ConsumerId = c.AssignedTo
+                                    WHERE c.ComplaintId = @ComplaintId AND c.AssignedTo = @OfficerId AND c.IsActive = 1";
+
+                DbCommand com = db.GetSqlStringCommand(sql);
+                db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
+                db.AddInParameter(com, "OfficerId", DbType.Int32, officerId);
+                DataSet ds = db.ExecuteDataSet(com);
+                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                    return MapComplaint(ds.Tables[0].Rows[0]);
+                return null;
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to retrieve assigned complaint.", "Complaint_GetAssignedComplaintById", ex);
             }
         }
 

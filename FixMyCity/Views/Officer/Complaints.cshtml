@@ -1,0 +1,299 @@
+@model FixMyCityModel.ViewModel.MyComplaintsViewModel
+@{
+    Layout = "~/Views/Shared/_OfficerLayout.cshtml";
+    ViewBag.Title = "Assigned Complaints";
+    ViewBag.ActivePage = "Complaints";
+}
+
+<div class="dash-page-header d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+    <div>
+        <h1>Assigned Complaints</h1>
+        <p>Search, sort, and manage the complaints assigned to you without reloading the page.</p>
+    </div>
+</div>
+
+<div class="dash-card p-3 mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+            <label class="dash-label">Search</label>
+            <input id="searchTerm" type="search" class="dash-input" placeholder="Number, title, category, priority or status" value="@Model.SearchTerm" />
+        </div>
+        <div class="col-md-2">
+            <label class="dash-label">Status</label>
+            <select id="statusFilter" class="dash-input">
+                <option value="">All Statuses</option>
+                @foreach (var status in Model.Statuses)
+                {
+                    <option value="@status.StatusId" @(Model.StatusId == status.StatusId ? "selected" : "")>@status.StatusName</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="dash-label">Priority</label>
+            <select id="priorityFilter" class="dash-input">
+                <option value="">All Priorities</option>
+                @foreach (var priority in Model.Priorities)
+                {
+                    <option value="@priority.PriorityId" @(Model.PriorityId == priority.PriorityId ? "selected" : "")>@priority.PriorityName</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="dash-label">Category</label>
+            <select id="categoryFilter" class="dash-input">
+                <option value="">All Categories</option>
+                @foreach (var category in Model.Categories)
+                {
+                    <option value="@category.CategoryId" @(Model.CategoryId == category.CategoryId ? "selected" : "")>@category.CategoryName</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-2">
+            <button type="button" id="applyFiltersBtn" class="btn-dash-primary w-100">
+                <i class="bi bi-search"></i> Search
+            </button>
+        </div>
+    </div>
+    <div class="mt-2">
+        <button type="button" id="clearFiltersBtn" class="btn btn-sm btn-link text-muted px-0">Clear filters</button>
+    </div>
+</div>
+
+<div id="complaintsContainer">
+    @Html.Partial("_OfficerComplaintTable", Model)
+</div>
+
+<div class="dash-card p-3 mt-4">
+    <p class="text-muted small mb-0">Filters and dropdowns apply automatically — use the Search button or press Enter if you don't want to wait.</p>
+</div>
+
+<!-- ── Edit modal ─────────────────────────────────────────────
+     Fields here match Officer/UpdateComplaint(complaintId, categoryId,
+     priorityId, statusId) exactly — no Remarks/ResolutionNotes, no
+     AssignedTo (that's admin-only). Values are populated from the row's
+     data-* attributes when Edit is clicked, so no extra round trip. -->
+<div class="dash-modal-overlay" id="editComplaintModal" style="display:none;">
+    <div class="dash-modal" onclick="event.stopPropagation()">
+        <div class="dash-modal-header">
+            <h5>Edit Complaint — <span id="editComplaintNumberLabel"></span></h5>
+            <button type="button" class="dash-modal-close" onclick="closeEditModal()">&times;</button>
+        </div>
+        <div class="dash-modal-body">
+            @using (Html.BeginForm("UpdateComplaint", "Officer", FormMethod.Post, new { id = "editComplaintForm" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="editComplaintId" name="complaintId" />
+
+                <div class="dash-form-group">
+                    <label class="dash-label">Title</label>
+                    <input type="text" id="editComplaintTitle" class="dash-input" readonly style="opacity:0.7;" />
+                </div>
+
+                <div class="row g-3 mt-1">
+                    <div class="col-md-4 dash-form-group">
+                        <label class="dash-label">Category</label>
+                        <select id="editCategoryId" name="categoryId" class="dash-input" required>
+                            @foreach (var category in Model.Categories)
+                            {
+                                <option value="@category.CategoryId">@category.CategoryName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4 dash-form-group">
+                        <label class="dash-label">Priority</label>
+                        <select id="editPriorityId" name="priorityId" class="dash-input" required>
+                            @foreach (var priority in Model.Priorities)
+                            {
+                                <option value="@priority.PriorityId">@priority.PriorityName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4 dash-form-group">
+                        <label class="dash-label">Status</label>
+                        <select id="editStatusId" name="statusId" class="dash-input" required>
+                            @foreach (var status in Model.Statuses)
+                            {
+                                <option value="@status.StatusId">@status.StatusName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="dash-modal-footer">
+                    <button type="button" class="btn-dash-outline" onclick="closeEditModal()">Cancel</button>
+                    <button type="submit" class="btn-dash-primary" id="updateComplaintBtn">
+                        <span class="spinner-border spinner-border-sm d-none" id="updateComplaintSpinner"></span>
+                        Save Changes
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section officerScripts {
+    <script>
+        var currentSortColumn = '@Model.SortColumn';
+        var currentSortDirection = '@Model.SortDirection';
+        var currentPage = @Model.CurrentPage;
+
+        function gatherOfficerFilters() {
+            return {
+                SearchTerm: $('#searchTerm').val(),
+                StatusId: $('#statusFilter').val(),
+                PriorityId: $('#priorityFilter').val(),
+                CategoryId: $('#categoryFilter').val(),
+                SortColumn: currentSortColumn,
+                SortDirection: currentSortDirection,
+                PageSize: @Model.PageSize
+            };
+        }
+
+        function updateSortIndicators() {
+            $('.complaint-sort').removeClass('sorted-asc sorted-desc');
+            $('.complaint-sort[data-sort="' + currentSortColumn + '"]').addClass(currentSortDirection === 'asc' ? 'sorted-asc' : 'sorted-desc');
+        }
+
+        function loadOfficerComplaints(page) {
+            page = page || 1;
+            currentPage = page;
+            var data = gatherOfficerFilters();
+            data.Page = page;
+
+            $.ajax({
+                url: '@Url.Action("ComplaintList", "Officer")',
+                type: 'GET',
+                cache: false,
+                data: data,
+                dataType: 'html',
+                success: function (html) {
+                    console.log(data)
+                    $('#complaintsContainer').html(html);
+                    updateSortIndicators();
+                },
+                error: function () {
+                    alert('Unable to load complaints. Please try again.');
+                }
+            });
+        }
+
+        function debounce(fn, delay) {
+            var timer;
+            return function () {
+                var context = this;
+                var args = arguments;
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    fn.apply(context, args);
+                }, delay);
+            };
+        }
+
+        // Auto-filter as you type / change dropdowns...
+        $('#searchTerm').on('input', debounce(function () {
+            loadOfficerComplaints(1);
+        }, 350));
+
+        $('#statusFilter, #priorityFilter, #categoryFilter').on('change', function () {
+            loadOfficerComplaints(1);
+        });
+
+        // ...plus an explicit button and Enter key, for anyone who doesn't
+        // want to wait on the debounce or wants a clear "go" action.
+        $('#applyFiltersBtn').on('click', function () {
+            loadOfficerComplaints(1);
+        });
+
+        $('#searchTerm').on('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                loadOfficerComplaints(1);
+            }
+        });
+
+        $('#clearFiltersBtn').on('click', function () {
+            $('#searchTerm').val('');
+            $('#statusFilter, #priorityFilter, #categoryFilter').val('');
+            loadOfficerComplaints(1);
+        });
+
+        $(document).on('click', '.complaint-sort', function (e) {
+            e.preventDefault();
+            var sortColumn = $(this).data('sort');
+            if (currentSortColumn === sortColumn) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = sortColumn;
+                currentSortDirection = 'asc';
+            }
+            loadOfficerComplaints(1);
+            return false;
+        });
+
+        $(document).on('click', '.complaint-page', function (e) {
+            e.preventDefault();
+            var page = parseInt($(this).data('page'));
+            if (!isNaN(page)) {
+                loadOfficerComplaints(page);
+            }
+            return false;
+        });
+
+        updateSortIndicators();
+
+        function openEditModal(button) {
+            var row = $(button);
+            $('#editComplaintId').val(row.data('complaint-id'));
+            $('#editComplaintNumberLabel').text('#' + row.data('complaint-number'));
+            $('#editComplaintTitle').val(row.data('title'));
+            $('#editStatusId').val(row.data('status-id'));
+            $('#editPriorityId').val(row.data('priority-id'));
+            $('#editCategoryId').val(row.data('category-id'));
+            $('#editComplaintModal').show();
+        }
+
+        function closeEditModal() {
+            $('#editComplaintModal').hide();
+        }
+
+        $(document).on('click', '.complaint-edit-btn', function () {
+            openEditModal(this);
+        });
+
+        $('#editComplaintModal').on('click', function (e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+
+        $('#editComplaintForm').on('submit', function (e) {
+            e.preventDefault();
+            var submitBtn = $('#updateComplaintBtn');
+            var spinner = $('#updateComplaintSpinner');
+            submitBtn.prop('disabled', true);
+            spinner.removeClass('d-none');
+
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function (res) {
+                    submitBtn.prop('disabled', false);
+                    spinner.addClass('d-none');
+
+                    if (res.success) {
+                        closeEditModal();
+                        loadOfficerComplaints(currentPage);
+                    } else {
+                        alert(res.message || 'Unable to save complaint changes.');
+                    }
+                },
+                error: function () {
+                    submitBtn.prop('disabled', false);
+                    spinner.addClass('d-none');
+                    alert('An error occurred while updating the complaint. Please try again.');
+                }
+            });
+        });
+    </script>
+}

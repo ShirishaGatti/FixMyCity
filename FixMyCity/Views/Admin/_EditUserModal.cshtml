@@ -24,7 +24,7 @@
                 new { @class = "form-control" })
         </div>
 
-        <div class="mb-3">
+        @*<div class="mb-3">
             <label class="form-label">Ward</label>
             @Html.DropDownList("wardId",
                 new SelectList(Model.Wards, "WardId", "WardName", Model.WardId),
@@ -35,7 +35,7 @@
         <div class="mb-3">
             <label class="form-label">Designation</label>
             <input type="text" name="designation" value="@Model.Designation" class="form-control" />
-        </div>
+        </div>*@
 
         <div id="editUserFormError" class="text-danger small"></div>
     </form>

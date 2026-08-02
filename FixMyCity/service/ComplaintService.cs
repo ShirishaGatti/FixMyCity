@@ -31,11 +31,12 @@ namespace FixMyCity.service
         //    _consumerService = consumerService;
         //}
 
-        public MyComplaintsViewModel GetMyComplaints(int consumerId)
+        public MyComplaintsViewModel GetComplaints(int consumerId,int assignedTo,int roleId)
         {
             return new MyComplaintsViewModel
             {
-                Complaints = _complaintRepo.GetByConsumerId(consumerId),
+                Complaints = _complaintRepo.GetComplaints(consumerId, assignedTo, roleId),
+                Statuses = _complaintRepo.GetStatuses(),
                 Categories = _complaintRepo.GetCategories(),
                 Priorities = _complaintRepo.GetPriorities(),
                 Cities = _consumerService.GetCities()
@@ -177,6 +178,13 @@ namespace FixMyCity.service
             string physicalPath = GetPhysicalPath(attachment);
             if (File.Exists(physicalPath)) File.Delete(physicalPath);
         }
+        public void UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId, int roleId)
+        {
+            if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
+            if (categoryId <= 0 || priorityId <= 0 || statusId <= 0)
+                throw new BusinessException("Category, priority and status are required.", "INVALID_INPUT");
+            _complaintRepo.UpdateComplaint(complaintId, categoryId, priorityId, statusId, assignedTo, actorId, roleId);
+        }
         public int SaveComplaint(FileComplaintViewModel vm, int consumerId,int roleId)
         {
             if (string.IsNullOrWhiteSpace(vm.Title)) throw new BusinessException("Title is required.");
@@ -198,6 +206,93 @@ namespace FixMyCity.service
             return _complaintRepo.SaveComplaint(complaint, roleId);
         }
 
+        public OfficerDashboardViewModel GetOfficerDashboard(int officerId, int roleId)
+        {
+            var complaints = _complaintRepo.GetComplaints(null, officerId, roleId);
+            var now = DateTime.Now;
+
+            return new OfficerDashboardViewModel
+            {
+                TotalAssigned = complaints.Count,
+                OpenCount = complaints.Count(c => string.Equals(c.StatusName, "Open", StringComparison.OrdinalIgnoreCase)),
+                InProgressCount = complaints.Count(c => string.Equals(c.StatusName, "In Progress", StringComparison.OrdinalIgnoreCase)),
+                ResolvedCount = complaints.Count(c => string.Equals(c.StatusName, "Resolved", StringComparison.OrdinalIgnoreCase)),
+                ClosedCount = complaints.Count(c => string.Equals(c.StatusName, "Closed", StringComparison.OrdinalIgnoreCase)),
+                TodayCount = complaints.Count(c => c.CreatedAt.Date == now.Date),
+                WeeklyCount = complaints.Count(c => c.CreatedAt.Date >= now.Date.AddDays(-7)),
+                MonthlyCount = complaints.Count(c => c.CreatedAt.Date >= now.Date.AddMonths(-1)),
+                PriorityBreakdown = complaints
+                    .GroupBy(c => c.PriorityName)
+                    .Select(g => new ValueCount { Label = g.Key, Count = g.Count() })
+                    .OrderByDescending(g => g.Count)
+                    .ToList(),
+                RecentComplaints = complaints
+                    .OrderByDescending(c => c.CreatedAt)
+                    .Take(5)
+                    .ToList()
+            };
+        }
+
+    /*    public OfficerComplaintsViewModel GetOfficerComplaints(int officerId, OfficerComplaintsQuery query)
+        {
+            if (query == null)
+                query = new OfficerComplaintsQuery();
+
+            var statuses = _complaintRepo.GetStatuses();
+            var categories = _complaintRepo.GetCategories();
+            var priorities = _complaintRepo.GetPriorities();
+            var complaints = _complaintRepo.GetAssignedByOfficerId(officerId);
+
+            if (!string.IsNullOrWhiteSpace(query.SearchTerm))
+            {
+                var searchLower = query.SearchTerm.Trim().ToLowerInvariant();
+                complaints = complaints.Where(c =>
+                    (!string.IsNullOrEmpty(c.ComplaintNumber) && c.ComplaintNumber.ToLowerInvariant().Contains(searchLower)) ||
+                    (!string.IsNullOrEmpty(c.Title) && c.Title.ToLowerInvariant().Contains(searchLower)) ||
+                    (!string.IsNullOrEmpty(c.CategoryName) && c.CategoryName.ToLowerInvariant().Contains(searchLower)) ||
+                    (!string.IsNullOrEmpty(c.PriorityName) && c.PriorityName.ToLowerInvariant().Contains(searchLower)) ||
+                    (!string.IsNullOrEmpty(c.StatusName) && c.StatusName.ToLowerInvariant().Contains(searchLower)))
+                    .ToList();
+            }
+
+            if (query.StatusId.HasValue)
+                complaints = complaints.Where(c => c.StatusId == query.StatusId.Value).ToList();
+
+            if (query.PriorityId.HasValue)
+                complaints = complaints.Where(c => c.PriorityId == query.PriorityId.Value).ToList();
+
+            if (query.CategoryId.HasValue)
+                complaints = complaints.Where(c => c.CategoryId == query.CategoryId.Value).ToList();
+
+            complaints = SortRegisteredComplaints(complaints, query.SortColumn, query.SortDirection);
+
+            var totalRecords = complaints.Count;
+            var page = query.Page <= 0 ? 1 : query.Page;
+            var pageSize = query.PageSize <= 0 ? 10 : query.PageSize;
+            var pagedComplaints = complaints.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            return new OfficerComplaintsViewModel
+            {
+                SearchTerm = query.SearchTerm,
+                StatusId = query.StatusId,
+                PriorityId = query.PriorityId,
+                CategoryId = query.CategoryId,
+                SortColumn = query.SortColumn,
+                SortDirection = query.SortDirection,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                AssignedComplaints = pagedComplaints,
+                Statuses = statuses,
+                Categories = categories,
+                Priorities = priorities
+            };
+        }
+    */
+        /*public Complaint GetAssignedComplaint(int officerId, int complaintId)
+        {
+            return _complaintRepo.GetAssignedComplaintById(complaintId, officerId);
+        }*/
         public void DeleteComplaint(int complaintId, int consumerId)
         {
             bool deleted = _complaintRepo.DeleteComplaint(complaintId, consumerId);
@@ -219,6 +314,38 @@ namespace FixMyCity.service
                 TotalCount = vm.TotalCount,
                 TotalPages = (int)Math.Ceiling(vm.TotalCount / (double)filter.PageSize)
             };
+        }
+        private static List<Complaint> SortRegisteredComplaints(List<Complaint> complaints, string sortColumn, string sortDirection)
+        {
+            bool descending = string.Equals(sortDirection, "desc", StringComparison.OrdinalIgnoreCase);
+            switch (sortColumn?.ToLowerInvariant())
+            {
+                case "complaintnumber":
+                    return descending
+                        ? complaints.OrderByDescending(c => c.ComplaintNumber).ToList()
+                        : complaints.OrderBy(c => c.ComplaintNumber).ToList();
+                case "title":
+                    return descending
+                        ? complaints.OrderByDescending(c => c.Title).ToList()
+                        : complaints.OrderBy(c => c.Title).ToList();
+                case "category":
+                    return descending
+                        ? complaints.OrderByDescending(c => c.CategoryName).ToList()
+                        : complaints.OrderBy(c => c.CategoryName).ToList();
+                case "priority":
+                    return descending
+                        ? complaints.OrderByDescending(c => c.PriorityName).ToList()
+                        : complaints.OrderBy(c => c.PriorityName).ToList();
+                case "status":
+                    return descending
+                        ? complaints.OrderByDescending(c => c.StatusName).ToList()
+                        : complaints.OrderBy(c => c.StatusName).ToList();
+                case "createdat":
+                default:
+                    return descending
+                        ? complaints.OrderByDescending(c => c.CreatedAt).ToList()
+                        : complaints.OrderBy(c => c.CreatedAt).ToList();
+            }
         }
 
         public ComplaintExportViewModel GetComplaintForExport(int complaintId, int consumerId)

@@ -9,6 +9,8 @@ using FixMyCityModel.ViewModel;
 using System;
 using System.Configuration;
 using System.Web.Mvc;
+using System.Web.Services.Description;
+using System.Web.UI.WebControls;
 
 namespace FixMyCity.Controllers
 {
@@ -40,7 +42,7 @@ private int roleId => _session.RoleId;
             return View(vm);
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
+        //[RoleAuthorize(RoleIds.Citizen)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult SaveComplaint(FileComplaintViewModel vm)
@@ -211,6 +213,14 @@ private int roleId => _session.RoleId;
             };
             PopulateProfileDropdowns(vm);
             return View(vm);
+        }
+        //Support executives expect a "Queue" landing page after login.Redirect to the officer complaints UI which implements the queue.
+        [RoleAuthorize(RoleIds.SupportExecutive)]
+        [HttpGet]
+        public ActionResult Queue()
+        {
+            // Reuse the Officer controller's Complaints action to show the assigned complaints/queue.
+            return RedirectToAction("Complaints", "Officer");
         }
 
         [RoleAuthorize]

@@ -44,6 +44,7 @@
                 <th class="sortable-th @(Model.Filter.SortBy == "StatusName" ? "th-active" : "")" data-sort-col="StatusName">
                     <span class="sort-link">Status <i class="fa @Icon("StatusName")"></i></span>
                 </th>
+                <th>Assigned To</th>
                 <th>City</th>
                 <th>Ward</th>
                 <th class="sortable-th @(Model.Filter.SortBy == "CreatedAt" ? "th-active" : "")" data-sort-col="CreatedAt">
@@ -65,6 +66,7 @@
                         <td>@Na(item.CategoryName)</td>
                         <td>@Na(item.PriorityName)</td>
                         <td><span class="badge bg-info text-dark">@Na(item.StatusName)</span></td>
+                        <td>@Na(item.AssigneeName)</td>
                         <td>@Na(item.CityName)</td>
                         <td>@Na(item.WardName)</td>
                         <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>

@@ -74,6 +74,7 @@
     <Compile Include="ViewModel\LoginViewModel.cs" />
     <Compile Include="ViewModel\MasterDataViewModel.cs" />
     <Compile Include="ViewModel\MyComplaintsViewModel.cs" />
+    <Compile Include="ViewModel\OfficerViewModels.cs" />
     <Compile Include="ViewModel\ProfileViewModel.cs" />
     <Compile Include="ViewModel\RegisterViewModel.cs" />
     <Compile Include="ViewModel\ResetPasswordViewModel.cs" />

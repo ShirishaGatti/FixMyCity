@@ -178,16 +178,16 @@ namespace FixMyCity.Repository
             return vm;
         }
 
-        public bool UpdateUserRole(int consumerId, int newRoleId, int? deptId, int? wardId, string designation, int actorId)
+        public bool UpdateUser(int consumerId, int newRoleId, int? deptId, int actorId)
         {
             try
             {
-                DbCommand com = db.GetStoredProcCommand("FixMyCity.Admin_UpdateUserRole");
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.UpdateUser");
                 db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
-                db.AddInParameter(com, "NewRoleId", DbType.Int32, newRoleId);
-                db.AddInParameter(com, "DeptId", DbType.Int32, deptId.HasValue ? (object)deptId.Value : DBNull.Value);
-                db.AddInParameter(com, "WardId", DbType.Int32, wardId.HasValue ? (object)wardId.Value : DBNull.Value);
-                db.AddInParameter(com, "Designation", DbType.String, (object)designation ?? DBNull.Value);
+                db.AddInParameter(com, "RoleId", DbType.Int32, newRoleId);
+                db.AddInParameter(com, "DepartmentId", DbType.Int32, deptId.HasValue ? (object)deptId.Value : DBNull.Value);
+                //db.AddInParameter(com, "WardId", DbType.Int32, wardId.HasValue ? (object)wardId.Value : DBNull.Value);
+                //db.AddInParameter(com, "Designation", DbType.String, (object)designation ?? DBNull.Value);
                 db.AddInParameter(com, "ActorId", DbType.Int32, actorId);
                 db.ExecuteNonQuery(com);
             }
@@ -323,6 +323,34 @@ namespace FixMyCity.Repository
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to update complaint.", "Admin_UpdateComplaint", ex); }
             return true;
+        }
+        public int SaveComplaint(Complaint c, int roleId)
+        {
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_Save");
+                db.AddInParameter(com, "ComplaintId", DbType.Int32, c.ComplaintId == 0 ? (object)DBNull.Value : c.ComplaintId);
+                db.AddInParameter(com, "Title", DbType.String, c.Title);
+                db.AddInParameter(com, "Description", DbType.String, c.Description);
+                db.AddInParameter(com, "CategoryId", DbType.Int32, c.CategoryId);
+                db.AddInParameter(com, "PriorityId", DbType.Int32, c.PriorityId);
+                db.AddInParameter(com, "RaisedBy", DbType.Int32, c.RaisedBy);
+                db.AddInParameter(com, "AddressLine", DbType.String, c.AddressLine);
+                db.AddInParameter(com, "Landmark", DbType.String, (object)c.Landmark ?? DBNull.Value);
+                db.AddInParameter(com, "WardId", DbType.Int32, c.WardId);
+                db.AddInParameter(com, "CityId", DbType.Int32, c.CityId);
+                db.AddInParameter(com, "RoleId", DbType.Int32, roleId);
+                db.AddOutParameter(com, "SavedComplaintId", DbType.Int32, 4);
+
+                db.ExecuteNonQuery(com);
+                int savedId = Convert.ToInt32(db.GetParameterValue(com, "SavedComplaintId"));
+               // ClearComplaintCache(c.RaisedBy);
+                return savedId;
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to save complaint.", "Complaint_Save", ex);
+            }
         }
 
         public bool DeleteComplaint(int complaintId, int actorId)

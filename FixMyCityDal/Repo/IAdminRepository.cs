@@ -11,7 +11,7 @@ namespace FixMyCity.Repository
 
         // Users / Officers
         AdminUserListViewModel ListUsers(AdminUserListFilterViewModel filter);
-        bool UpdateUserRole(int consumerId, int newRoleId, int? deptId, int? wardId, string designation, int actorId);
+        bool UpdateUser(int consumerId, int newRoleId, int? deptId, int actorId);
         //bool UpdateOfficer(int consumerId, string designation, int? wardId, int? deptId, int actorId);
         bool DeleteUser(int consumerId, int actorId);
 

@@ -1,0 +1,128 @@
+@model FixMyCityModel.ViewModel.MyComplaintsViewModel
+
+@{
+    Func<string, string, string> sortUrl = (sortColumn, sortDirection) => Url.Action("Complaints", "Officer", new
+    {
+        SortColumn = sortColumn,
+        SortDirection = sortDirection,
+        SearchTerm = Model.SearchTerm,
+        StatusId = Model.StatusId,
+        PriorityId = Model.PriorityId,
+        CategoryId = Model.CategoryId,
+        Page = Model.CurrentPage,
+        PageSize = Model.PageSize
+    });
+
+    Func<string, string, string> sortClass = (sortColumn, direction) =>
+        Model.SortColumn == sortColumn && !string.IsNullOrWhiteSpace(Model.SortDirection) &&
+            Model.SortDirection.ToLowerInvariant() == direction.ToLowerInvariant()
+            ? "sorted-" + direction
+            : string.Empty;
+}
+
+<div class="dash-card">
+    @if (!Model.Complaints.Any())
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox fs-1 d-block mb-3"></i>
+            No assigned complaints match the current filter.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="dash-table mb-0">
+                <thead>
+                    <tr>
+                        <th>
+                            <a href="@sortUrl("ComplaintNumber", Model.SortColumn == "ComplaintNumber" && Model.SortDirection == "asc" ? "desc" : "asc")"
+                               class="complaint-sort text-decoration-none @sortClass("ComplaintNumber", "asc") @sortClass("ComplaintNumber", "desc")"
+                               data-sort="ComplaintNumber">
+                                Complaint #
+                            </a>
+                        </th>
+                        <th>
+                            <a href="@sortUrl("Title", Model.SortColumn == "Title" && Model.SortDirection == "asc" ? "desc" : "asc")"
+                               class="complaint-sort text-decoration-none @sortClass("Title", "asc") @sortClass("Title", "desc")"
+                               data-sort="Title">
+                                Title
+                            </a>
+                        </th>
+                        <th>
+                            <a href="@sortUrl("Category", Model.SortColumn == "Category" && Model.SortDirection == "asc" ? "desc" : "asc")"
+                               class="complaint-sort text-decoration-none @sortClass("Category", "asc") @sortClass("Category", "desc")"
+                               data-sort="Category">
+                                Category
+                            </a>
+                        </th>
+                        <th>
+                            <a href="@sortUrl("Priority", Model.SortColumn == "Priority" && Model.SortDirection == "asc" ? "desc" : "asc")"
+                               class="complaint-sort text-decoration-none @sortClass("Priority", "asc") @sortClass("Priority", "desc")"
+                               data-sort="Priority">
+                                Priority
+                            </a>
+                        </th>
+                        <th>
+                            <a href="@sortUrl("Status", Model.SortColumn == "Status" && Model.SortDirection == "asc" ? "desc" : "asc")"
+                               class="complaint-sort text-decoration-none @sortClass("Status", "asc") @sortClass("Status", "desc")"
+                               data-sort="Status">
+                                Status
+                            </a>
+                        </th>
+                        <th>Assigned To</th>
+                        <th>
+                            <a href="@sortUrl("CreatedAt", Model.SortColumn == "CreatedAt" && Model.SortDirection == "asc" ? "desc" : "asc")"
+                               class="complaint-sort text-decoration-none @sortClass("CreatedAt", "asc") @sortClass("CreatedAt", "desc")"
+                               data-sort="CreatedAt">
+                                Filed On
+                            </a>
+                        </th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Complaints)
+                    {
+                        <tr>
+                            <td class="complaint-num">@item.ComplaintNumber</td>
+                            <td>@item.Title</td>
+                            <td>@item.CategoryName</td>
+                            <td><span class="priority-badge @item.PriorityName.ToLower()">@item.PriorityName</span></td>
+                            <td><span class="status-badge @item.StatusName.ToLower().Replace(" ", "")">@item.StatusName</span></td>
+                            <td>@(string.IsNullOrWhiteSpace(item.AssigneeName) ? "N/A" : item.AssigneeName)</td>
+                            <td>@item.CreatedAt.ToString("dd MMM yyyy")</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-primary complaint-edit-btn"
+                                        data-complaint-id="@item.ComplaintId"
+                                        data-status-id="@item.StatusId"
+                                        data-priority-id="@item.PriorityId"
+                                        data-category-id="@item.CategoryId"
+                                        data-complaint-number="@item.ComplaintNumber"
+                                        data-title="@item.Title">
+                                    Edit
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3 gap-2">
+            <div class="text-muted small">
+                Showing @(((Model.CurrentPage - 1) * Model.PageSize) + 1) - @(((Model.CurrentPage - 1) * Model.PageSize) + Model.Complaints.Count) of @Model.TotalRecords
+            </div>
+            <nav>
+                <ul class="pagination mb-0">
+                    @for (int page = 1; page <= Math.Max(1, (int)Math.Ceiling(Model.TotalRecords / (double)Model.PageSize)); page++)
+                    {
+                        <li class="page-item @(page == Model.CurrentPage ? "active" : "")">
+                            <a href="@Url.Action("Complaints", "Officer")"
+                               class="page-link complaint-page" data-page="@page">@page</a>
+                        </li>
+                    }
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
