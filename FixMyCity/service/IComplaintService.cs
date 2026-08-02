@@ -21,7 +21,7 @@ namespace FixMyCity.service
         void DeleteAttachment(int attachmentId, int consumerId);
         // Interface additions
         OfficerDashboardViewModel GetOfficerDashboard(int officerId, int roleId);
-      //  OfficerComplaintsViewModel GetOfficerComplaints(int officerId, OfficerComplaintsQuery query);
+        MyComplaintsViewModel GetOfficerComplaints(int officerId, OfficerComplaintsQuery query);
         //Complaint GetAssignedComplaint(int officerId, int complaintId);
         int SaveComplaint(FileComplaintViewModel vm, int consumerId,int roleId);              // upsert — Complaint.ComplaintId null/0 = create
         void DeleteComplaint(int complaintId, int consumerId);

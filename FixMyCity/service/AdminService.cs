@@ -108,9 +108,25 @@ namespace FixMyCity.service
             return vm;
         }
 
+        public AdminComplaintEditViewModel GetComplaintById(int complaintId)
+        {
+            if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
+            var vm = _repo.GetComplaintById(complaintId);
+            if (vm == null) throw new BusinessException("Complaint not found.", "NOT_FOUND");
+
+            vm.Categories = _repo.GetCategories();
+            vm.Priorities = _repo.GetPriorities();
+            vm.Statuses = _repo.GetStatuses();
+            vm.Officers = _repo.ListUsers(new AdminUserListFilterViewModel { RoleId = 3, PageSize = 1000 }).Rows;
+            return vm;
+        }
+
+        public void UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId, int roleId)
+        {
+            if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
             if (categoryId <= 0 || priorityId <= 0 || statusId <= 0)
                 throw new BusinessException("Category, priority and status are required.", "INVALID_INPUT");
-            _repo.UpdateComplaint(complaintId, categoryId, priorityId, statusId, assignedTo, actorId,roleId);
+            _repo.UpdateComplaint(complaintId, categoryId, priorityId, statusId, assignedTo, actorId, roleId);
         }
 
         public void DeleteComplaint(int complaintId, int actorId)

@@ -30,7 +30,7 @@ namespace FixMyCity.Filters
             _allowedRoles = allowedRoles ?? new int[0];
         }
 
-        public void OnAuthorization(AuthorizationContext filterContext)
+        public void OnAuthorization(System.Web.Mvc.AuthorizationContext filterContext)
         {
             var request = filterContext.HttpContext.Request;
             var response = filterContext.HttpContext.Response;

@@ -1,0 +1,240 @@
+﻿/* ===========================
+   Officer Panel
+=========================== */
+
+body {
+    background: #f4f7fb;
+    color: #1f2937;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* Page */
+
+.dash-page-header {
+    margin-bottom: 25px;
+}
+
+    .dash-page-header h1 {
+        font-size: 30px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .dash-page-header p {
+        color: #6b7280;
+    }
+
+/* Cards */
+
+.dash-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 4px 12px rgba(0,0,0,.05);
+}
+
+/* Labels */
+
+.dash-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #374151;
+}
+
+/* Inputs */
+
+.dash-input {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0 12px;
+    background: white;
+}
+
+    .dash-input:focus {
+        outline: none;
+        border-color: #2563eb;
+    }
+
+/* Buttons */
+
+.btn-dash-primary {
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    height: 42px;
+    padding: 0 20px;
+}
+
+    .btn-dash-primary:hover {
+        background: #1d4ed8;
+    }
+
+.btn-dash-outline {
+    background: white;
+    border: 1px solid #2563eb;
+    color: #2563eb;
+    border-radius: 8px;
+    padding: 8px 18px;
+}
+
+/* Table */
+
+.dash-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+    .dash-table thead {
+        background: #f8fafc;
+    }
+
+    .dash-table th {
+        padding: 14px;
+        font-weight: 600;
+        border-bottom: 1px solid #e5e7eb;
+        white-space: nowrap;
+    }
+
+    .dash-table td {
+        padding: 14px;
+        border-bottom: 1px solid #edf2f7;
+        vertical-align: middle;
+    }
+
+    .dash-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+.complaint-num {
+    font-weight: 600;
+    color: #2563eb;
+}
+
+/* Status */
+
+.status-badge,
+.priority-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+    .status-badge.open {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .status-badge.inprogress {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .status-badge.resolved {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .status-badge.closed {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    /* Priority */
+
+    .priority-badge.low {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .priority-badge.medium {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .priority-badge.high {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+/* Pagination */
+
+.pagination .page-link {
+    border-radius: 8px;
+    margin: 0 3px;
+}
+
+.pagination .active .page-link {
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+/* Modal */
+
+.dash-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+}
+
+.dash-modal {
+    background: white;
+    width: 700px;
+    max-width: 95%;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(0,0,0,.25);
+}
+
+.dash-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dash-modal-body {
+    padding: 24px;
+}
+
+.dash-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.dash-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Responsive */
+
+@media (max-width:768px) {
+
+    .dash-table {
+        min-width: 900px;
+    }
+
+    .dash-card {
+        overflow-x: auto;
+    }
+
+    .dash-page-header h1 {
+        font-size: 24px;
+    }
+}

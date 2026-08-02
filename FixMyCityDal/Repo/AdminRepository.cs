@@ -324,34 +324,6 @@ namespace FixMyCity.Repository
             catch (SqlException ex) { throw new DataAccessException("Failed to update complaint.", "Admin_UpdateComplaint", ex); }
             return true;
         }
-        public int SaveComplaint(Complaint c, int roleId)
-        {
-            try
-            {
-                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_Save");
-                db.AddInParameter(com, "ComplaintId", DbType.Int32, c.ComplaintId == 0 ? (object)DBNull.Value : c.ComplaintId);
-                db.AddInParameter(com, "Title", DbType.String, c.Title);
-                db.AddInParameter(com, "Description", DbType.String, c.Description);
-                db.AddInParameter(com, "CategoryId", DbType.Int32, c.CategoryId);
-                db.AddInParameter(com, "PriorityId", DbType.Int32, c.PriorityId);
-                db.AddInParameter(com, "RaisedBy", DbType.Int32, c.RaisedBy);
-                db.AddInParameter(com, "AddressLine", DbType.String, c.AddressLine);
-                db.AddInParameter(com, "Landmark", DbType.String, (object)c.Landmark ?? DBNull.Value);
-                db.AddInParameter(com, "WardId", DbType.Int32, c.WardId);
-                db.AddInParameter(com, "CityId", DbType.Int32, c.CityId);
-                db.AddInParameter(com, "RoleId", DbType.Int32, roleId);
-                db.AddOutParameter(com, "SavedComplaintId", DbType.Int32, 4);
-
-                db.ExecuteNonQuery(com);
-                int savedId = Convert.ToInt32(db.GetParameterValue(com, "SavedComplaintId"));
-               // ClearComplaintCache(c.RaisedBy);
-                return savedId;
-            }
-            catch (SqlException ex)
-            {
-                throw new DataAccessException("Failed to save complaint.", "Complaint_Save", ex);
-            }
-        }
 
         public bool DeleteComplaint(int complaintId, int actorId)
         {

@@ -19,14 +19,15 @@ namespace FixMyCity.Controllers
         private readonly IConsumerService _consumerService;
         private readonly IComplaintService _complaintService;
         private readonly ISessionContext _session;
-private int CurrentActorId => _session.ConsumerId;
-private int roleId => _session.RoleId;
         public ComplaintController()
         {
             _consumerService = new ConsumerService();
             _complaintService = new ComplaintService();
             _session = new JwtSessionContext();
         }
+        private int CurrentActorId => _session.ConsumerId;
+        private int roleId => _session.RoleId;
+
 
         [RoleAuthorize(RoleIds.Citizen)]
         [HttpGet]
@@ -42,7 +43,7 @@ private int roleId => _session.RoleId;
             return View(vm);
         }
 
-        //[RoleAuthorize(RoleIds.Citizen)]
+        [RoleAuthorize(RoleIds.Citizen)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult SaveComplaint(FileComplaintViewModel vm)

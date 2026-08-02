@@ -203,7 +203,7 @@ namespace FixMyCity.service
                 WardId = vm.WardId,
                 CityId = vm.CityId
             };
-            return _complaintRepo.SaveComplaint(complaint, roleId);
+            return _complaintRepo.SaveComplaint(complaint,consumerId, roleId);
         }
 
         public OfficerDashboardViewModel GetOfficerDashboard(int officerId, int roleId)
@@ -233,7 +233,7 @@ namespace FixMyCity.service
             };
         }
 
-    /*    public OfficerComplaintsViewModel GetOfficerComplaints(int officerId, OfficerComplaintsQuery query)
+    public MyComplaintsViewModel GetOfficerComplaints(int officerId, OfficerComplaintsQuery query)
         {
             if (query == null)
                 query = new OfficerComplaintsQuery();
@@ -271,7 +271,7 @@ namespace FixMyCity.service
             var pageSize = query.PageSize <= 0 ? 10 : query.PageSize;
             var pagedComplaints = complaints.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-            return new OfficerComplaintsViewModel
+                        return new MyComplaintsViewModel
             {
                 SearchTerm = query.SearchTerm,
                 StatusId = query.StatusId,
@@ -282,13 +282,12 @@ namespace FixMyCity.service
                 CurrentPage = page,
                 PageSize = pageSize,
                 TotalRecords = totalRecords,
-                AssignedComplaints = pagedComplaints,
+                                Complaints = pagedComplaints,
                 Statuses = statuses,
                 Categories = categories,
                 Priorities = priorities
             };
         }
-    */
         /*public Complaint GetAssignedComplaint(int officerId, int complaintId)
         {
             return _complaintRepo.GetAssignedComplaintById(complaintId, officerId);

@@ -16,14 +16,14 @@ namespace FixMyCity.Repository
         Attachment GetAttachmentById(int attachmentId, int consumerId);
         void DeleteAttachment(int attachmentId, int consumerId);
         // Interface additions
-        int SaveComplaint(Complaint complaint,int roleId);
+        int SaveComplaint(Complaint complaint,int roleId,int consumerId);
         // upsert — Complaint.ComplaintId null/0 = create
         bool UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId, int roleId);
 
 
         bool DeleteComplaint(int complaintId, int consumerId);
         ComplaintSearchResult Search(int consumerId, ComplaintListFilterViewModel filter); List<ComplaintStatus> GetStatuses();
-       // List<Complaint> GetAssignedByOfficerId(int officerId);
+        List<Complaint> GetAssignedByOfficerId(int officerId);
         //Complaint GetAssignedComplaintById(int complaintId, int officerId);
     }
 }

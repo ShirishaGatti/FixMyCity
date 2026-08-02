@@ -333,11 +333,19 @@
                     $('#detailsDrawerContent').html(html);
                 },
 
-                error: function (xhr) {
-                    $('#detailsDrawerContent').html(
-                        '<div class="text-danger p-4">Unable to load complaint details.</div>'
-                    );
+                error: function (xhr, status, error) {
+
+                    submitBtn.prop('disabled', false);
+                    spinner.addClass('d-none');
+
                     console.log(xhr);
+                    console.log(xhr.responseText);
+
+                    alert(
+                        "Status : " + xhr.status +
+                        "\nError : " + error +
+                        "\nResponse : " + xhr.responseText
+                    );
                 }
             });
         }
@@ -369,17 +377,38 @@
             spinner.removeClass('d-none');
 
             $.ajax({
-                url: $(this).attr('action'), type: 'POST', data: formData, processData: false, contentType: false,
+                url: $('#complaintForm').attr('action'),
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function (res) {
+
+                    console.log(res);
+
                     submitBtn.prop('disabled', false);
                     spinner.addClass('d-none');
-                    if (res.success) window.location.reload();
-                    else alert(res.message || 'Failed to save complaint.');
+
+                    if (res.success) {
+                        window.location.reload();
+                    }
+                    else {
+                        alert(res.message || 'Failed to save complaint.');
+                    }
                 },
-                error: function () {
+                error: function (xhr, status, error) {
+
                     submitBtn.prop('disabled', false);
                     spinner.addClass('d-none');
-                    alert('An error occurred. Please try again.');
+
+                    console.log(xhr);
+                    console.log(xhr.responseText);
+
+                    alert(
+                        "Status : " + xhr.status +
+                        "\nError : " + error +
+                        "\nResponse : " + xhr.responseText
+                    );
                 }
             });
         });

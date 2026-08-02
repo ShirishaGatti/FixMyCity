@@ -36,17 +36,16 @@ namespace FixMyCity.Controllers
         public ActionResult Complaints(OfficerComplaintsQuery query)
         {
             ViewBag.ActivePage = "Complaints";
-            var vm = _complaintService.GetComplaints(0,_session.ConsumerId, _session.RoleId);
-            return PartialView("_OfficerComplaintTable", vm);
-
+            var vm = _complaintService.GetOfficerComplaints(_session.ConsumerId, query);
+            return View(vm);
         }
 
-        /*  [HttpGet]
-          public PartialViewResult ComplaintList(OfficerComplaintsQuery query)
-          {
-              var vm = _complaintService.GetOfficerComplaints(_session.ConsumerId, query);
-              return PartialView("_OfficerComplaintTable", vm);
-          }*/
+        [HttpGet]
+        public PartialViewResult ComplaintList(OfficerComplaintsQuery query)
+        {
+            var vm = _complaintService.GetOfficerComplaints(_session.ConsumerId, query);
+            return PartialView("_OfficerComplaintTable", vm);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

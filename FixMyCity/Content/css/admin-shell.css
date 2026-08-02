@@ -1,5 +1,5 @@
 /* =============================================================
-   admin-shell.css  –  Sidebar, topbar & content wrapper.
+   admin-shell.css   Sidebar, topbar & content wrapper.
    Nested inside _Layout.cshtml which already provides the sticky
    top navbar.  The admin shell sits in the <main> block.
    ============================================================= */

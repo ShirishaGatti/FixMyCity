@@ -2,7 +2,7 @@
    Same AJAX search/sort/page/edit/delete pattern as admin-users.js, applied
    to the Manage Complaints screen. Kept as a separate file (rather than one
    shared generic script) so each page's URLs/selectors stay simple and
-   explicit — worth merging later only if a third grid shows up.
+   explicit  worth merging later only if a third grid shows up.
 */
 (function () {
     "use strict";

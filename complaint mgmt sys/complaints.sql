@@ -483,12 +483,24 @@ BEGIN
             DECLARE @CurrentStatus VARCHAR(30) = (  
                 SELECT st.StatusName FROM FixMyCity.Complaint c  
                 JOIN FixMyCity.ComplaintStatus st ON st.StatusId = c.StatusId  
-                WHERE c.ComplaintId = @ComplaintId AND (c.RaisedBy = @RaisedBy OR @RoleId <>2)AND c.IsActive = 1  
+                WHERE c.ComplaintId = @ComplaintId
+                AND c.IsActive = 1
+                AND
+                (
+                    (@RoleId = 1)
+                    OR
+                    (@RoleId = 2 AND c.RaisedBy = @RaisedBy)
+                    OR
+                    (@RoleId = 3 AND c.AssignedTo = @RaisedBy)
+                )
             );  
   
             IF @CurrentStatus IS NULL THROW 51001, 'Complaint not found or you do not have permission to edit it.', 1;  
-            IF @CurrentStatus <> 'Open' THROW 51002, 'Complaint can only be edited while it is Open.', 1;  
-  
+            IF @RoleId = 2 AND @CurrentStatus <> 'Open'
+            BEGIN
+                THROW 51002, 'Complaint can only be edited while it is Open.', 1;
+            END
+
             IF @RoleId=2
                 UPDATE FixMyCity.Complaint  
                 SET Title = @Title, Description = @Description, CategoryId = @CategoryId,  
@@ -500,77 +512,12 @@ BEGIN
                 SET CategoryId = @CategoryId,  
                     PriorityId = @PriorityId, 
                     StatusId=@Status,
-                    AssignedTo=@AssignedTo,
                     LastModifiedAt = GETUTCDATE()  
                 WHERE ComplaintId = @ComplaintId ; 
             SET @SavedComplaintId = @ComplaintId;  
   
             INSERT INTO FixMyCity.ComplaintHistory (ComplaintId, FieldChanged, OldValue, NewValue)  
             VALUES (@SavedComplaintId, 'Complaint', 'Edited', 'Details updated');  
-        END  
-  
-        COMMIT TRANSACTION;  
-    END TRY  
-    BEGIN CATCH  
-        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;  
-        THROW;  
-    END CATCH  
-END  
-
-CREATE   PROCEDURE FixMyCity.AdminComplaintSave  
-    @ComplaintId INT = NULL,  
-    @CategoryId INT, @PriorityId INT,  
-    @RaisedBy INT, @AddressLine VARCHAR(250), @Landmark VARCHAR(150) = NULL,  
-    @WardId INT, @CityId INT, @SavedComplaintId INT OUTPUT  ,    @RoleId INT
-AS  
-BEGIN  
-    SET NOCOUNT ON; SET XACT_ABORT ON;  
-    BEGIN TRY  
-        BEGIN TRANSACTION;  
-  
-        IF @ComplaintId IS NULL OR @ComplaintId = 0  
-        BEGIN  
-            DECLARE @StatusId INT = (SELECT StatusId FROM FixMyCity.ComplaintStatus WHERE StatusName = 'Open');  
-            IF @StatusId IS NULL THROW 51000, 'Open status not configured.', 1;  
-  
-            INSERT INTO FixMyCity.Complaint  
-                (ComplaintNumber, Title, Description, CategoryId, PriorityId, StatusId,  
-                 RaisedBy, AddressLine, Landmark, WardId, CityId, CreatedBy)  
-            VALUES  
-                ('TEMP', @Title, @Description, @CategoryId, @PriorityId, @StatusId,  
-                 @RaisedBy, @AddressLine, @Landmark, @WardId, @CityId, @RaisedBy);  
-  
-            SET @SavedComplaintId = SCOPE_IDENTITY();  
-  
-            UPDATE FixMyCity.Complaint  
-            SET ComplaintNumber = 'FMC' + CONVERT(VARCHAR(4), YEAR(GETDATE()))  
-                                 + RIGHT('000000' + CAST(@SavedComplaintId AS VARCHAR(6)), 6)  
-            WHERE ComplaintId = @SavedComplaintId;  
-  
-            INSERT INTO FixMyCity.ComplaintHistory (ComplaintId, FieldChanged, OldValue, NewValue, CreatedBy)  
-            VALUES (@SavedComplaintId, 'StatusId', NULL, CAST(@StatusId AS VARCHAR(10)), @RaisedBy);  
-        END  
-        ELSE  
-        BEGIN  
-            DECLARE @CurrentStatus VARCHAR(30) = (  
-                SELECT st.StatusName FROM FixMyCity.Complaint c  
-                JOIN FixMyCity.ComplaintStatus st ON st.StatusId = c.StatusId  
-                WHERE c.ComplaintId = @ComplaintId AND c.RaisedBy = @RaisedBy AND c.IsActive = 1  
-            );  
-  
-            IF @CurrentStatus IS NULL THROW 51001, 'Complaint not found or you do not have permission to edit it.', 1;  
-            IF @CurrentStatus <> 'Open' THROW 51002, 'Complaint can only be edited while it is Open.', 1;  
-  
-            UPDATE FixMyCity.Complaint  
-            SET Title = @Title, Description = @Description, CategoryId = @CategoryId,  
-                PriorityId = @PriorityId, AddressLine = @AddressLine, Landmark = @Landmark,  
-                WardId = @WardId, CityId = @CityId, LastModifiedAt = GETUTCDATE(), LastModifiedBy = @RaisedBy  
-            WHERE ComplaintId = @ComplaintId AND RaisedBy = @RaisedBy;  
-  
-            SET @SavedComplaintId = @ComplaintId;  
-  
-            INSERT INTO FixMyCity.ComplaintHistory (ComplaintId, FieldChanged, OldValue, NewValue, CreatedBy)  
-            VALUES (@SavedComplaintId, 'Complaint', 'Edited', 'Details updated', @RaisedBy);  
         END  
   
         COMMIT TRANSACTION;  
