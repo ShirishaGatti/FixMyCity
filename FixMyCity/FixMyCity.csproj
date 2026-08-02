@@ -348,6 +348,7 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AdminController.cs" />
+    <Compile Include="Controllers\ComplaintChatController.cs" />
     <Compile Include="Controllers\ComplaintController.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -370,9 +371,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="service\AdminService.cs" />
     <Compile Include="service\AuthService.cs" />
+    <Compile Include="service\ComplaintChatService.cs" />
     <Compile Include="service\ComplaintService.cs" />
     <Compile Include="service\ConsumerService.cs" />
     <Compile Include="service\IAdminService.cs" />
+    <Compile Include="service\IComplaintChatService.cs" />
     <Compile Include="service\IComplaintService.cs" />
     <Compile Include="service\IConsumerService.cs" />
     <Compile Include="service\MailService.cs" />
@@ -517,6 +520,8 @@
     <Content Include="Views\Officer\_Sidebar.cshtml" />
     <Content Include="Views\Shared\_OfficerLayout.cshtml" />
     <Content Include="Views\Shared\_ProfileForm.cshtml" />
+    <Content Include="Views\Shared\_ComplaintChat.cshtml" />
+    <Content Include="Views\Shared\_ChatMessageBubble.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

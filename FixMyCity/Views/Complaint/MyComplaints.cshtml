@@ -91,6 +91,7 @@
                             <button type="button" class="row-action-btn" title="Edit" @(isOpen ? "" : "disabled") onclick="openEditComplaint(@c.ComplaintId)"><i class="bi bi-pencil-square"></i></button>
                             <button type="button" class="row-action-btn text-danger" title="Delete" @(isOpen ? "" : "disabled") onclick="deleteComplaint(@c.ComplaintId)"><i class="bi bi-trash"></i></button>
                             <a class="row-action-btn" title="Export PDF" href="@Url.Action("ExportComplaintPdf", "Complaint", new { id = c.ComplaintId })"><i class="bi bi-file-earmark-pdf"></i></a>
+
                         </td>
                     </tr>
                 }

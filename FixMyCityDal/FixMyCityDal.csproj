@@ -59,9 +59,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repo\AdminRepository.cs" />
     <Compile Include="Repo\AuthRepository.cs" />
+    <Compile Include="Repo\ComplaintChatRepository.cs" />
     <Compile Include="Repo\ComplaintRepository.cs" />
     <Compile Include="Repo\IAdminRepository.cs" />
     <Compile Include="Repo\IAuthRepository.cs" />
+    <Compile Include="Repo\IComplaintChatRepository.cs" />
     <Compile Include="Repo\IComplaintRepository.cs" />
   </ItemGroup>
   <ItemGroup>

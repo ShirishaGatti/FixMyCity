@@ -1,4 +1,4 @@
-﻿@model FixMyCityModel.ViewModel.ComplaintDetailsViewModel
+@model FixMyCityModel.ViewModel.ComplaintDetailsViewModel
 
 <div class="drawer-card-header">
     <div>
@@ -53,11 +53,29 @@
             }
         </div>
     }
+
+    @* Officer <-> Citizen discussion thread. Self-contained partial: owns
+        its own markup, polling loop, and drag-drop composer. Automatically
+        read-only once Model.Chat.IsChatOpen is false (Resolved/Closed). *@
+    @*<div id="discussionSection">
+        @Html.Partial("_ComplaintChat", Model.Chat)
+    </div>*@
+    @Html.Partial("_ComplaintChat", Model.Chat)
 </div>
 
 <script>
     // Delegated (not $(document).ready-bound) because this markup is
     // injected via AJAX after the page has already loaded.
+
+    //$.get('/Complaint/ComplaintDetailsPartial', { id: complaintId }, function (html) {
+    //    $('#drawerContent').html(html);
+    //    openDetailsDrawer();
+
+    //    setTimeout(function () {
+    //        document.getElementById('discussionSection')
+    //            .scrollIntoView({ behavior: 'smooth' });
+    //    }, 100);
+    //});
     $('.drawer-delete-attachment-btn').off('click').on('click', function () {
         var btn = $(this);
         if (!confirm('Remove this attachment? This cannot be undone.')) return;

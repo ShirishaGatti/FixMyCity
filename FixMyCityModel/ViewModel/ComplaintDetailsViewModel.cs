@@ -7,5 +7,7 @@ namespace FixMyCityModel.ViewModel
     {
         public Complaint Complaint { get; set; }
         public List<AttachmentViewModel> Attachments { get; set; }
+        public ComplaintChatViewModel Chat { get; set; }   // NEW
+
     }
 }

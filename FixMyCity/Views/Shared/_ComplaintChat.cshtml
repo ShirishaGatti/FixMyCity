@@ -1,0 +1,192 @@
+@model FixMyCityModel.ViewModel.ComplaintChatViewModel
+@*
+    Shared chat partial — used inside the Citizen details drawer
+    (ComplaintDetails.cshtml) and can be dropped into the Officer
+    complaint view the same way. Self-contained: owns its own polling
+    loop and drag-drop zone, scoped by data-complaint-id so multiple
+    instances never collide if ever rendered twice on one page.
+*@
+
+<div class="chat-panel" id="chatPanel-@Model.ComplaintId" data-complaint-id="@Model.ComplaintId" data-last-id="0">
+    <h5 class="mt-4 mb-2">Discussion</h5>
+
+    @if (!Model.IsChatOpen)
+    {
+        <div class="chat-closed-banner">
+            <i class="bi bi-lock-fill"></i>
+            This complaint is resolved or closed — the discussion is now read-only.
+        </div>
+    }
+
+    <div class="chat-thread" id="chatThread-@Model.ComplaintId">
+        @foreach (var m in Model.Messages)
+        {
+            @Html.Partial("_ChatMessageBubble", m)
+        }
+    </div>
+
+    @if (Model.IsChatOpen)
+    {
+        <div class="chat-dropzone" id="chatDropzone-@Model.ComplaintId">
+            <div class="chat-dropzone-hint">
+                <i class="bi bi-cloud-arrow-up"></i> Drag a file here, or use the paperclip below
+            </div>
+        </div>
+
+        <form id="chatForm-@Model.ComplaintId" class="chat-composer" autocomplete="off">
+            @Html.AntiForgeryToken()
+            <button type="button" class="chat-attach-btn" title="Attach a file" onclick="document.getElementById('chatFile-@Model.ComplaintId').click()">
+                <i class="bi bi-paperclip"></i>
+            </button>
+            <input type="file" id="chatFile-@Model.ComplaintId" class="d-none"
+                   data-allowed-ext="@Model.AllowedExtensionsCsv" data-max-size-mb="@Model.MaxAttachmentSizeMB" />
+            <input type="text" id="chatInput-@Model.ComplaintId" class="chat-input" placeholder="Type a message..." maxlength="1000" />
+            <button type="submit" class="chat-send-btn" title="Send">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </form>
+    }
+</div>
+
+<script>
+    (function () {
+        var complaintId = @Model.ComplaintId;
+        var panel = document.getElementById('chatPanel-' + complaintId);
+        var thread = document.getElementById('chatThread-' + complaintId);
+        var form = document.getElementById('chatForm-' + complaintId);
+        var input = document.getElementById('chatInput-' + complaintId);
+        var fileInput = document.getElementById('chatFile-' + complaintId);
+        var dropzone = document.getElementById('chatDropzone-' + complaintId);
+        var pollTimer = null;
+
+        function scrollToBottom() {
+            thread.scrollTop = thread.scrollHeight;
+        }
+        scrollToBottom();
+
+        function appendMessage(html) {
+            thread.insertAdjacentHTML('beforeend', html);
+            scrollToBottom();
+        }
+
+        function poll() {
+            var lastId = panel.dataset.lastId || 0;
+            $.ajax({
+                url: '/ComplaintChat/GetThread',
+                type: 'GET',
+                data: { complaintId: complaintId, sinceMessageId: lastId },
+                dataType: 'json',
+                success: function (res) {
+                    if (!res.success) return;
+                    if (res.messages && res.messages.length) {
+                        res.messages.forEach(function (m) {
+                            // Skip messages we already optimistically rendered ourselves
+                            // (server-rendered HTML is identical either way, but this
+                            // avoids a visible duplicate flashing in before dedupe).
+                            if (!thread.querySelector('[data-message-id="' + m.chatMessageId + '"]')) {
+                                appendMessage(m.html);
+                            }
+                            panel.dataset.lastId = m.chatMessageId;
+                        });
+                    }
+                    if (!res.isChatOpen && form) {
+                        form.style.display = 'none';
+                        if (dropzone) dropzone.style.display = 'none';
+                        clearInterval(pollTimer);
+                    }
+                }
+            });
+        }
+
+        // Seed lastId from whatever the server already rendered so the first
+        // poll only asks for messages newer than what's on screen.
+        var existingBubbles = thread.querySelectorAll('[data-message-id]');
+        if (existingBubbles.length) {
+            panel.dataset.lastId = existingBubbles[existingBubbles.length - 1].getAttribute('data-message-id');
+        }
+
+        pollTimer = setInterval(poll, 5000);
+
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var text = input.value.trim();
+                if (!text) return;
+
+                var token = $(form).find('input[name="__RequestVerificationToken"]').val();
+                input.value = '';
+
+                $.ajax({
+                    url: '/ComplaintChat/SendText',
+                    type: 'POST',
+                    data: { ComplaintId: complaintId, MessageText: text, __RequestVerificationToken: token },
+                    success: function (res) {
+                        if (res.success) {
+                            appendMessage(res.html);
+                            panel.dataset.lastId = res.chatMessageId;
+                        } else {
+                            alert(res.message || 'Failed to send message.');
+                        }
+                    },
+                    error: function () { alert('Failed to send message.'); }
+                });
+            });
+
+            fileInput.addEventListener('change', function () {
+                if (fileInput.files.length) uploadFile(fileInput.files[0]);
+                fileInput.value = '';
+            });
+        }
+
+        if (dropzone) {
+            ['dragenter', 'dragover'].forEach(function (evt) {
+                dropzone.addEventListener(evt, function (e) {
+                    e.preventDefault(); e.stopPropagation();
+                    dropzone.classList.add('chat-dropzone-active');
+                });
+            });
+            ['dragleave', 'drop'].forEach(function (evt) {
+                dropzone.addEventListener(evt, function (e) {
+                    e.preventDefault(); e.stopPropagation();
+                    dropzone.classList.remove('chat-dropzone-active');
+                });
+            });
+            dropzone.addEventListener('drop', function (e) {
+                var files = e.dataTransfer.files;
+                if (files && files.length) uploadFile(files[0]);
+            });
+        }
+
+        function uploadFile(file) {
+            var allowedExt = (fileInput.dataset.allowedExt || '').split(',').map(function (x) { return x.trim().toLowerCase(); });
+            var maxBytes = parseFloat(fileInput.dataset.maxSizeMb) * 1024 * 1024;
+            var ext = '.' + file.name.split('.').pop().toLowerCase();
+
+            if (allowedExt.indexOf(ext) === -1) { alert(file.name + ' is not an allowed file type.'); return; }
+            if (file.size > maxBytes) { alert(file.name + ' exceeds the size limit.'); return; }
+
+            var token = $(form).find('input[name="__RequestVerificationToken"]').val();
+            var formData = new FormData();
+            formData.append('complaintId', complaintId);
+            formData.append('file', file);
+            formData.append('__RequestVerificationToken', token);
+
+            $.ajax({
+                url: '/ComplaintChat/SendAttachment',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+                    if (res.success) {
+                        appendMessage(res.html);
+                        panel.dataset.lastId = res.chatMessageId;
+                    } else {
+                        alert(res.message || 'Failed to upload file.');
+                    }
+                },
+                error: function () { alert('Failed to upload file.'); }
+            });
+        }
+    })();
+</script>

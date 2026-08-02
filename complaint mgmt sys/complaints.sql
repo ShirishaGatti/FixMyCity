@@ -528,7 +528,7 @@ BEGIN
     END CATCH  
 END  
 
-select * from FixMyCity.Complaint
+select * from FixMyCity.consumer
 update FixMyCity.Complaint set IsActive =1 where ComplaintId=6
 EXEC SP_HELPTEXT'FIXMYCITY.Complaint_Delete'
 CREATE OR ALTER PROCEDURE FixMyCity.ComplaintGetById

@@ -1,0 +1,34 @@
+@model FixMyCityModel.ViewModel.ChatMessageViewModel
+@{
+    string bubbleClass = Model.IsMine ? "chat-bubble-mine" : "chat-bubble-theirs";
+}
+<div class="chat-bubble @bubbleClass" data-message-id="@Model.ChatMessageId">
+    <div class="chat-bubble-sender">
+        @(string.IsNullOrEmpty(Model.SenderName) ? Model.SenderRoleLabel : Model.SenderName)
+        <span class="chat-bubble-role">(@Model.SenderRoleLabel)</span>
+    </div>
+    <div class="chat-bubble-body">
+        @if (Model.IsAttachment)
+        {
+            if (Model.IsImage)
+            {
+                <a href="@Url.Action("DownloadAttachment", "ComplaintChat", new { id = Model.AttachmentId })" target="_blank">
+                    <img src="@Url.Action("DownloadAttachment", "ComplaintChat", new { id = Model.AttachmentId })" class="chat-bubble-img" alt="@Model.FileName" />
+                </a>
+            }
+            else
+            {
+                <a href="@Url.Action("DownloadAttachment", "ComplaintChat", new { id = Model.AttachmentId })" class="chat-bubble-file" target="_blank">
+                    <i class="bi @Model.IconClass"></i>
+                    <span>@Model.FileName</span>
+                    <small>@Model.FileSizeDisplay</small>
+                </a>
+            }
+        }
+        else
+        {
+            @Model.MessageText
+        }
+    </div>
+    <div class="chat-bubble-time">@Model.CreatedAt.ToString("dd MMM, hh:mm tt")</div>
+</div>
