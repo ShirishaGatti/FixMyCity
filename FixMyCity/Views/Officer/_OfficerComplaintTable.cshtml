@@ -89,7 +89,7 @@
                             <td>@item.CategoryName</td>
                             <td><span class="priority-badge @item.PriorityName.ToLower()">@item.PriorityName</span></td>
                             <td><span class="status-badge @item.StatusName.ToLower().Replace(" ", "")">@item.StatusName</span></td>
-                            <td>@(string.IsNullOrWhiteSpace(item.AssigneeName) ? "N/A" : item.AssigneeName)</td>
+                            <td>@(string.IsNullOrWhiteSpace(item.AssignedName) ? "N/A" :item.AssignedName)</td>
                             <td>@item.CreatedAt.ToString("dd MMM yyyy")</td>
                             <td>
                                 <button type="button" class="btn btn-sm btn-outline-primary complaint-edit-btn"

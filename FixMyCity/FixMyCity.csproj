@@ -522,6 +522,7 @@
     <Content Include="Views\Shared\_ProfileForm.cshtml" />
     <Content Include="Views\Shared\_ComplaintChat.cshtml" />
     <Content Include="Views\Shared\_ChatMessageBubble.cshtml" />
+    <Content Include="Views\Complaint\_MyComplaintList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

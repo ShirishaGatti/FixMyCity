@@ -1,0 +1,185 @@
+﻿
+<div class="dash-card">
+    @if (Model.Complaints.Count == 0)
+    {
+        <div class="text-center py-5" style="color:var(--tx3);">
+            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+            No complaints match your filters.
+        </div>
+    }
+    else
+    {
+        <table class="dash-table">
+            <thead>
+                <tr>
+                    @Html.Raw(SortHeader("ComplaintId", "ComplaintId", Model.Filter))
+                    <th>Title</th>
+                    @Html.Raw(SortHeader("CategoryName", "Category", Model.Filter))
+                    @Html.Raw(SortHeader("PriorityId", "Priority", Model.Filter))
+                    <th>Status</th>
+                    @Html.Raw(SortHeader("CreatedAt", "Filed On", Model.Filter))
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model.Complaints)
+                {
+                    bool isOpen = c.StatusName == "Open";
+                    <tr>
+                        <td><a href="javascript:void(0)" class="complaint-num-link" onclick="openDetailsDrawer(@c.ComplaintId)">@c.ComplaintNumber</a></td>
+                        <td>@c.Title</td>
+                        <td>@c.CategoryName</td>
+                        <td><span class="priority-badge @c.PriorityName.ToLower()">@c.PriorityName</span></td>
+                        <td><span class="status-badge @c.StatusName.ToLower().Replace(" ", "")">@c.StatusName</span></td>
+                        <td>@c.CreatedAt.ToString("dd MMM yyyy")</td>
+                        <td class="row-actions">
+                            <button type="button" class="row-action-btn" title="Edit" @(isOpen ? "" : "disabled") onclick="openEditComplaint(@c.ComplaintId)"><i class="bi bi-pencil-square"></i></button>
+                            <button type="button" class="row-action-btn text-danger" title="Delete" @(isOpen ? "" : "disabled") onclick="deleteComplaint(@c.ComplaintId)"><i class="bi bi-trash"></i></button>
+                            <a class="row-action-btn" title="Export PDF" href="@Url.Action("ExportComplaintPdf", "Complaint", new { id = c.ComplaintId })"><i class="bi bi-file-earmark-pdf"></i></a>
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Pager -->
+        @*if (Model.TotalPages > 1)
+        {
+            <div class="dash-pager">
+                <span>
+                    Showing
+                    @((Model.Filter.PageNumber - 1) * Model.Filter.PageSize + 1)
+                    –
+                    @(Math.Min(Model.Filter.PageNumber * Model.Filter.PageSize, Model.TotalCount))
+                    of @Model.TotalCount
+                </span>
+
+                <div class="dash-pager-controls">
+                    @Html.Raw(PagerLink(1, "«", Model.Filter, Model.Filter.PageNumber > 1))
+                    @Html.Raw(PagerLink(Model.Filter.PageNumber - 1, "‹", Model.Filter, Model.Filter.PageNumber > 1))
+
+                    <span class="dash-pager-current">
+                        Page @Model.Filter.PageNumber of @Model.TotalPages
+                    </span>
+
+                    @Html.Raw(PagerLink(Model.Filter.PageNumber + 1, "›", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
+                    @Html.Raw(PagerLink(Model.TotalPages, "»", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
+                </div>
+            </div>
+        }
+    }*@
+     if (Model.TotalPages > 0)
+     {
+        <div class="dash-pager d-flex justify-content-between align-items-center flex-wrap">
+
+            <div>
+                Showing
+                <strong>@((Model.Filter.PageNumber - 1) * Model.Filter.PageSize + 1)</strong>
+                -
+                <strong>@Math.Min(Model.Filter.PageNumber * Model.Filter.PageSize, Model.TotalCount)</strong>
+                of
+                <strong>@Model.TotalCount</strong>
+                complaints
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+
+                @*<div class="d-flex align-items-center gap-2">
+                    <label class="mb-0">Page</label>
+
+                    <input type="number"
+                           id="pageNumber"
+                           min="1"
+                           max="@Model.TotalPages"
+                           value="@Model.Filter.PageNumber"
+                           class="form-control form-control-sm"
+                           style="width:70px;" />
+
+                    <span>of <strong>@Model.TotalPages</strong></span>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    <label class="mb-0">Rows</label>
+
+                    <select id="pageSize"
+                            class="form-select form-select-sm"
+                            style="width:80px;">
+
+                        <option value="5" @(Model.Filter.PageSize == 5 ? "selected" : "")>5</option>
+                        <option value="2" @(Model.Filter.PageSize == 2 ? "selected" : "")>2</option>
+                        <option value="20" @(Model.Filter.PageSize == 20 ? "selected" : "")>20</option>
+                        <option value="50" @(Model.Filter.PageSize == 50 ? "selected" : "")>50</option>
+
+                    </select>
+                </div>*@
+
+                <div class="dash-pager-controls">
+                    @Html.Raw(PagerLink(1, "«", Model.Filter, Model.Filter.PageNumber > 1))
+                    @Html.Raw(PagerLink(Model.Filter.PageNumber - 1, "‹", Model.Filter, Model.Filter.PageNumber > 1))
+
+                    @Html.Raw(PagerLink(Model.Filter.PageNumber + 1, "›", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
+                    @Html.Raw(PagerLink(Model.TotalPages, "»", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
+                </div>
+
+            </div>
+
+        </div>
+     }
+    }
+</div>
+
+@functions {
+    string SortHeader(string field, string label, FixMyCityModel.ViewModel.ComplaintListFilterViewModel filter)
+    {
+        string dir = (filter.SortField == field && filter.SortDirection == "ASC") ? "DESC" : "ASC";
+        //string icon = filter.SortField == field ? (filter.SortDirection == "ASC" ? "▲" : "▼") : "";
+        string icon = "";
+
+        if (filter.SortField == field)
+        {
+            icon = filter.SortDirection == "ASC"
+                ? " <i class='bi bi-caret-up-fill ms-1'></i>"
+                : " <i class='bi bi-caret-down-fill ms-1'></i>";
+        }
+        else
+        {
+            icon = " <i class='bi bi-arrow-down-up ms-1 text-muted'></i>";
+        }
+        var url = new UrlHelper(HttpContext.Current.Request.RequestContext);
+        string href = url.Action("MyComplaints", "Complaint", new
+        {
+            Filter_Title = filter.Title,
+            Filter_CategoryId = filter.CategoryId,
+            Filter_StatusId = filter.StatusId,
+            Filter_DateFrom = filter.DateFrom,
+            Filter_DateTo = filter.DateTo,
+            Filter_SortField = field,
+            Filter_SortDirection = dir,
+            Filter_PageNumber = 1,
+            Filter_PageSize = filter.PageSize
+        });
+        //return $"<th><a href='{href}' class='sort-header'>{label} {icon}</a></th>";
+        return $"<th><a href='#'class='sort-header'data-field='{field}'data-dir='{dir}'>{label} {icon}</a></th>";
+    }
+
+    string PagerLink(int page, string label, FixMyCityModel.ViewModel.ComplaintListFilterViewModel filter, bool enabled)
+    {
+        if (!enabled) return $"<span class='dash-pager-link disabled'>{label}</span>";
+        var url = new UrlHelper(HttpContext.Current.Request.RequestContext);
+        string href = url.Action("MyComplaints", "Complaint", new
+        {
+            Filter_Title = filter.Title,
+            Filter_CategoryId = filter.CategoryId,
+            Filter_StatusId = filter.StatusId,
+            Filter_DateFrom = filter.DateFrom,
+            Filter_DateTo = filter.DateTo,
+            Filter_SortField = filter.SortField,
+            Filter_SortDirection = filter.SortDirection,
+            Filter_PageNumber = page,
+            Filter_PageSize = filter.PageSize
+        });
+        // return $"<a href='{href}' class='dash-pager-link'>{label}</a>";
+        return $"<a href='#'class='dash-pager-link pager-link'data-page='{page}'>{label}</a>";
+    }
+}

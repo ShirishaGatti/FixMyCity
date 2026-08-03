@@ -284,7 +284,8 @@ EXEC FixMyCity.ComplaintChat_Insert
     SELECT RaisedBy
 FROM FixMyCity.Complaint
 WHERE ComplaintId = 6;
-
+use Training_DB_Shirisha_Gatti
+exec sp_helptext 'FixMyCity.Complaint_Search'
 select * from fixmycity.complaint
 SELECT
     m.ChatMessageId,
@@ -299,3 +300,11 @@ JOIN FixMyCity.Role r
     ON r.RoleId = m.SenderRoleId
 WHERE m.ComplaintId = 6
 ORDER BY m.ChatMessageId;
+use Training_DB_Shirisha_Gatti
+SELECT
+    c.ComplaintNumber,
+    c.AssignedTo,
+    asg.Name AS AssigneeName
+FROM FixMyCity.Complaint c
+LEFT JOIN FixMyCity.Consumer asg
+    ON asg.ConsumerId = c.AssignedTo;

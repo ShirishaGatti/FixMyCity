@@ -231,7 +231,7 @@ namespace FixMyCity.Repository
 
             try
             {
-                DbCommand com = db.GetStoredProcCommand("FixMyCity.Admin_ListComplaints");
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.AdminComplaintList");
                 db.AddInParameter(com, "CategoryId", DbType.Int32, filter.CategoryId.HasValue ? (object)filter.CategoryId.Value : DBNull.Value);
                 db.AddInParameter(com, "CityId", DbType.Int32, filter.CityId.HasValue ? (object)filter.CityId.Value : DBNull.Value);
                 db.AddInParameter(com, "WardId", DbType.Int32, filter.WardId.HasValue ? (object)filter.WardId.Value : DBNull.Value);
@@ -259,6 +259,7 @@ namespace FixMyCity.Repository
                             StatusId = ToInt(row["StatusId"]),
                             StatusName = row["StatusName"] is DBNull ? null : row["StatusName"].ToString(),
                             AssignedTo = row["AssignedTo"] is DBNull ? (int?)null : ToInt(row["AssignedTo"]),
+                            AssignedName = row["AssignedName"].ToString(),
                             CityId = row["CityId"] is DBNull ? 0 : ToInt(row["CityId"]),
                             CityName = row["CityName"] is DBNull ? null : row["CityName"].ToString(),
                             WardId = row["WardId"] is DBNull ? 0 : ToInt(row["WardId"]),
@@ -531,7 +532,9 @@ namespace FixMyCity.Repository
                             ParentId = reader["ParentId"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["ParentId"]),
                             ParentName = reader["ParentName"] == DBNull.Value ? null : reader["ParentName"].ToString(),
                             IsActive = Convert.ToBoolean(reader["IsActive"]),
-                            WardNo = HasColumn(reader, "WardNo") && reader["WardNo"] != DBNull.Value ? reader["WardNo"].ToString() : null
+                            WardNo = HasColumn(reader, "WardNo") && reader["WardNo"] != DBNull.Value ? reader["WardNo"].ToString() : null,
+                            DepartmentName = HasColumn(reader, "DepartmentName") && reader["DepartmentName"] != DBNull.Value
+                            ? reader["DepartmentName"].ToString(): null,
                         });
                     }
                 }

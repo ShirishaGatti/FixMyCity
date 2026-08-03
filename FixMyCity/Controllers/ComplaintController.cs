@@ -44,9 +44,13 @@ namespace FixMyCity.Controllers
             var vm = _complaintService.Search(CurrentActorId, filter);
             vm.AllowedExtensionsCsv = ConfigurationManager.AppSettings["AllowedAttachmentExtensions"] ?? ".jpg,.jpeg,.png,.pdf,.doc,.docx";
             vm.MaxAttachmentSizeMB = Convert.ToInt32(ConfigurationManager.AppSettings["MaxAttachmentSizeMB"] ?? "5");
+            if (Request.IsAjaxRequest())
+            {
+                return PartialView("_MyComplaintList", vm);
+            }
             return View(vm);
         }
-
+       
         [RoleAuthorize(RoleIds.Citizen)]
         [HttpPost]
         [ValidateAntiForgeryToken]

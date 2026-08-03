@@ -17,13 +17,14 @@ namespace FixMyCityModel.ViewModel
         public int StatusId { get; set; }
         public string StatusName { get; set; }
         public string RaisedByName { get; set; }
-        public string AssigneeName { get; set; }
+        public string AssignedName { get; set; }
         public int? AssignedTo { get; set; }
         public int CityId { get; set; }
         public string CityName { get; set; }
         public int WardId { get; set; }
         public string WardName { get; set; }
         public DateTime CreatedAt { get; set; }
+
     }
 
     public class AdminComplaintListFilterViewModel
@@ -31,7 +32,6 @@ namespace FixMyCityModel.ViewModel
         public int? CategoryId { get; set; }
         public int? CityId { get; set; }
         public int? WardId { get; set; }
-
         // "ComplaintId", "CreatedAt", "CategoryName", "StatusName", "PriorityName"
         public string SortBy { get; set; } = "ComplaintId";
         public string SortDir { get; set; } = "DESC";

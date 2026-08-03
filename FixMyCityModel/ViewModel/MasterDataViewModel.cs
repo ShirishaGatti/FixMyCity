@@ -41,5 +41,6 @@ namespace FixMyCityModel.ViewModel
         public string ParentName { get; set; }
         public bool IsActive { get; set; }
         public string WardNo { get; set; }
+        public string DepartmentName { get; set; }
     }
 }

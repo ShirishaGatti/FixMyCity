@@ -436,7 +436,7 @@ namespace FixMyCity.Repository
                 StatusName = Convert.ToString(row["StatusName"]),
                 RaisedBy = Convert.ToInt32(row["RaisedBy"]),
                 AssignedTo = row["AssignedTo"] is DBNull ? (int?)null : Convert.ToInt32(row["AssignedTo"]),
-                AssigneeName = row["AssigneeName"] is DBNull ? null : Convert.ToString(row["AssigneeName"]),
+                //AssignedName = row["AssignedName"] is DBNull ? null : Convert.ToString(row["AssignedName"]),
                 AddressLine = Convert.ToString(row["AddressLine"]),
                 Landmark = row["Landmark"] is DBNull ? null : Convert.ToString(row["Landmark"]),
                 WardId = Convert.ToInt32(row["WardId"]),

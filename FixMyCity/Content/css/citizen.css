@@ -674,3 +674,24 @@
 }
 .user-dropdown-menu a:hover, .user-dropdown-logout:hover { background: var(--accent-glow); color: var(--accent); }
 .user-dropdown-menu hr { margin: 4px 0; border-color: var(--bd); }
+
+.dash-card .dash-label{
+    font-size:12px;
+    margin-bottom:4px;
+    display:block;
+    font-weight:600;
+}
+
+.dash-card .dash-input{
+    height:42px;
+    border-radius:8px;
+}
+
+.btn-dash-primary,
+.btn-dash-outline{
+    height:42px;
+}
+
+.btn-dash-primary i{
+    font-size:18px;
+}

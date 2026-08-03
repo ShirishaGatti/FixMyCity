@@ -34,6 +34,6 @@ namespace FixMyCityModel.Model
         public string StatusName { get; set; }
         public string WardName { get; set; }
         public string CityName { get; set; }
-        public string AssigneeName { get; set; }
+        public string AssignedName { get; set; }
     }
 }

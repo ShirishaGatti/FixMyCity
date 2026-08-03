@@ -42,88 +42,56 @@
                 <label class="dash-label">To</label>
                 @Html.TextBoxFor(m => m.Filter.DateTo, "{0:yyyy-MM-dd}", new { type = "date", @class = "dash-input" })
             </div>
-            <div class="col-md-1 d-flex gap-1">
-                <button type="submit" class="btn-dash-primary btn-sm" title="Search"><i class="bi bi-search"></i></button>
-                <a href="@Url.Action("MyComplaints", "Complaint")" class="btn-dash-outline btn-sm" title="Clear filters"><i class="bi bi-x-lg"></i></a>
+            <div class="col-md-1">
+                <label class="dash-label">Page</label>
+                @Html.TextBoxFor(m => m.Filter.PageNumber, new
+                {
+                    @class = "dash-input",
+                    type = "number",
+                    min = "1",
+                    id = "Filter_PageNumber"
+                })
+                </div>
+
+            <div class="col-md-1">
+                <label class="dash-label">Size</label>
+                @Html.DropDownListFor(m => m.Filter.PageSize,
+        new SelectList(new[]
+        {
+            new { Value = 1, Text = "1" },
+                        new { Value = 2, Text = "2" },
+            new { Value = 3, Text = "3" },
+
+            new { Value = 5, Text = "5" },
+            new { Value = 10, Text = "10" },
+            new { Value = 20, Text = "20" },
+            new { Value = 50, Text = "50" }
+        }, "Value", "Text", Model.Filter.PageSize),
+        new { @class = "dash-input", id = "Filter_PageSize" })
             </div>
+
+            <div class="col-md-1 d-flex gap-1">
+                <button type="submit" class="btn-dash-primary btn-sm" title="Search">
+                    <i class="bi bi-search"></i>
+                </button>
+
+                <button type="button" id="btnClearFilters" class="btn-dash-outline btn-sm">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            @*<div class="col-md-1 d-flex gap-1">
+                <button type="submit" class="btn-dash-primary btn-sm" title="Search"><i class="bi bi-search"></i></button>
+                <button type="button" id="btnClearFilters" class="btn-dash-outline btn-sm">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>*@
         </div>
         @Html.HiddenFor(m => m.Filter.SortField)
         @Html.HiddenFor(m => m.Filter.SortDirection)
-        <input type="hidden" name="PageNumber" value="1" />
-        @Html.HiddenFor(m => m.Filter.PageSize)
     </div>
 }
-
-<div class="dash-card">
-    @if (Model.Complaints.Count == 0)
-    {
-        <div class="text-center py-5" style="color:var(--tx3);">
-            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-            No complaints match your filters.
-        </div>
-    }
-    else
-    {
-        <table class="dash-table">
-            <thead>
-                <tr>
-                    @Html.Raw(SortHeader("ComplaintId", "Complaint #", Model.Filter))
-                    <th>Title</th>
-                    @Html.Raw(SortHeader("CategoryName", "Category", Model.Filter))
-                    @Html.Raw(SortHeader("PriorityId", "Priority", Model.Filter))
-                    <th>Status</th>
-                    @Html.Raw(SortHeader("CreatedAt", "Filed On", Model.Filter))
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var c in Model.Complaints)
-                {
-                    bool isOpen = c.StatusName == "Open";
-                    <tr>
-                        <td><a href="javascript:void(0)" class="complaint-num-link" onclick="openDetailsDrawer(@c.ComplaintId)">@c.ComplaintNumber</a></td>
-                        <td>@c.Title</td>
-                        <td>@c.CategoryName</td>
-                        <td><span class="priority-badge @c.PriorityName.ToLower()">@c.PriorityName</span></td>
-                        <td><span class="status-badge @c.StatusName.ToLower().Replace(" ", "")">@c.StatusName</span></td>
-                        <td>@c.CreatedAt.ToString("dd MMM yyyy")</td>
-                        <td class="row-actions">
-                            <button type="button" class="row-action-btn" title="Edit" @(isOpen ? "" : "disabled") onclick="openEditComplaint(@c.ComplaintId)"><i class="bi bi-pencil-square"></i></button>
-                            <button type="button" class="row-action-btn text-danger" title="Delete" @(isOpen ? "" : "disabled") onclick="deleteComplaint(@c.ComplaintId)"><i class="bi bi-trash"></i></button>
-                            <a class="row-action-btn" title="Export PDF" href="@Url.Action("ExportComplaintPdf", "Complaint", new { id = c.ComplaintId })"><i class="bi bi-file-earmark-pdf"></i></a>
-
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-
-        <!-- Pager -->
-        if (Model.TotalPages > 1)
-        {
-            <div class="dash-pager">
-                <span>
-                    Showing
-                    @((Model.Filter.PageNumber - 1) * Model.Filter.PageSize + 1)
-                    –
-                    @(Math.Min(Model.Filter.PageNumber * Model.Filter.PageSize, Model.TotalCount))
-                    of @Model.TotalCount
-                </span>
-
-                <div class="dash-pager-controls">
-                    @Html.Raw(PagerLink(1, "«", Model.Filter, Model.Filter.PageNumber > 1))
-                    @Html.Raw(PagerLink(Model.Filter.PageNumber - 1, "‹", Model.Filter, Model.Filter.PageNumber > 1))
-
-                    <span class="dash-pager-current">
-                        Page @Model.Filter.PageNumber of @Model.TotalPages
-                    </span>
-
-                    @Html.Raw(PagerLink(Model.Filter.PageNumber + 1, "›", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
-                    @Html.Raw(PagerLink(Model.TotalPages, "»", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
-                </div>
-            </div>
-        }
-    }
+<div id="complaintsContainer">
+    @Html.Partial("_MyComplaintList", Model)
 </div>
 
 <!-- Details drawer (blocking overlay) -->
@@ -217,46 +185,6 @@
     </div>
 </div>
 
-@functions {
-    string SortHeader(string field, string label, FixMyCityModel.ViewModel.ComplaintListFilterViewModel filter)
-    {
-        string dir = (filter.SortField == field && filter.SortDirection == "ASC") ? "DESC" : "ASC";
-        string icon = filter.SortField == field ? (filter.SortDirection == "ASC" ? "▲" : "▼") : "";
-        var url = new UrlHelper(HttpContext.Current.Request.RequestContext);
-        string href = url.Action("MyComplaints", "Complaint", new
-        {
-            Filter_Title = filter.Title,
-            Filter_CategoryId = filter.CategoryId,
-            Filter_StatusId = filter.StatusId,
-            Filter_DateFrom = filter.DateFrom,
-            Filter_DateTo = filter.DateTo,
-            Filter_SortField = field,
-            Filter_SortDirection = dir,
-            Filter_PageNumber = 1,
-            Filter_PageSize = filter.PageSize
-        });
-        return $"<th><a href='{href}' class='sort-header'>{label} {icon}</a></th>";
-    }
-
-    string PagerLink(int page, string label, FixMyCityModel.ViewModel.ComplaintListFilterViewModel filter, bool enabled)
-    {
-        if (!enabled) return $"<span class='dash-pager-link disabled'>{label}</span>";
-        var url = new UrlHelper(HttpContext.Current.Request.RequestContext);
-        string href = url.Action("MyComplaints", "Complaint", new
-        {
-            Filter_Title = filter.Title,
-            Filter_CategoryId = filter.CategoryId,
-            Filter_StatusId = filter.StatusId,
-            Filter_DateFrom = filter.DateFrom,
-            Filter_DateTo = filter.DateTo,
-            Filter_SortField = filter.SortField,
-            Filter_SortDirection = filter.SortDirection,
-            Filter_PageNumber = page,
-            Filter_PageSize = filter.PageSize
-        });
-        return $"<a href='{href}' class='dash-pager-link'>{label}</a>";
-    }
-}
 
 @section scripts {
     <script>
@@ -308,7 +236,27 @@
                 error: function () { alert('Failed to delete complaint.'); }
             });
         }
+        $(function () {
 
+            $('#filterForm').on('submit', function (e) {
+
+                e.preventDefault();
+
+                $.ajax({
+                    url: '/Complaint/MyComplaints',
+                    type: 'GET',
+                    data: $(this).serialize(),
+                    success: function (html) {
+                        $('#complaintsContainer').html(html);
+                    },
+                    error: function () {
+                        alert('Unable to load complaints.');
+                    }
+                });
+
+            });
+
+        });
         //function openDetailsDrawer(id) {
         //    document.getElementById('detailsDrawerOverlay').style.display = 'flex';
         //    document.getElementById('detailsDrawerContent').innerHTML = '<div class="text-center py-5"><span class="spinner-border"></span></div>';
@@ -466,6 +414,66 @@
                 input.files = dt.files;
                 renderPreview();
             }
+            $('#btnClearFilters').click(function () {
+
+                $('#filterForm')[0].reset();
+
+                $('#Filter_SortField').val('');
+                $('#Filter_SortDirection').val('');
+                
+                $('#Filter_PageNumber').val(1);
+                $('#Filter_PageSize').val(10);
+              //  $('input[name="PageNumber"]').val(1);
+
+                $('#filterForm').submit();
+
+            });
         })();
+        $(document).on('click', '.sort-header', function (e) {
+
+            e.preventDefault();
+
+            $('#Filter_SortField').val($(this).data('field'));
+            $('#Filter_SortDirection').val($(this).data('dir'));
+
+            $('#Filter_PageNumber').val(1);
+
+            $('#filterForm').submit();
+
+        });
+        $(document).on('click', '.pager-link', function (e) {
+
+            e.preventDefault();
+
+            $('#Filter_PageNumber').val($(this).data('page'));
+
+            $('#filterForm').submit();
+
+        });
+        $(document).on("change", "#pageSize", function () {
+
+            $('#Filter_PageSize').val($(this).val());
+            $('input[name="PageNumber"]').val(1);
+
+            $('#filterForm').submit();
+
+        });
+        $(document).on("change", "#Filter_PageNumber", function () {
+
+            var page = parseInt($(this).val());
+
+            if (isNaN(page) || page < 1)
+                page = 1;
+
+            var max = @Model.TotalPages;
+
+            if (page > max)
+                page = max;
+
+            $('#Filter_PageNumber').val(page);
+
+            $('#filterForm').submit();
+
+        });
     </script>
 }

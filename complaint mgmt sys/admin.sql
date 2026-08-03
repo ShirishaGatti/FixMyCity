@@ -480,3 +480,74 @@ BEGIN
     WHERE ConsumerId = @ConsumerId;
 END
 GO
+
+use Training_DB_Shirisha_Gatti
+CREATE OR ALTER PROCEDURE FixMyCity.AdminComplaintList
+(  
+    @CategoryId INT = NULL,  
+    @CityId INT = NULL,  
+    @WardId INT = NULL,  
+    @SortBy NVARCHAR(50) = 'ComplaintId',  
+    @SortDir NVARCHAR(4) = 'DESC',  
+    @PageNumber INT = 1,  
+    @PageSize INT = 10  
+)  
+AS  
+BEGIN  
+    SET NOCOUNT ON;  
+  
+    IF (@PageNumber < 1) SET @PageNumber = 1;  
+    IF (@PageSize < 1 OR @PageSize > 100) SET @PageSize = 10;  
+  
+    IF @SortBy NOT IN ('ComplaintId', 'CreatedAt', 'CategoryName', 'StatusName', 'PriorityName')  
+        SET @SortBy = 'ComplaintId';  
+  
+    IF UPPER(@SortDir) NOT IN ('ASC', 'DESC')  
+        SET @SortDir = 'DESC';  
+  
+    DECLARE @Sql NVARCHAR(MAX) = N'  
+    ;WITH Filtered AS  
+    (  
+        SELECT  
+            c.ComplaintId,  
+            c.ComplaintNumber,  
+            c.Title,  
+            c.CategoryId,  
+            cat.CategoryName,  
+            c.PriorityId,  
+            p.PriorityName,  
+            c.StatusId,  
+            s.StatusName,  
+            c.RaisedBy,  
+            c.AssignedTo, 
+			con.Name AS AssignedName,
+            c.CityId,  
+            ci.CityName,  
+            c.WardId,  
+            w.WardName,  
+            c.CreatedAt,  
+            TotalCount = COUNT(*) OVER()  
+        FROM FixMyCity.Complaint c  
+        LEFT JOIN FixMyCity.ComplaintCategory cat ON c.CategoryId = cat.CategoryId  
+        LEFT JOIN FixMyCity.ComplaintPriority p ON c.PriorityId = p.PriorityId  
+        LEFT JOIN FixMyCity.ComplaintStatus s ON c.StatusId = s.StatusId  
+        LEFT JOIN FixMyCity.City ci ON c.CityId = ci.CityId  
+        LEFT JOIN FixMyCity.Ward w ON c.WardId = w.WardId  
+		LEFT JOIN FixMyCity.Consumer con ON con.ConsumerId = c.AssignedTo
+        WHERE c.IsActive = 1  
+          AND (@CategoryId IS NULL OR c.CategoryId = @CategoryId)  
+          AND (@CityId IS NULL OR c.CityId = @CityId)  
+          AND (@WardId IS NULL OR c.WardId = @WardId)  
+    )  
+    SELECT *  
+    FROM Filtered  
+    ORDER BY ' + QUOTENAME(@SortBy) + ' ' + @SortDir +  
+    CASE WHEN @SortBy <> 'ComplaintId' THEN ', ComplaintId ' + @SortDir ELSE '' END + '  
+    OFFSET (@PageNumber - 1) * @PageSize ROWS  
+    FETCH NEXT @PageSize ROWS ONLY;';  
+  
+    EXEC sp_executesql  
+        @Sql,  
+        N'@CategoryId INT, @CityId INT, @WardId INT, @PageNumber INT, @PageSize INT',  
+        @CategoryId, @CityId, @WardId, @PageNumber, @PageSize;  
+END  

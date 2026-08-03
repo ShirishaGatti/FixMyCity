@@ -18,7 +18,7 @@
         <div class="col-md-4"><strong>Filed:</strong> @Model.Complaint.CreatedAt.ToString("dd MMM yyyy, hh:mm tt")</div>
         <div class="col-md-4"><strong>Ward:</strong> @Model.Complaint.WardName</div>
         <div class="col-md-4"><strong>City:</strong> @Model.Complaint.CityName</div>
-        <div class="col-md-4"><strong>Assigned:</strong> @(Model.Complaint.AssigneeName ?? "Not yet assigned")</div>
+        <div class="col-md-4"><strong>Assigned:</strong> @(Model.Complaint.AssignedName ?? "Not yet assigned")</div>
     </div>
 
     <h5 class="mt-4">Attachments</h5>
