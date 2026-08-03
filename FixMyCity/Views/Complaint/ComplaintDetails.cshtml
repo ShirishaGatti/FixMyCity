@@ -82,12 +82,16 @@
         $.ajax({
             url: '/Complaint/DeleteAttachment/' + btn.data('id'),
             type: 'POST',
-            headers: { 'RequestVerificationToken': window.antiForgeryToken },
-            success: function (res) {
+            data: {
+                __RequestVerificationToken: antiForgeryToken
+            }  ,          success: function (res) {
                 if (res.success) btn.closest('.attachment-card').fadeOut(200, function () { $(this).remove(); });
                 else alert(res.message);
             },
-            error: function () { alert('Failed to remove attachment.'); }
+            error: function (xhr) {
+            console.log(xhr.status);
+            console.log(xhr.responseText);
+        }
         });
     });
 </script>

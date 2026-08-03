@@ -22,7 +22,7 @@
 {
     <div class="dash-card mb-3">
         <div class="row g-2 align-items-end">
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="dash-label">Title</label>
                 @Html.TextBoxFor(m => m.Filter.Title, new { @class = "dash-input", placeholder = "Search title..." })
             </div>
@@ -42,52 +42,19 @@
                 <label class="dash-label">To</label>
                 @Html.TextBoxFor(m => m.Filter.DateTo, "{0:yyyy-MM-dd}", new { type = "date", @class = "dash-input" })
             </div>
-            <div class="col-md-1">
-                <label class="dash-label">Page</label>
-                @Html.TextBoxFor(m => m.Filter.PageNumber, new
-                {
-                    @class = "dash-input",
-                    type = "number",
-                    min = "1",
-                    id = "Filter_PageNumber"
-                })
-                </div>
-
-            <div class="col-md-1">
-                <label class="dash-label">Size</label>
-                @Html.DropDownListFor(m => m.Filter.PageSize,
-        new SelectList(new[]
-        {
-            new { Value = 1, Text = "1" },
-                        new { Value = 2, Text = "2" },
-            new { Value = 3, Text = "3" },
-
-            new { Value = 5, Text = "5" },
-            new { Value = 10, Text = "10" },
-            new { Value = 20, Text = "20" },
-            new { Value = 50, Text = "50" }
-        }, "Value", "Text", Model.Filter.PageSize),
-        new { @class = "dash-input", id = "Filter_PageSize" })
-            </div>
-
-            <div class="col-md-1 d-flex gap-1">
-                <button type="submit" class="btn-dash-primary btn-sm" title="Search">
+            <div class="col-md-2 d-flex gap-1 align-items-end">
+                <button type="submit" class="btn-dash-primary btn-sm flex-fill" title="Search">
                     <i class="bi bi-search"></i>
                 </button>
-
-                <button type="button" id="btnClearFilters" class="btn-dash-outline btn-sm">
+                <button type="button" id="btnClearFilters" class="btn-dash-outline btn-sm" title="Clear">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
-            @*<div class="col-md-1 d-flex gap-1">
-                <button type="submit" class="btn-dash-primary btn-sm" title="Search"><i class="bi bi-search"></i></button>
-                <button type="button" id="btnClearFilters" class="btn-dash-outline btn-sm">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>*@
         </div>
         @Html.HiddenFor(m => m.Filter.SortField)
         @Html.HiddenFor(m => m.Filter.SortDirection)
+        @Html.HiddenFor(m => m.Filter.PageNumber)
+        @Html.HiddenFor(m => m.Filter.PageSize)
     </div>
 }
 <div id="complaintsContainer">
@@ -189,7 +156,7 @@
 @section scripts {
     <script>
         var isEditMode = false;
-
+        //var antiForgeryToken = $('input[name="__RequestVerificationToken"]').val();
         function openComplaintModal() {
             isEditMode = false;
             $('#complaintForm')[0].reset();
@@ -228,7 +195,9 @@
             if (!confirm('Delete this complaint? This cannot be undone.')) return;
             $.ajax({
                 url: '/Complaint/DeleteComplaint/' + id, type: 'POST',
-                headers: { 'RequestVerificationToken': window.antiForgeryToken },
+                data: {
+                    __RequestVerificationToken: antiForgeryToken
+                },
                 success: function (res) {
                     if (res.success) window.location.reload();
                     else alert(res.message);
@@ -268,6 +237,7 @@
         //    //});
         //}
         function openDetailsDrawer(id) {
+            stopActiveChatPolling();
 
             $('#detailsDrawerOverlay').show();
             $('#detailsDrawerContent').html(
@@ -300,9 +270,15 @@
         }
         function closeDetailsDrawer(e) {
             if (e) e.stopPropagation();
+            stopActiveChatPolling();
             document.getElementById('detailsDrawerOverlay').style.display = 'none';
         }
-
+        function stopActiveChatPolling() {
+            var panel = document.querySelector('#detailsDrawerContent .chat-panel');
+            if (panel && typeof panel.stopChatPolling === 'function') {
+                panel.stopChatPolling();
+            }
+        }
         $('#complaintCityId').on('change', function () {
             var cityId = $(this).val();
             var wardSelect = $('#complaintWardId');

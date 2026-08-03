@@ -31,10 +31,18 @@
                             <input type="text" name="Filter.Designation" value="@Model.Filter.Designation" class="form-control" placeholder="Designation" />
                         </div>
                         <div class="col-md-2">
-                            <input type="number" name="Filter.CityId" value="@Model.Filter.CityId" class="form-control" placeholder="City Id" />
+                            @Html.DropDownList("Filter.CityId",
+                                     new SelectList(Model.Cities, "CityId", "CityName", Model.Filter.CityId),
+                                     "All Cities",
+                                     new { @class = "form-control" })
+                            @*<input type="number" name="Filter.CityId" value="@Model.Filter.CityId" class="form-control" placeholder="City Id" />*@
                         </div>
                         <div class="col-md-2">
-                            <input type="number" name="Filter.WardId" value="@Model.Filter.WardId" class="form-control" placeholder="Ward Id" />
+                            @Html.DropDownList("Filter.WardId",
+                                     new SelectList(Model.Wards, "WardId", "WardName", Model.Filter.WardId),
+                                     "All Wards",
+                                     new { @class = "form-control" })
+                            @*  <input type="number" name="Filter.WardId" value="@Model.Filter.WardId" class="form-control" placeholder="Ward Id" />*@
                         </div>
                         <div class="col-md-2">
                             @Html.DropDownList("Filter.RoleId",

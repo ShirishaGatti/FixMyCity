@@ -1,6 +1,6 @@
 use Training_DB_Shirisha_Gatti
 /* =============================================================
-   FixMyCity database schema — full rebuild from Complaint schema
+   FixMyCity database schema ï¿½ full rebuild from Complaint schema
    Changes made:
      1. Complaint.* -> FixMyCity.* (schema renamed throughout)
      2. CreatedBy and LastModifiedBy made NULLable on every table
@@ -511,7 +511,8 @@ BEGIN
                 UPDATE FixMyCity.Complaint  
                 SET CategoryId = @CategoryId,  
                     PriorityId = @PriorityId, 
-                    StatusId=@Status,
+                    StatusId = @Status,
+                    AssignedTo = CASE WHEN @RoleId = 1 THEN @AssignedTo ELSE AssignedTo END,
                     LastModifiedAt = GETUTCDATE()  
                 WHERE ComplaintId = @ComplaintId ; 
             SET @SavedComplaintId = @ComplaintId;  
@@ -528,9 +529,10 @@ BEGIN
     END CATCH  
 END  
 
+use Training_DB_Shirisha_Gatti
 select * from FixMyCity.consumer
 update FixMyCity.Complaint set IsActive =1 where ComplaintId=6
-EXEC SP_HELPTEXT'FIXMYCITY.Complaint_Delete'
+EXEC SP_HELPTEXT'FIXMYCITY.Complaint_Save'
 CREATE OR ALTER PROCEDURE FixMyCity.ComplaintGetById
 (
     @RoleId INT,

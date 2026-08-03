@@ -14,9 +14,9 @@
 
 <div class="dash-card p-3 mb-4">
     <div class="row g-3 align-items-end">
-        <div class="col-md-4">
+        <div class="col-md-2">
             <label class="dash-label">Search</label>
-            <input id="searchTerm" type="search" class="dash-input" placeholder="Number, title, category, priority or status" value="@Model.SearchTerm" />
+            <input id="searchTerm" type="search" class="dash-input" placeholder="Number, title, category..." value="@Model.SearchTerm" />
         </div>
         <div class="col-md-2">
             <label class="dash-label">Status</label>
@@ -48,14 +48,27 @@
                 }
             </select>
         </div>
-        <div class="col-md-2 d-flex gap-2">
-            <button type="button" id="applyFiltersBtn" class="btn-dash-primary w-100">
+        <div class="col-md-1">
+            <label class="dash-label">Page</label>
+            <input type="number" id="pageNumberFilter" class="dash-input" min="1" value="@Model.CurrentPage" />
+        </div>
+        <div class="col-md-1">
+            <label class="dash-label">Size</label>
+            <select id="pageSizeFilter" class="dash-input">
+                <option value="5" @(Model.PageSize == 5 ? "selected" : "")>5</option>
+                <option value="10" @(Model.PageSize == 10 ? "selected" : "")>10</option>
+                <option value="20" @(Model.PageSize == 20 ? "selected" : "")>20</option>
+                <option value="50" @(Model.PageSize == 50 ? "selected" : "")>50</option>
+            </select>
+        </div>
+        <div class="col-md-2 d-flex gap-1 align-items-end">
+            <button type="button" id="applyFiltersBtn" class="btn-dash-primary btn-sm flex-fill">
                 <i class="bi bi-search"></i> Search
             </button>
+            <button type="button" id="clearFiltersBtn" class="btn-dash-outline btn-sm" title="Clear filters">
+                <i class="bi bi-x-lg"></i>
+            </button>
         </div>
-    </div>
-    <div class="mt-2">
-        <button type="button" id="clearFiltersBtn" class="btn btn-sm btn-link text-muted px-0">Clear filters</button>
     </div>
 </div>
 
@@ -64,7 +77,7 @@
 </div>
 
 <div class="dash-card p-3 mt-4">
-    <p class="text-muted small mb-0">Filters and dropdowns apply automatically — use the Search button or press Enter if you don't want to wait.</p>
+    <p class="text-muted small mb-0">Set your filters, then click Search or press Enter to apply them.</p>
 </div>
 
 <!-- ── Edit modal ─────────────────────────────────────────────
@@ -131,6 +144,22 @@
     </div>
 </div>
 
+<!-- ── Chat modal ─────────────────────────────────────────────
+     Body is populated via AJAX (ComplaintChat/ThreadPartial) each
+     time it's opened, textOnly=true since officers here only need to
+     send text (per requirement) — no attach/dropzone surface shown. -->
+<div class="dash-modal-overlay" id="chatModal" style="display:none;" onclick="closeChatModal()">
+    <div class="dash-modal" onclick="event.stopPropagation()">
+        <div class="dash-modal-header">
+            <h5>Discussion — <span id="chatModalNumberLabel"></span></h5>
+            <button type="button" class="dash-modal-close" onclick="closeChatModal()">&times;</button>
+        </div>
+        <div class="dash-modal-body" id="chatModalBody">
+            <div class="text-center py-5"><span class="spinner-border"></span></div>
+        </div>
+    </div>
+</div>
+
 @section officerScripts {
     <script>
         var currentSortColumn = '@Model.SortColumn';
@@ -145,7 +174,7 @@
                 CategoryId: $('#categoryFilter').val(),
                 SortColumn: currentSortColumn,
                 SortDirection: currentSortDirection,
-                PageSize: @Model.PageSize
+                PageSize: $('#pageSizeFilter').val()
             };
         }
 
@@ -167,8 +196,8 @@
                 data: data,
                 dataType: 'html',
                 success: function (html) {
-                    console.log(data)
                     $('#complaintsContainer').html(html);
+                    $('#pageNumberFilter').val(currentPage);
                     updateSortIndicators();
                 },
                 error: function () {
@@ -177,43 +206,28 @@
             });
         }
 
-        function debounce(fn, delay) {
-            var timer;
-            return function () {
-                var context = this;
-                var args = arguments;
-                clearTimeout(timer);
-                timer = setTimeout(function () {
-                    fn.apply(context, args);
-                }, delay);
-            };
-        }
-
-        // Auto-filter as you type / change dropdowns...
-        $('#searchTerm').on('input', debounce(function () {
-            loadOfficerComplaints(1);
-        }, 350));
-
-        $('#statusFilter, #priorityFilter, #categoryFilter').on('change', function () {
-            loadOfficerComplaints(1);
-        });
-
-        // ...plus an explicit button and Enter key, for anyone who doesn't
-        // want to wait on the debounce or wants a clear "go" action.
+        // Filters are applied only when Search is clicked (or Enter is
+        // pressed) — no auto-filter on typing or dropdown change.
         $('#applyFiltersBtn').on('click', function () {
-            loadOfficerComplaints(1);
+            var page = parseInt($('#pageNumberFilter').val(), 10) || 1;
+            if (page < 1) page = 1;
+            loadOfficerComplaints(page);
         });
 
         $('#searchTerm').on('keydown', function (e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                loadOfficerComplaints(1);
+                var page = parseInt($('#pageNumberFilter').val(), 10) || 1;
+                if (page < 1) page = 1;
+                loadOfficerComplaints(page);
             }
         });
 
         $('#clearFiltersBtn').on('click', function () {
             $('#searchTerm').val('');
             $('#statusFilter, #priorityFilter, #categoryFilter').val('');
+            $('#pageNumberFilter').val(1);
+            $('#pageSizeFilter').val(10);
             loadOfficerComplaints(1);
         });
 
@@ -259,7 +273,6 @@
         $(document).on('click', '.complaint-edit-btn', function () {
             openEditModal(this);
         });
-
         $('#editComplaintModal').on('click', function (e) {
             if (e.target === this) {
                 closeEditModal();
@@ -294,6 +307,44 @@
                     alert('An error occurred while updating the complaint. Please try again.');
                 }
             });
+        });
+
+        // ── Chat modal ──────────────────────────────────────────────
+        // Delegated handler (document-level) since row buttons are
+        // replaced wholesale every time loadOfficerComplaints() swaps
+        // #complaintsContainer's HTML — a directly-bound handler would
+        // stop working after the first filter/sort/page action.
+        function openChatModal(button) {
+            var row = $(button);
+            var complaintId = row.data('complaint-id');
+            $('#chatModalNumberLabel').text('#' + row.data('complaint-number'));
+            $('#chatModalBody').html('<div class="text-center py-5"><span class="spinner-border"></span></div>');
+            document.getElementById('chatModal').style.display = 'flex';
+
+            $.ajax({
+                url: '/ComplaintChat/ThreadPartial',
+                type: 'GET',
+                data: { complaintId: complaintId, textOnly: true },
+                success: function (html) {
+                    $('#chatModalBody').html(html);
+                },
+                error: function (xhr) {
+                    $('#chatModalBody').html('<div class="p-3 text-danger">Unable to load the discussion. Status: ' + xhr.status + '</div>');
+                }
+            });
+        }
+
+        function closeChatModal() {
+            var panel = document.querySelector('#chatModalBody .chat-panel');
+            if (panel && typeof panel.stopChatPolling === 'function') {
+                panel.stopChatPolling();
+            }
+            document.getElementById('chatModal').style.display = 'none';
+            $('#chatModalBody').empty();
+        }
+
+        $(document).on('click', '.complaint-chat-btn', function () {
+            openChatModal(this);
         });
     </script>
 }

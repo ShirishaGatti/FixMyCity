@@ -482,6 +482,9 @@ END
 GO
 
 use Training_DB_Shirisha_Gatti
+exec sp_helptext 'FixMyCity.Auth_Register'
+select * from fixmycity.consumer
+       delete from fixmycity.consumer where consumerid=14
 CREATE OR ALTER PROCEDURE FixMyCity.AdminComplaintList
 (  
     @CategoryId INT = NULL,  

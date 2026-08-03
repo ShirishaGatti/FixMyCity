@@ -203,7 +203,7 @@ namespace FixMyCity.service
                 WardId = vm.WardId,
                 CityId = vm.CityId
             };
-            return _complaintRepo.SaveComplaint(complaint,consumerId, roleId);
+            return _complaintRepo.SaveComplaint(complaint, roleId, consumerId);
         }
 
         public OfficerDashboardViewModel GetOfficerDashboard(int officerId, int roleId)

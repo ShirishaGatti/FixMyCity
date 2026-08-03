@@ -77,7 +77,7 @@ namespace FixMyCity.Repository
 
             try
             {
-                DbCommand com = db.GetStoredProcCommand("FixMyCity.Admin_ListUsers");
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.AdminUserList");
 
                 db.AddInParameter(com, "Name", DbType.String,
                     string.IsNullOrWhiteSpace(filter.Name) ? (object)DBNull.Value : filter.Name.Trim());

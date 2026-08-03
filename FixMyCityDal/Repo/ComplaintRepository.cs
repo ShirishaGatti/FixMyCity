@@ -249,7 +249,7 @@ namespace FixMyCity.Repository
             {
                 const string sql = @"SELECT c.ComplaintId, c.ComplaintNumber, c.Title, c.Description,
                                            c.CategoryId, cat.CategoryName, c.PriorityId, pr.PriorityName,
-                                           c.StatusId, st.StatusName, c.RaisedBy, c.AssignedTo, asg.Name AS AssigneeName,
+                                           c.StatusId, st.StatusName, c.RaisedBy, c.AssignedTo, asg.Name AS AssignedName,
                                            c.AddressLine, c.Landmark, c.WardId, w.WardName, c.CityId, ci.CityName,
                                            c.ResolvedDate, c.ClosedDate, c.ReopenCount, c.CreatedAt
                                     FROM FixMyCity.Complaint c
@@ -280,7 +280,7 @@ namespace FixMyCity.Repository
             {
                 const string sql = @"SELECT c.ComplaintId, c.ComplaintNumber, c.Title, c.Description,
                                            c.CategoryId, cat.CategoryName, c.PriorityId, pr.PriorityName,
-                                           c.StatusId, st.StatusName, c.RaisedBy, c.AssignedTo, asg.Name AS AssigneeName,
+                                           c.StatusId, st.StatusName, c.RaisedBy, c.AssignedTo, asg.Name AS AssignedName,
                                            c.AddressLine, c.Landmark, c.WardId, w.WardName, c.CityId, ci.CityName,
                                            c.ResolvedDate, c.ClosedDate, c.ReopenCount, c.CreatedAt
                                     FROM FixMyCity.Complaint c

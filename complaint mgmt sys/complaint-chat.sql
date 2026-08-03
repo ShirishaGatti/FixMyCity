@@ -308,3 +308,79 @@ SELECT
 FROM FixMyCity.Complaint c
 LEFT JOIN FixMyCity.Consumer asg
     ON asg.ConsumerId = c.AssignedTo;
+
+	exec sp_helptext 'fixmycity.Admin_ListUsers'
+
+	CREATE   PROCEDURE FixMyCity.AdminUserList  
+(  
+    @Name       NVARCHAR(100) = NULL,  
+    @Designation NVARCHAR(100) = NULL,  
+    @CityId     INT = NULL,  
+    @WardId     INT = NULL,  
+    @RoleId     INT = NULL,  
+    @SortBy     NVARCHAR(50) = 'ConsumerId',  
+    @SortDir    NVARCHAR(4) = 'DESC',  
+    @PageNumber INT = 1,  
+    @PageSize   INT = 10  
+)  
+AS  
+BEGIN  
+    SET NOCOUNT ON;  
+  
+    IF (@PageNumber < 1) SET @PageNumber = 1;  
+    IF (@PageSize < 1 OR @PageSize > 100) SET @PageSize = 10;  
+  
+    SET @Name = NULLIF(LTRIM(RTRIM(@Name)), '');  
+    SET @Designation = NULLIF(LTRIM(RTRIM(@Designation)), '');  
+  
+    IF @SortBy NOT IN ('ConsumerId', 'Name', 'DOB')  
+        SET @SortBy = 'ConsumerId';  
+  
+    IF UPPER(@SortDir) NOT IN ('ASC', 'DESC')  
+        SET @SortDir = 'DESC';  
+  
+    DECLARE @Sql NVARCHAR(MAX) = N'  
+    ;WITH Filtered AS  
+    (  
+        SELECT  
+            c.ConsumerId,  
+            c.Name,  
+            c.Email,  
+            c.Contact,  
+            c.DOB,  
+            c.RoleId,  
+            r.RoleName,  
+            c.CityId,  
+            ci.CityName,  
+            c.WardId,  
+            w.WardName,  
+            c.DeptId,  
+            d.DepartmentName,  
+            c.Designation,  
+            c.IsActive,  
+            c.CreatedDate,  
+            TotalCount = COUNT(*) OVER()  
+        FROM FixMyCity.Consumer c  
+        LEFT JOIN FixMyCity.Role r ON c.RoleId = r.RoleId  
+        LEFT JOIN FixMyCity.City ci ON c.CityId = ci.CityId  
+        LEFT JOIN FixMyCity.Ward w ON c.WardId = w.WardId  
+        LEFT JOIN FixMyCity.Department d ON c.DeptId = d.DepartmentId  
+        WHERE c.IsActive = 1  
+          AND (@Name IS NULL OR c.Name LIKE ''%'' + @Name + ''%'')  
+          AND (@Designation IS NULL OR c.Designation LIKE ''%'' + @Designation + ''%'')  
+          AND (@CityId IS NULL OR c.CityId = @CityId)  
+          AND (@WardId IS NULL OR c.WardId = @WardId)  
+          AND (@RoleId IS NULL OR c.RoleId = @RoleId)  
+    )  
+    SELECT *  
+    FROM Filtered  
+    ORDER BY ' + QUOTENAME(@SortBy) + ' ' + @SortDir +  
+    CASE WHEN @SortBy <> 'ConsumerId' THEN ', ConsumerId ' + @SortDir ELSE '' END + '  
+    OFFSET (@PageNumber - 1) * @PageSize ROWS  
+    FETCH NEXT @PageSize ROWS ONLY;';  
+  
+    EXEC sp_executesql  
+        @Sql,  
+        N'@Name NVARCHAR(100), @Designation NVARCHAR(100), @CityId INT, @WardId INT, @RoleId INT, @PageNumber INT, @PageSize INT',  
+        @Name, @Designation, @CityId, @WardId, @RoleId, @PageNumber, @PageSize;  
+END  

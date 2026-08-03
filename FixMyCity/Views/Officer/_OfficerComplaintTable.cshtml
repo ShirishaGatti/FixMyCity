@@ -20,6 +20,20 @@
             : string.Empty;
 }
 
+@functions {
+    string SortIcon(string field)
+    {
+        bool isCurrent = string.Equals(Model.SortColumn, field, StringComparison.OrdinalIgnoreCase);
+        if (isCurrent)
+        {
+            return string.Equals(Model.SortDirection, "asc", StringComparison.OrdinalIgnoreCase)
+                ? "<i class='bi bi-caret-up-fill ms-1'></i>"
+                : "<i class='bi bi-caret-down-fill ms-1'></i>";
+        }
+        return "<i class='bi bi-arrow-down-up ms-1 text-muted'></i>";
+    }
+}
+
 <div class="dash-card">
     @if (!Model.Complaints.Any())
     {
@@ -38,35 +52,35 @@
                             <a href="@sortUrl("ComplaintNumber", Model.SortColumn == "ComplaintNumber" && Model.SortDirection == "asc" ? "desc" : "asc")"
                                class="complaint-sort text-decoration-none @sortClass("ComplaintNumber", "asc") @sortClass("ComplaintNumber", "desc")"
                                data-sort="ComplaintNumber">
-                                Complaint #
+                                Complaint # @Html.Raw(SortIcon("ComplaintNumber"))
                             </a>
                         </th>
                         <th>
                             <a href="@sortUrl("Title", Model.SortColumn == "Title" && Model.SortDirection == "asc" ? "desc" : "asc")"
                                class="complaint-sort text-decoration-none @sortClass("Title", "asc") @sortClass("Title", "desc")"
                                data-sort="Title">
-                                Title
+                                Title @Html.Raw(SortIcon("Title"))
                             </a>
                         </th>
                         <th>
                             <a href="@sortUrl("Category", Model.SortColumn == "Category" && Model.SortDirection == "asc" ? "desc" : "asc")"
                                class="complaint-sort text-decoration-none @sortClass("Category", "asc") @sortClass("Category", "desc")"
                                data-sort="Category">
-                                Category
+                                Category @Html.Raw(SortIcon("Category"))
                             </a>
                         </th>
                         <th>
                             <a href="@sortUrl("Priority", Model.SortColumn == "Priority" && Model.SortDirection == "asc" ? "desc" : "asc")"
                                class="complaint-sort text-decoration-none @sortClass("Priority", "asc") @sortClass("Priority", "desc")"
                                data-sort="Priority">
-                                Priority
+                                Priority @Html.Raw(SortIcon("Priority"))
                             </a>
                         </th>
                         <th>
                             <a href="@sortUrl("Status", Model.SortColumn == "Status" && Model.SortDirection == "asc" ? "desc" : "asc")"
                                class="complaint-sort text-decoration-none @sortClass("Status", "asc") @sortClass("Status", "desc")"
                                data-sort="Status">
-                                Status
+                                Status @Html.Raw(SortIcon("Status"))
                             </a>
                         </th>
                         <th>Assigned To</th>
@@ -74,7 +88,7 @@
                             <a href="@sortUrl("CreatedAt", Model.SortColumn == "CreatedAt" && Model.SortDirection == "asc" ? "desc" : "asc")"
                                class="complaint-sort text-decoration-none @sortClass("CreatedAt", "asc") @sortClass("CreatedAt", "desc")"
                                data-sort="CreatedAt">
-                                Filed On
+                                Filed On @Html.Raw(SortIcon("CreatedAt"))
                             </a>
                         </th>
                         <th>Action</th>
@@ -89,18 +103,26 @@
                             <td>@item.CategoryName</td>
                             <td><span class="priority-badge @item.PriorityName.ToLower()">@item.PriorityName</span></td>
                             <td><span class="status-badge @item.StatusName.ToLower().Replace(" ", "")">@item.StatusName</span></td>
-                            <td>@(string.IsNullOrWhiteSpace(item.AssignedName) ? "N/A" :item.AssignedName)</td>
+                            <td>@(string.IsNullOrWhiteSpace(item.AssignedName) ? "N/A" : item.AssignedName)</td>
                             <td>@item.CreatedAt.ToString("dd MMM yyyy")</td>
                             <td>
-                                <button type="button" class="btn btn-sm btn-outline-primary complaint-edit-btn"
-                                        data-complaint-id="@item.ComplaintId"
-                                        data-status-id="@item.StatusId"
-                                        data-priority-id="@item.PriorityId"
-                                        data-category-id="@item.CategoryId"
-                                        data-complaint-number="@item.ComplaintNumber"
-                                        data-title="@item.Title">
-                                    Edit
-                                </button>
+                                <div class="d-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-primary complaint-edit-btn"
+                                            data-complaint-id="@item.ComplaintId"
+                                            data-status-id="@item.StatusId"
+                                            data-priority-id="@item.PriorityId"
+                                            data-category-id="@item.CategoryId"
+                                            data-complaint-number="@item.ComplaintNumber"
+                                            data-title="@item.Title">
+                                        Edit
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary complaint-chat-btn"
+                                            title="Discuss with citizen"
+                                            data-complaint-id="@item.ComplaintId"
+                                            data-complaint-number="@item.ComplaintNumber">
+                                        <i class="bi bi-chat-dots"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     }

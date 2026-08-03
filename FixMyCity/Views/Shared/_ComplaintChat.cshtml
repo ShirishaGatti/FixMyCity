@@ -1,13 +1,33 @@
 @model FixMyCityModel.ViewModel.ComplaintChatViewModel
+@{
+    // textOnly: when true, hides the paperclip/dropzone and shows just the
+    // text composer. Used for the officer quick-chat modal, where the ask
+    // was specifically "officer can send text msg" — no upload surface
+    // needed there. Citizen drawer omits this flag so it defaults to false
+    // (full composer with attachments), unchanged from before.
+    bool textOnly = ViewBag.ChatTextOnly ?? false;
+
+    // Optional suffix so DOM ids stay unique if this partial is ever
+    // rendered more than once on the same page (e.g. citizen drawer +
+    // officer modal both present, even though not shown simultaneously
+    // today). Defaults to empty to keep existing citizen-side ids unchanged.
+    string idSuffix = ViewBag.ChatIdSuffix as string ?? "";
+    string domId = Model.ComplaintId + idSuffix;
+}
 @*
     Shared chat partial — used inside the Citizen details drawer
-    (ComplaintDetails.cshtml) and can be dropped into the Officer
-    complaint view the same way. Self-contained: owns its own polling
-    loop and drag-drop zone, scoped by data-complaint-id so multiple
+    (ComplaintDetails.cshtml, full composer with attachments) and the
+    Officer quick-chat modal (_OfficerComplaintTable.cshtml, text-only via
+    ViewBag.ChatTextOnly = true). Self-contained: owns its own polling
+    loop and drag-drop zone, scoped by a computed domId so multiple
     instances never collide if ever rendered twice on one page.
+
+    Optional ViewBag flags (both optional, default to citizen behavior):
+      ChatTextOnly  (bool)   - true hides paperclip/dropzone (officer modal)
+      ChatIdSuffix  (string) - appended to all element ids for uniqueness
 *@
 
-<div class="chat-panel" id="chatPanel-@Model.ComplaintId" data-complaint-id="@Model.ComplaintId" data-last-id="0">
+<div class="chat-panel" id="chatPanel-@domId" data-complaint-id="@Model.ComplaintId" data-last-id="0">
     <h5 class="mt-4 mb-2">Discussion</h5>
 
     @if (!Model.IsChatOpen)
@@ -18,7 +38,7 @@
         </div>
     }
 
-    <div class="chat-thread" id="chatThread-@Model.ComplaintId">
+    <div class="chat-thread" id="chatThread-@domId">
         @foreach (var m in Model.Messages)
         {
             @Html.Partial("_ChatMessageBubble", m)
@@ -27,20 +47,26 @@
 
     @if (Model.IsChatOpen)
     {
-        <div class="chat-dropzone" id="chatDropzone-@Model.ComplaintId">
-            <div class="chat-dropzone-hint">
-                <i class="bi bi-cloud-arrow-up"></i> Drag a file here, or use the paperclip below
+        if (!textOnly)
+        {
+            <div class="chat-dropzone" id="chatDropzone-@domId">
+                <div class="chat-dropzone-hint">
+                    <i class="bi bi-cloud-arrow-up"></i> Drag a file here, or use the paperclip below
+                </div>
             </div>
-        </div>
+        }
 
-        <form id="chatForm-@Model.ComplaintId" class="chat-composer" autocomplete="off">
+        <form id="chatForm-@domId" class="chat-composer" autocomplete="off">
             @Html.AntiForgeryToken()
-            <button type="button" class="chat-attach-btn" title="Attach a file" onclick="document.getElementById('chatFile-@Model.ComplaintId').click()">
-                <i class="bi bi-paperclip"></i>
-            </button>
-            <input type="file" id="chatFile-@Model.ComplaintId" class="d-none"
-                   data-allowed-ext="@Model.AllowedExtensionsCsv" data-max-size-mb="@Model.MaxAttachmentSizeMB" />
-            <input type="text" id="chatInput-@Model.ComplaintId" class="chat-input" placeholder="Type a message..." maxlength="1000" />
+            @if (!textOnly)
+            {
+                <button type="button" class="chat-attach-btn" title="Attach a file" onclick="document.getElementById('chatFile-@domId').click()">
+                    <i class="bi bi-paperclip"></i>
+                </button>
+                <input type="file" id="chatFile-@domId" class="d-none"
+                       data-allowed-ext="@Model.AllowedExtensionsCsv" data-max-size-mb="@Model.MaxAttachmentSizeMB" />
+            }
+            <input type="text" id="chatInput-@domId" class="chat-input" placeholder="Type a message..." maxlength="1000" />
             <button type="submit" class="chat-send-btn" title="Send">
                 <i class="bi bi-send-fill"></i>
             </button>
@@ -51,12 +77,13 @@
 <script>
     (function () {
         var complaintId = @Model.ComplaintId;
-        var panel = document.getElementById('chatPanel-' + complaintId);
-        var thread = document.getElementById('chatThread-' + complaintId);
-        var form = document.getElementById('chatForm-' + complaintId);
-        var input = document.getElementById('chatInput-' + complaintId);
-        var fileInput = document.getElementById('chatFile-' + complaintId);
-        var dropzone = document.getElementById('chatDropzone-' + complaintId);
+        var domId = '@domId';
+        var panel = document.getElementById('chatPanel-' + domId);
+        var thread = document.getElementById('chatThread-' + domId);
+        var form = document.getElementById('chatForm-' + domId);
+        var input = document.getElementById('chatInput-' + domId);
+        var fileInput = document.getElementById('chatFile-' + domId);
+        var dropzone = document.getElementById('chatDropzone-' + domId);
         var pollTimer = null;
 
         function scrollToBottom() {
@@ -107,6 +134,14 @@
 
         pollTimer = setInterval(poll, 5000);
 
+        // Expose a stop handle on the panel node itself so a host page that
+        // tears this partial's markup down (e.g. closing a modal) can stop
+        // the interval explicitly, instead of leaking a timer that keeps
+        // firing against a detached DOM until isChatOpen eventually flips.
+        panel.stopChatPolling = function () {
+            clearInterval(pollTimer);
+        };
+
         if (form) {
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
@@ -132,10 +167,12 @@
                 });
             });
 
-            fileInput.addEventListener('change', function () {
-                if (fileInput.files.length) uploadFile(fileInput.files[0]);
-                fileInput.value = '';
-            });
+            if (fileInput) {
+                fileInput.addEventListener('change', function () {
+                    if (fileInput.files.length) uploadFile(fileInput.files[0]);
+                    fileInput.value = '';
+                });
+            }
         }
 
         if (dropzone) {
