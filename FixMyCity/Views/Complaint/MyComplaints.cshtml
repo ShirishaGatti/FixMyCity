@@ -1,4 +1,4 @@
-@model FixMyCityModel.ViewModel.MyComplaintsViewModel
+﻿@model FixMyCityModel.ViewModel.MyComplaintsViewModel
 @{
     Layout = "~/Views/Shared/_CitizenLayout.cshtml";
     ViewBag.Title = "My Complaints";
@@ -72,7 +72,7 @@
             <div class="col-md-1" style="width:80px; flex:none;">
                 <label class="dash-label">Rows</label>
                 <select id="pageSizeFilter" class="dash-input" name="Filter.PageSize">
-                    <option value="5"  @(Model.Filter.PageSize == 5  ? "selected" : "")>5</option>
+                    <option value="5" @(Model.Filter.PageSize == 5 ? "selected" : "")>5</option>
                     <option value="10" @(Model.Filter.PageSize == 10 ? "selected" : "")>10</option>
                     <option value="20" @(Model.Filter.PageSize == 20 ? "selected" : "")>20</option>
                     <option value="50" @(Model.Filter.PageSize == 50 ? "selected" : "")>50</option>
@@ -144,7 +144,7 @@
                             <option value="">-- Select --</option>
                             @foreach (var cat in Model.Categories)
                             {
-                            <option value="@cat.CategoryId">@cat.CategoryName</option> }
+                                <option value="@cat.CategoryId">@cat.CategoryName</option> }
                         </select>
                     </div>
                     <div class="col-6">
@@ -153,7 +153,7 @@
                             <option value="">-- Select --</option>
                             @foreach (var p in Model.Priorities)
                             {
-                            <option value="@p.PriorityId">@p.PriorityName</option> }
+                                <option value="@p.PriorityId">@p.PriorityName</option> }
                         </select>
                     </div>
                 </div>
@@ -164,7 +164,7 @@
                             <option value="">-- Select --</option>
                             @foreach (var city in Model.Cities)
                             {
-                            <option value="@city.CityId">@city.CityName</option> }
+                                <option value="@city.CityId">@city.CityName</option> }
                         </select>
                     </div>
                     <div class="col-6">

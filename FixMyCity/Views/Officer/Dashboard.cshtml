@@ -12,53 +12,71 @@
     </div>
 </div>
 
-<div class="row g-3 mt-3">
-    <div class="col-sm-6 col-xl-3">
-        <div class="dash-card p-3">
-            <h6>Total Assigned</h6>
-            <p class="display-6 mb-0">@Model.TotalAssigned</p>
+<div class="row g-3 mb-4">
+    <div class="col-lg-3 col-sm-6">
+        <div class="dash-stat">
+            <div class="ds-icon" style="background:linear-gradient(135deg,#1574e0,#38bdf8)"><i class="bi bi-file-earmark-text-fill"></i></div>
+            <div>
+                <div class="ds-val">@Model.TotalAssigned</div>
+                <div class="ds-lbl">Total Assigned</div>
+            </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="dash-card p-3">
-            <h6>Open</h6>
-            <p class="display-6 mb-0">@Model.OpenCount</p>
+    <div class="col-lg-3 col-sm-6">
+        <div class="dash-stat">
+            <div class="ds-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"><i class="bi bi-file-earmark-exclamation-fill"></i></div>
+            <div>
+                <div class="ds-val">@Model.OpenCount</div>
+                <div class="ds-lbl">Open</div>
+            </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="dash-card p-3">
-            <h6>In Progress</h6>
-            <p class="display-6 mb-0">@Model.InProgressCount</p>
+    <div class="col-lg-3 col-sm-6">
+        <div class="dash-stat">
+            <div class="ds-icon" style="background:linear-gradient(135deg,#0d6efd,#0dcaf0)"><i class="bi bi-hourglass-split"></i></div>
+            <div>
+                <div class="ds-val">@Model.InProgressCount</div>
+                <div class="ds-lbl">In Progress</div>
+            </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="dash-card p-3">
-            <h6>Resolved / Closed</h6>
-            <p class="display-6 mb-0">@(Model.ResolvedCount + Model.ClosedCount)</p>
+    <div class="col-lg-3 col-sm-6">
+        <div class="dash-stat">
+            <div class="ds-icon" style="background:linear-gradient(135deg,#10b981,#34d399)"><i class="bi bi-check-circle-fill"></i></div>
+            <div>
+                <div class="ds-val">@(Model.ResolvedCount + Model.ClosedCount)</div>
+                <div class="ds-lbl">Resolved / Closed</div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="row g-3 mt-3">
+<div class="row g-3 mb-4">
     <div class="col-md-4">
-        <div class="dash-card p-3">
-            <h6>Today</h6>
-            <p class="fs-2 fw-bold mb-1">@Model.TodayCount</p>
-            <p class="text-muted small mb-0">Assigned complaints created today</p>
+        <div class="dash-stat" style="min-height:92px;">
+            <div class="ds-icon" style="background:rgba(21,116,224,0.12);color:#1574e0;"><i class="bi bi-calendar-event"></i></div>
+            <div>
+                <div class="ds-val" style="font-size:1.5rem;">@Model.TodayCount</div>
+                <div class="ds-lbl" style="font-size:0.75rem;">Assigned Today</div>
+            </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="dash-card p-3">
-            <h6>Last 7 Days</h6>
-            <p class="fs-2 fw-bold mb-1">@Model.WeeklyCount</p>
-            <p class="text-muted small mb-0">Created in the last week</p>
+        <div class="dash-stat" style="min-height:92px;">
+            <div class="ds-icon" style="background:rgba(16,185,129,0.12);color:#10b981;"><i class="bi bi-calendar-week"></i></div>
+            <div>
+                <div class="ds-val" style="font-size:1.5rem;">@Model.WeeklyCount</div>
+                <div class="ds-lbl" style="font-size:0.75rem;">Last 7 Days</div>
+            </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="dash-card p-3">
-            <h6>Last 30 Days</h6>
-            <p class="fs-2 fw-bold mb-1">@Model.MonthlyCount</p>
-            <p class="text-muted small mb-0">Created in the last month</p>
+        <div class="dash-stat" style="min-height:92px;">
+            <div class="ds-icon" style="background:rgba(245,158,11,0.12);color:#f59e0b;"><i class="bi bi-calendar-month"></i></div>
+            <div>
+                <div class="ds-val" style="font-size:1.5rem;">@Model.MonthlyCount</div>
+                <div class="ds-lbl" style="font-size:0.75rem;">Last 30 Days</div>
+            </div>
         </div>
     </div>
 </div>

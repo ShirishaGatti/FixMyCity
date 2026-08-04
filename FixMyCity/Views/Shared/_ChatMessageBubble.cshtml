@@ -1,34 +1,43 @@
 @model FixMyCityModel.ViewModel.ChatMessageViewModel
 @{
-    string bubbleClass = Model.IsMine ? "chat-bubble-mine" : "chat-bubble-theirs";
+    // WhatsApp style classes: mine aligns right, theirs aligns left
+    string bubbleAlignClass = Model.IsMine ? "mine" : "theirs";
 }
-<div class="chat-bubble @bubbleClass" data-message-id="@Model.ChatMessageId">
-    <div class="chat-bubble-sender">
-        @(string.IsNullOrEmpty(Model.SenderName) ? Model.SenderRoleLabel : Model.SenderName)
-        <span class="chat-bubble-role">(@Model.SenderRoleLabel)</span>
-    </div>
-    <div class="chat-bubble-body">
-        @if (Model.IsAttachment)
-        {
-            if (Model.IsImage)
+<div class="chat-bubble @bubbleAlignClass" data-message-id="@Model.ChatMessageId">
+    <div class="chat-bubble-inner">
+        <div class="chat-bubble-sender" style="font-size:0.75rem; font-weight:600; margin-bottom:2px; color: var(--tx3);">
+            @(string.IsNullOrEmpty(Model.SenderName) ? Model.SenderRoleLabel : Model.SenderName)
+            <span style="font-size:0.65rem; font-weight:normal; opacity:0.7;">(@Model.SenderRoleLabel)</span>
+        </div>
+        
+        <div class="chat-bubble-body">
+            @if (Model.IsAttachment)
             {
-                <a href="@Url.Action("DownloadAttachment", "ComplaintChat", new { id = Model.AttachmentId })" target="_blank">
-                    <img src="@Url.Action("DownloadAttachment", "ComplaintChat", new { id = Model.AttachmentId })" class="chat-bubble-img" alt="@Model.FileName" />
-                </a>
+                if (Model.IsImage)
+                {
+                    <a href="@Url.Action("DownloadAttachment", "ComplaintChat", new { id = Model.AttachmentId })" target="_blank" style="display:block; margin: 4px 0;">
+                        <img src="@Url.Action("DownloadAttachment", "ComplaintChat", new { id = Model.AttachmentId })" class="chat-bubble-img" alt="@Model.FileName" style="max-width:100%; max-height:200px; border-radius:8px; display:block;" />
+                    </a>
+                }
+                else
+                {
+                    <div class="chat-bubble-attachment">
+                        <i class="bi @Model.IconClass"></i>
+                        <div style="min-width:0; flex:1;">
+                            <a href="@Url.Action("DownloadAttachment", "ComplaintChat", new { id = Model.AttachmentId })" target="_blank" style="font-weight:600; text-decoration:none;">@Model.FileName</a>
+                            <div style="font-size:0.7rem; opacity:0.8;">@Model.FileSizeDisplay</div>
+                        </div>
+                    </div>
+                }
             }
             else
             {
-                <a href="@Url.Action("DownloadAttachment", "ComplaintChat", new { id = Model.AttachmentId })" class="chat-bubble-file" target="_blank">
-                    <i class="bi @Model.IconClass"></i>
-                    <span>@Model.FileName</span>
-                    <small>@Model.FileSizeDisplay</small>
-                </a>
+                @Model.MessageText
             }
-        }
-        else
-        {
-            @Model.MessageText
-        }
+        </div>
+        
+        <div class="chat-bubble-meta text-end" style="font-size:0.68rem; margin-top:2px; opacity:0.6;">
+            @Model.CreatedAt.ToString("hh:mm tt")
+        </div>
     </div>
-    <div class="chat-bubble-time">@Model.CreatedAt.ToString("dd MMM, hh:mm tt")</div>
 </div>

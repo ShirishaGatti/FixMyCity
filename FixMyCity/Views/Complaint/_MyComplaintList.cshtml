@@ -122,11 +122,11 @@
                 </div>*@
 
                 <div class="dash-pager-controls">
-                    @Html.Raw(PagerLink(1, "«", Model.Filter, Model.Filter.PageNumber > 1))
-                    @Html.Raw(PagerLink(Model.Filter.PageNumber - 1, "‹", Model.Filter, Model.Filter.PageNumber > 1))
+                    @Html.Raw(PagerLink(1, "<<", Model.Filter, Model.Filter.PageNumber > 1))
+                    @Html.Raw(PagerLink(Model.Filter.PageNumber - 1, "<", Model.Filter, Model.Filter.PageNumber > 1))
 
-                    @Html.Raw(PagerLink(Model.Filter.PageNumber + 1, "›", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
-                    @Html.Raw(PagerLink(Model.TotalPages, "»", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
+                    @Html.Raw(PagerLink(Model.Filter.PageNumber + 1, ">", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
+                    @Html.Raw(PagerLink(Model.TotalPages, ">>", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
                 </div>
 
             </div>

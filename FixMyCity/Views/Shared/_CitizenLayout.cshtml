@@ -67,6 +67,15 @@
             <div class="sidebar-section-label">Navigation</div>
             <ul class="sidebar-nav">
                 <li>
+                    <a href="@Url.Action("Home", "Complaint")"
+                       class="nav-link @(activePage == "Home" ? "active" : "")">
+                        <i class="bi bi-house-door-fill"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+            </ul>
+            <ul class="sidebar-nav">
+                <li>
                     <a href="@Url.Action("MyComplaints", "Complaint")"
                        class="nav-link @(activePage == "MyComplaints" ? "active" : "")">
                         <i class="bi bi-clipboard2-check-fill"></i>
@@ -74,7 +83,7 @@
                     </a>
                 </li>
             </ul>
-
+            
             <hr class="sidebar-divider" />
 
             <div class="sidebar-section-label">Account</div>

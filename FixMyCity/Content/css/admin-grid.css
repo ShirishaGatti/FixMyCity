@@ -17,16 +17,27 @@
     }
 
 .page-card {
-    background: #fff;
+    background: var(--bg2);
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 3px 10px rgba(0,0,0,.1);
+    border: 1px solid var(--bd);
 }
 
 .table th {
-    background: #0d6efd;
-    color: #fff;
+    background: var(--bg3);
+    color: var(--tx2);
     white-space: nowrap;
+    border-color: var(--bd);
+}
+
+.table td {
+    color: var(--tx);
+    border-color: var(--bd);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--bg3) !important;
 }
 
 .sortable-th {
@@ -35,18 +46,18 @@
 }
 
 .sort-link {
-    color: #fff;
+    color: var(--tx2);
     display: inline-flex;
     align-items: center;
     gap: 6px;
 }
 
 .sortable-th:hover .sort-link {
-    color: #ffe08a;
+    color: #38bdf8;
 }
 
 .th-active {
-    background: #0a58ca !important;
+    background: var(--bg3) !important;
 }
 
 .action-btn {
@@ -54,10 +65,10 @@
 }
 
 .filter-card {
-    background: #f8f9fb;
+    background: var(--bg3);
     border-radius: 10px;
     padding: 16px;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--bd);
 }
 
 .page-link {
