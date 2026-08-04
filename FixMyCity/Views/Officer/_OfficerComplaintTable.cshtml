@@ -105,22 +105,23 @@
                             <td><span class="status-badge @item.StatusName.ToLower().Replace(" ", "")">@item.StatusName</span></td>
                             <td>@(string.IsNullOrWhiteSpace(item.AssignedName) ? "N/A" : item.AssignedName)</td>
                             <td>@item.CreatedAt.ToString("dd MMM yyyy")</td>
-                            <td>
+                            <td class="row-actions">
                                 <div class="d-flex gap-1">
-                                    <button type="button" class="btn btn-sm btn-outline-primary complaint-edit-btn"
+                                    <button type="button" class="row-action-btn complaint-edit-btn"
+                                            title="Edit complaint"
                                             data-complaint-id="@item.ComplaintId"
                                             data-status-id="@item.StatusId"
                                             data-priority-id="@item.PriorityId"
                                             data-category-id="@item.CategoryId"
                                             data-complaint-number="@item.ComplaintNumber"
                                             data-title="@item.Title">
-                                        Edit
+                                        <i class="bi bi-pencil-square"></i>
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary complaint-chat-btn"
-                                            title="Discuss with citizen"
+                                    <button type="button" class="chat-row-btn complaint-chat-btn"
+                                            title="Discussion"
                                             data-complaint-id="@item.ComplaintId"
                                             data-complaint-number="@item.ComplaintNumber">
-                                        <i class="bi bi-chat-dots"></i>
+                                        <i class="bi bi-chat-dots-fill"></i>
                                     </button>
                                 </div>
                             </td>

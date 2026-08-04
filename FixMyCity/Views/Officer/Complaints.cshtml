@@ -12,12 +12,15 @@
     </div>
 </div>
 
-<div class="dash-card p-3 mb-4">
-    <div class="row g-3 align-items-end">
-        <div class="col-md-2">
+<div class="dash-card mb-4" style="padding:18px 20px;">
+    <div class="row g-2 align-items-end">
+
+        <div class="col-md">
             <label class="dash-label">Search</label>
-            <input id="searchTerm" type="search" class="dash-input" placeholder="Number, title, category..." value="@Model.SearchTerm" />
+            <input id="searchTerm" type="search" class="dash-input"
+                   placeholder="Number, title, category..." value="@Model.SearchTerm" />
         </div>
+
         <div class="col-md-2">
             <label class="dash-label">Status</label>
             <select id="statusFilter" class="dash-input">
@@ -28,6 +31,7 @@
                 }
             </select>
         </div>
+
         <div class="col-md-2">
             <label class="dash-label">Priority</label>
             <select id="priorityFilter" class="dash-input">
@@ -38,6 +42,7 @@
                 }
             </select>
         </div>
+
         <div class="col-md-2">
             <label class="dash-label">Category</label>
             <select id="categoryFilter" class="dash-input">
@@ -48,19 +53,22 @@
                 }
             </select>
         </div>
+
         <div class="col-md-1">
             <label class="dash-label">Page</label>
             <input type="number" id="pageNumberFilter" class="dash-input" min="1" value="@Model.CurrentPage" />
         </div>
+
         <div class="col-md-1">
-            <label class="dash-label">Size</label>
+            <label class="dash-label">Rows</label>
             <select id="pageSizeFilter" class="dash-input">
-                <option value="5" @(Model.PageSize == 5 ? "selected" : "")>5</option>
+                <option value="5"  @(Model.PageSize == 5  ? "selected" : "")>5</option>
                 <option value="10" @(Model.PageSize == 10 ? "selected" : "")>10</option>
                 <option value="20" @(Model.PageSize == 20 ? "selected" : "")>20</option>
                 <option value="50" @(Model.PageSize == 50 ? "selected" : "")>50</option>
             </select>
         </div>
+
         <div class="col-md-2 d-flex gap-1 align-items-end">
             <button type="button" id="applyFiltersBtn" class="btn-dash-primary btn-sm flex-fill">
                 <i class="bi bi-search"></i> Search
@@ -69,6 +77,7 @@
                 <i class="bi bi-x-lg"></i>
             </button>
         </div>
+
     </div>
 </div>
 
@@ -144,17 +153,14 @@
     </div>
 </div>
 
-<!-- ── Chat modal ─────────────────────────────────────────────
-     Body is populated via AJAX (ComplaintChat/ThreadPartial) each
-     time it's opened, textOnly=true since officers here only need to
-     send text (per requirement) — no attach/dropzone surface shown. -->
+<!-- ── Chat modal ────────────────────────────────────────── -->
 <div class="dash-modal-overlay" id="chatModal" style="display:none;" onclick="closeChatModal()">
-    <div class="dash-modal" onclick="event.stopPropagation()">
+    <div class="dash-modal" onclick="event.stopPropagation()" style="width:620px;">
         <div class="dash-modal-header">
-            <h5>Discussion — <span id="chatModalNumberLabel"></span></h5>
+            <h5><i class="bi bi-chat-dots-fill me-2" style="color:#1574e0;"></i>Discussion — <span id="chatModalNumberLabel"></span></h5>
             <button type="button" class="dash-modal-close" onclick="closeChatModal()">&times;</button>
         </div>
-        <div class="dash-modal-body" id="chatModalBody">
+        <div class="dash-modal-body" id="chatModalBody" style="padding:16px 20px; overflow-y:auto; max-height:520px;">
             <div class="text-center py-5"><span class="spinner-border"></span></div>
         </div>
     </div>
@@ -324,7 +330,7 @@
             $.ajax({
                 url: '/ComplaintChat/ThreadPartial',
                 type: 'GET',
-                data: { complaintId: complaintId, textOnly: true },
+                data: { complaintId: complaintId },
                 success: function (html) {
                     $('#chatModalBody').html(html);
                 },

@@ -2,11 +2,26 @@
 @using FixMyCityModel.Model
 @model FixMyCityModel.ViewModel.RegisterViewModel
 @{
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = null;
     ViewBag.Title = "Register Citizen Account";
 }
-
-<link href="~/Content/css/auth.css" rel="stylesheet" />
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register Citizen Account — FixMyCity</title>
+    <meta name="description" content="Create your FixMyCity citizen account to report infrastructure issues." />
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <!-- Styles -->
+    <link rel="stylesheet" href="~/Content/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/Content/css/style.css" />
+    <link rel="stylesheet" href="~/Content/css/auth.css" />
+</head>
+<body class="d-flex flex-column min-vh-100">
 
 <div class="container py-5 my-md-3">
     <div class="row justify-content-center">
@@ -159,6 +174,8 @@
     </div>
 </div>
 
-@section Scripts {
-    <script src="~/Content/js/Auth.js"></script>
-}
+<script src="~/Content/js/jquery-3.7.1.min.js"></script>
+<script src="~/Content/js/bootstrap.bundle.min.js"></script>
+<script src="~/Content/js/Auth.js"></script>
+</body>
+</html>

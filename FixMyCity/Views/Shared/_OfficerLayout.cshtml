@@ -1,11 +1,67 @@
 @{
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = null; // standalone — no public _Layout
 }
-@section styles{
-    <link href="~/Content/css/officer.css" rel="stylesheet" />
-    @RenderSection("officerStyles", false)
-}
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(ViewBag.Title ?? "Officer") — FixMyCity</title>
+    <meta name="description" content="FixMyCity Officer Panel" />
 
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="~/Content/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/Content/css/style.css" />
+    <link rel="stylesheet" href="~/Content/css/citizen.css" />
+    <link href="~/Content/css/officer.css" rel="stylesheet" />
+    @RenderSection("officerStyles", required: false)
+</head>
+<body>
+
+<!-- ── TOP NAVBAR (same style as citizen) ──────────────────────────── -->
+<nav class="dash-navbar">
+    <div class="d-flex align-items-center gap-3">
+        <a href="@Url.Action("Dashboard", "Officer")" class="dash-brand">
+            <div class="dash-brand-icon"><i class="bi bi-shield-fill-check"></i></div>
+            Fix<span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">MyCity</span>
+            <span class="ms-2 badge" style="background:rgba(56,189,248,0.15);color:#38bdf8;font-size:0.7rem;font-weight:600;border:1px solid rgba(56,189,248,0.3);border-radius:6px;padding:3px 8px;">Officer</span>
+        </a>
+    </div>
+
+    <div class="dash-nav-right">
+        <!-- Theme toggle -->
+        <button class="dash-theme-btn" id="dashThemeBtn" title="Toggle theme">
+            <i class="bi bi-sun-fill text-warning" id="dashSunIcon" style="display:none"></i>
+            <i class="bi bi-moon-stars-fill text-info" id="dashMoonIcon"></i>
+            <span id="dashThemeLabel" class="d-none d-sm-inline">Dark</span>
+        </button>
+
+        <!-- User info -->
+        @if (Request.IsAuthenticated)
+        {
+            <span class="text-white-50 small d-none d-sm-inline">
+                <i class="bi bi-person-circle me-1"></i>@User.Identity.Name
+            </span>
+        }
+
+        <!-- Logout -->
+        @using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { id = "officerNavLogoutForm", @class = "d-inline" }))
+        {
+            @Html.AntiForgeryToken()
+            <button type="submit" class="dash-logout-btn" title="Logout">
+                <i class="bi bi-box-arrow-right"></i>
+                <span class="d-none d-sm-inline">Logout</span>
+            </button>
+        }
+    </div>
+</nav>
+
+<!-- ── SHELL (Sidebar + Content) ────────────────────────────────────── -->
 <div class="admin-shell d-flex">
 
     <!-- ── Sidebar ──────────────────────────────────────────── -->
@@ -57,26 +113,6 @@
     <!-- ── Content wrapper ──────────────────────────────────── -->
     <div class="admin-content flex-grow-1">
 
-        <!-- Topbar -->
-        <div class="admin-topbar d-flex align-items-center justify-content-between px-4 py-2">
-            <div class="d-flex align-items-center gap-2">
-                <i class="bi bi-grid-1x2-fill text-primary"></i>
-                <span class="fw-semibold text-white">
-                    @(ViewBag.Title ?? "Officer")
-                </span>
-            </div>
-            <div class="d-flex align-items-center gap-2 text-white-50 small">
-                <i class="bi bi-person-circle me-1"></i>
-                @if (Request.IsAuthenticated)
-                {
-                    <span>@User.Identity.Name</span>
-                }
-                <span class="mx-2 text-muted">|</span>
-                <i class="bi bi-circle-fill text-success" style="font-size:.5rem"></i>
-                <span>Officer</span>
-            </div>
-        </div>
-
         <!-- Page body -->
         <div class="p-4">
             @RenderBody()
@@ -87,6 +123,80 @@
 
 </div>
 
-@section scripts {
-    @RenderSection("officerScripts", required: false)
-}
+<!-- Scripts -->
+<script src="~/Content/js/jquery-3.7.1.min.js"></script>
+<script src="~/Content/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ── Theme ────────────────────────────────────────────
+    function applyDashTheme(isLight) {
+        var root = document.getElementById('htmlRoot');
+        if (isLight) {
+            root.classList.add('lm');
+            document.getElementById('dashSunIcon').style.display = '';
+            document.getElementById('dashMoonIcon').style.display = 'none';
+            var lbl = document.getElementById('dashThemeLabel');
+            if (lbl) lbl.textContent = 'Light';
+        } else {
+            root.classList.remove('lm');
+            document.getElementById('dashSunIcon').style.display = 'none';
+            document.getElementById('dashMoonIcon').style.display = '';
+            var lbl = document.getElementById('dashThemeLabel');
+            if (lbl) lbl.textContent = 'Dark';
+        }
+    }
+    var savedTheme = localStorage.getItem('fixmycity_theme');
+    applyDashTheme(savedTheme === 'light');
+
+    document.getElementById('dashThemeBtn').addEventListener('click', function () {
+        var isLight = !document.getElementById('htmlRoot').classList.contains('lm');
+        applyDashTheme(isLight);
+        localStorage.setItem('fixmycity_theme', isLight ? 'light' : 'dark');
+    });
+</script>
+
+<script>
+    function confirmDialog(message, onOk) {
+        var overlay = document.getElementById('globalConfirmOverlay');
+        document.getElementById('globalConfirmMsg').textContent = message;
+        overlay.style.display = 'flex';
+        overlay._onOk = onOk;
+    }
+    function hideConfirmDialog() {
+        document.getElementById('globalConfirmOverlay').style.display = 'none';
+    }
+    function confirmOk() {
+        if (typeof document.getElementById('globalConfirmOverlay')._onOk === 'function') {
+            document.getElementById('globalConfirmOverlay')._onOk();
+        }
+        hideConfirmDialog();
+    }
+    function showPageLoading() {
+        document.getElementById('globalLoadingOverlay').style.display = 'flex';
+    }
+    function hidePageLoading() {
+        document.getElementById('globalLoadingOverlay').style.display = 'none';
+    }
+    $(document).ajaxStart(showPageLoading);
+    $(document).ajaxStop(hidePageLoading);
+</script>
+
+@RenderSection("officerScripts", required: false)
+
+<!-- ── Global confirm dialog ─────────────────────────────── -->
+<div class="dash-modal-overlay" id="globalConfirmOverlay" style="display:none;" onclick="hideConfirmDialog()">
+    <div class="dash-modal" style="max-width:400px;" onclick="event.stopPropagation()">
+        <div class="dash-modal-header"><h5>Confirm</h5></div>
+        <div class="dash-modal-body"><p id="globalConfirmMsg" class="mb-0"></p></div>
+        <div class="dash-modal-footer">
+            <button type="button" class="btn-dash-outline" onclick="hideConfirmDialog()">Cancel</button>
+            <button type="button" class="btn-dash-primary" onclick="confirmOk()">OK</button>
+        </div>
+    </div>
+</div>
+<!-- ── Global page loading overlay ───────────────────────── -->
+<div class="dash-modal-overlay" id="globalLoadingOverlay" style="display:none;z-index:9999;background:rgba(0,0,0,0.35);" onclick="return false;">
+    <div class="text-center text-white"><div class="spinner-border spinner-border-lg mb-2" role="status"></div><p class="mb-0">Loading...</p></div>
+</div>
+
+</body>
+</html>

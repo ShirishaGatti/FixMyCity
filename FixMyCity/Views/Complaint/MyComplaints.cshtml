@@ -1,4 +1,4 @@
-﻿@model FixMyCityModel.ViewModel.MyComplaintsViewModel
+@model FixMyCityModel.ViewModel.MyComplaintsViewModel
 @{
     Layout = "~/Views/Shared/_CitizenLayout.cshtml";
     ViewBag.Title = "My Complaints";
@@ -20,15 +20,18 @@
 <!-- Filter bar -->
 @using (Html.BeginForm("MyComplaints", "Complaint", FormMethod.Get, new { id = "filterForm" }))
 {
-    <div class="dash-card p-3 mb-4">
-        <div class="row g-3 align-items-end">
-            <div class="col-md-2">
+    <div class="dash-card mb-4" style="padding:18px 20px;">
+        <div class="row g-2 align-items-end">
+
+            <div class="col-md">
                 <label class="dash-label">Search</label>
-                <input id="searchTerm" type="search" class="dash-input" placeholder="Number, title, category..." value="@Model.Filter.Title" />
+                <input id="searchTerm" type="search" class="dash-input" name="Filter.Title"
+                       placeholder="Number, title..." value="@Model.Filter.Title" />
             </div>
+
             <div class="col-md-2">
                 <label class="dash-label">Status</label>
-                <select id="statusFilter" class="dash-input">
+                <select id="statusFilter" class="dash-input" name="Filter.StatusId">
                     <option value="">All Statuses</option>
                     @foreach (var status in Model.Statuses)
                     {
@@ -36,9 +39,10 @@
                     }
                 </select>
             </div>
+
             <div class="col-md-2">
                 <label class="dash-label">Category</label>
-                <select id="categoryFilter" class="dash-input">
+                <select id="categoryFilter" class="dash-input" name="Filter.CategoryId">
                     <option value="">All Categories</option>
                     @foreach (var category in Model.Categories)
                     {
@@ -46,35 +50,44 @@
                     }
                 </select>
             </div>
-            <div class="col-md-1">
+
+            <div class="col-md-2">
                 <label class="dash-label">From</label>
-                <input type="date" id="dateFrom" class="dash-input" value="@(Model.Filter.DateFrom?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateFrom" />
+                <input type="date" id="dateFrom" class="dash-input"
+                       value="@(Model.Filter.DateFrom?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateFrom" />
             </div>
-            <div class="col-md-1">
+
+            <div class="col-md-2">
                 <label class="dash-label">To</label>
-                <input type="date" id="dateTo" class="dash-input" value="@(Model.Filter.DateTo?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateTo" />
+                <input type="date" id="dateTo" class="dash-input"
+                       value="@(Model.Filter.DateTo?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateTo" />
             </div>
-            <div class="col-md-1">
+
+            <div class="col-md-1" style="width:70px; flex:none;">
                 <label class="dash-label">Page</label>
-                <input type="number" id="pageNumberFilter" class="dash-input" min="1" value="@Model.Filter.PageNumber" name="Filter.PageNumber" />
+                <input type="number" id="pageNumberFilter" class="dash-input" min="1"
+                       value="@Model.Filter.PageNumber" name="Filter.PageNumber" />
             </div>
-            <div class="col-md-1">
-                <label class="dash-label">Size</label>
+
+            <div class="col-md-1" style="width:80px; flex:none;">
+                <label class="dash-label">Rows</label>
                 <select id="pageSizeFilter" class="dash-input" name="Filter.PageSize">
-                    <option value="5" @(Model.Filter.PageSize == 5 ? "selected" : "")>5</option>
+                    <option value="5"  @(Model.Filter.PageSize == 5  ? "selected" : "")>5</option>
                     <option value="10" @(Model.Filter.PageSize == 10 ? "selected" : "")>10</option>
                     <option value="20" @(Model.Filter.PageSize == 20 ? "selected" : "")>20</option>
                     <option value="50" @(Model.Filter.PageSize == 50 ? "selected" : "")>50</option>
                 </select>
             </div>
-            <div class="col-md-2 d-flex gap-1 align-items-end">
-                <button type="submit" class="btn-dash-primary btn-sm flex-fill">
+
+            <div class="col-md-auto d-flex gap-1 align-items-end">
+                <button type="submit" class="btn-dash-primary btn-sm" style="height:42px;">
                     <i class="bi bi-search"></i> Search
                 </button>
-                <button type="button" id="btnClearFilters" class="btn-dash-outline btn-sm" title="Clear filters">
+                <button type="button" id="btnClearFilters" class="btn-dash-outline btn-sm" style="height:42px;" title="Clear filters">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
+
         </div>
         @Html.HiddenFor(m => m.Filter.SortField)
         @Html.HiddenFor(m => m.Filter.SortDirection)
@@ -88,6 +101,19 @@
 <div id="detailsDrawerOverlay" class="dash-modal-overlay" style="display:none;" onclick="closeDetailsDrawer(event)">
     <div class="dash-modal drawer-card" onclick="event.stopPropagation()" id="detailsDrawerContent">
         <div class="text-center py-5"><span class="spinner-border"></span></div>
+    </div>
+</div>
+
+<!-- ── User Chat Modal ───────────────────────────────────────── -->
+<div class="dash-modal-overlay" id="userChatModalOverlay" style="display:none;" onclick="closeUserChatModal()">
+    <div class="dash-modal" onclick="event.stopPropagation()" style="width:620px;">
+        <div class="dash-modal-header">
+            <h5><i class="bi bi-chat-dots-fill me-2" style="color:#1574e0;"></i>Discussion — <span id="userChatModalNumber"></span></h5>
+            <button type="button" class="dash-modal-close" onclick="closeUserChatModal()">&times;</button>
+        </div>
+        <div class="dash-modal-body" id="userChatModalBody" style="padding:16px 20px;">
+            <div class="text-center py-5"><span class="spinner-border"></span></div>
+        </div>
     </div>
 </div>
 
@@ -180,6 +206,31 @@
     <script>
         var isEditMode = false;
         var antiForgeryToken = $('input[name="__RequestVerificationToken"]').val();
+
+        // ── User Chat Modal ──────────────────────────────────────────
+        function openUserChatModal(complaintId, complaintNumber) {
+            stopActiveChatPolling();
+            $('#userChatModalNumber').text(complaintNumber);
+            $('#userChatModalBody').html('<div class="text-center py-5"><span class="spinner-border"></span></div>');
+            document.getElementById('userChatModalOverlay').style.display = 'flex';
+            $.ajax({
+                url: '/ComplaintChat/ThreadPartial',
+                type: 'GET',
+                data: { complaintId: complaintId },
+                success: function (html) { $('#userChatModalBody').html(html); },
+                error: function (xhr) {
+                    $('#userChatModalBody').html('<div class="p-3 text-danger">Unable to load discussion. Status: ' + xhr.status + '</div>');
+                }
+            });
+        }
+
+        function closeUserChatModal() {
+            var panel = document.querySelector('#userChatModalBody .chat-panel');
+            if (panel && typeof panel.stopChatPolling === 'function') panel.stopChatPolling();
+            document.getElementById('userChatModalOverlay').style.display = 'none';
+            $('#userChatModalBody').empty();
+        }
+
         function openComplaintModal() {
             isEditMode = false;
             $('#complaintForm')[0].reset();
@@ -419,8 +470,8 @@ $('#btnClearFilters').click(function () {
                 $('#Filter_SortField').val('');
                 $('#Filter_SortDirection').val('');
                 $('#searchTerm').val('');
-                $('#statusFilter').val('');
-                $('#categoryFilter').val('');
+                $('#statusFilter').val('').prop('selectedIndex', 0);
+                $('#categoryFilter').val('').prop('selectedIndex', 0);
                 $('#dateFrom').val('');
                 $('#dateTo').val('');
                 $('#pageNumberFilter').val(1);

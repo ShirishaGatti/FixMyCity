@@ -1,7 +1,5 @@
 ﻿@{
     Layout = null; // standalone layout — no public _Layout
-    var consumerName = ViewBag.ConsumerName as string ?? "Citizen";
-    var initial = consumerName.Length > 0 ? consumerName[0].ToString().ToUpper() : "C";
     var activePage = ViewBag.ActivePage as string ?? "";
 }
 <!DOCTYPE html>
@@ -30,9 +28,6 @@
     <!-- ── TOP NAVBAR ─────────────────────────────────── -->
     <nav class="dash-navbar">
         <div class="d-flex align-items-center gap-3">
-            <button class="sidebar-toggle" id="sidebarToggle" title="Toggle menu">
-                <i class="bi bi-list"></i>
-            </button>
             <a href="@Url.Action("Home", "Complaint")" class="dash-brand">
                 <div class="dash-brand-icon"><i class="bi bi-building-fill"></i></div>
                 Fix<span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">MyCity</span>
@@ -47,16 +42,14 @@
                 <span id="dashThemeLabel" class="d-none d-sm-inline">Dark</span>
             </button>
 
-            <!-- User badge -->
-            <div class="dash-user-badge">
-                <div class="avatar">@initial</div>
-                <span class="d-none d-sm-inline">@consumerName</span>
-            </div>
+            <!-- Profile -->
+            <a href="@Url.Action("Profile", "Complaint")" class="dash-profile-btn" title="Profile">
+                <i class="bi bi-person-fill"></i>
+            </a>
 
             <!-- Logout -->
             @using (Html.BeginForm("Logout", "Account", FormMethod.Post, new { id = "navLogoutForm", @class = "d-inline" }))
             {
-           //     @Html.AntiForgeryToken()
                 <button type="submit" class="dash-logout-btn" title="Logout">
                     <i class="bi bi-box-arrow-right"></i>
                     <span class="d-none d-sm-inline">Logout</span>
@@ -73,13 +66,6 @@
 
             <div class="sidebar-section-label">Navigation</div>
             <ul class="sidebar-nav">
-                <li>
-                    <a href="@Url.Action("Home", "Complaint")"
-                       class="nav-link @(activePage == "Home" ? "active" : "")">
-                        <i class="bi bi-house-door-fill"></i>
-                        <span>Home</span>
-                    </a>
-                </li>
                 <li>
                     <a href="@Url.Action("MyComplaints", "Complaint")"
                        class="nav-link @(activePage == "MyComplaints" ? "active" : "")">
@@ -121,10 +107,6 @@
     </div>
 </div>
 
-<!-- Sidebar overlay for mobile -->
-<div id="sidebarOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:850;"
-     onclick="closeSidebar()"></div>
-
 <!-- Scripts -->
 <script src="~/Content/js/jquery-3.7.1.min.js"></script>
 <script>
@@ -154,19 +136,6 @@
         localStorage.setItem('fixmycity_theme', isLight ? 'light' : 'dark');
     });
 
-    // ── Sidebar toggle ───────────────────────────────────
-    function openSidebar() {
-        document.getElementById('dashSidebar').classList.add('open');
-        document.getElementById('sidebarOverlay').style.display = '';
-    }
-    function closeSidebar() {
-        document.getElementById('dashSidebar').classList.remove('open');
-        document.getElementById('sidebarOverlay').style.display = 'none';
-    }
-    document.getElementById('sidebarToggle').addEventListener('click', function () {
-        var sb = document.getElementById('dashSidebar');
-        if (sb.classList.contains('open')) closeSidebar(); else openSidebar();
-    });
 </script>
 
     <script>

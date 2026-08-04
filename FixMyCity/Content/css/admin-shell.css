@@ -1,17 +1,20 @@
 /* =============================================================
-   admin-shell.css   Sidebar, topbar & content wrapper.
-   Nested inside _Layout.cshtml which already provides the sticky
-   top navbar.  The admin shell sits in the <main> block.
+   admin-shell.css   Sidebar & content wrapper.
+   Now uses standalone layout with dash-navbar (fixed, 60px).
    ============================================================= */
 
 /* ── Shell wrapper ───────────────────────────────────────────── */
 .admin-shell {
-    margin-top: 40px;
-    min-height: calc(100vh - 50px);
+    padding-top: var(--nav-h, 60px);
+    min-height: 100vh;
 }
 
 /* ── Sidebar ─────────────────────────────────────────────────── */
 .admin-sidebar {
+    position: fixed;
+    top: var(--nav-h, 60px);
+    left: 0;
+    bottom: 0;
     width: 240px;
     flex: 0 0 240px;
     background: #0d1526;
@@ -19,6 +22,7 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    z-index: 900;
 }
 
 /* Brand strip */
@@ -104,6 +108,7 @@
 .admin-content {
     background: #080f1e;
     min-width: 0;
+    margin-left: 240px;
     /* prevents flex overflow on wide tables */
     overflow-x: auto;
 }
@@ -149,16 +154,27 @@ html.lm .admin-content {
 
 /* ── Mobile collapse ───────────────────────────────────────────── */
 @media (max-width: 767px) {
-    .admin-shell {
-        flex-direction: column;
+    .admin-sidebar {
+        width: 200px;
+        flex: 0 0 200px;
     }
 
-    .admin-sidebar {
-        width: 100%;
-        flex: 0 0 auto;
+    .admin-content {
+        margin-left: 200px;
     }
 
     .admin-nav-link {
         border-radius: 8px;
+    }
+}
+
+@media (max-width: 575px) {
+    .admin-sidebar {
+        position: fixed;
+        width: 180px;
+        flex: 0 0 180px;
+    }
+    .admin-content {
+        margin-left: 180px;
     }
 }

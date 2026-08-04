@@ -46,7 +46,7 @@
 
     $("#complaintsClearFilters").on("click", function () {
         $form.find('input[type="text"], input[type="number"]').val("");
-        $form.find('select[name="Filter.CategoryId"]').val("");
+        $form.find('select').val("").prop('selectedIndex', 0);
         $form.find('input[name="Filter.SortBy"]').val("ComplaintId");
         $form.find('input[name="Filter.SortDir"]').val("DESC");
         $form.find('input[name="Filter.PageNumber"]').val(1);
