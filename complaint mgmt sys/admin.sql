@@ -482,9 +482,10 @@ END
 GO
 
 use Training_DB_Shirisha_Gatti
-exec sp_helptext 'FixMyCity.Auth_Register'
+exec sp_helptext 'FixMyCity.AdminUserList'
 select * from fixmycity.consumer
-       delete from fixmycity.consumer where consumerid=14
+       delete from fixmycity.consumer where consumerid=15
+	   update fixmycity.consumer set designation='BTECH' where consumerid=16
 CREATE OR ALTER PROCEDURE FixMyCity.AdminComplaintList
 (  
     @CategoryId INT = NULL,  

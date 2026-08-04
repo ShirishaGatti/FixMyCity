@@ -1,5 +1,5 @@
 use Training_DB_Shirisha_Gatti
-
+exec sp_helptext Fixmycity.Complaint_Search
 
 CREATE OR ALTER PROCEDURE FixMyCity.State_GetAll
     @IncludeInactive BIT = 0

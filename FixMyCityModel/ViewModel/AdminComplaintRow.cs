@@ -24,6 +24,7 @@ namespace FixMyCityModel.ViewModel
         public int WardId { get; set; }
         public string WardName { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int isActive { get; set; }
 
     }
 

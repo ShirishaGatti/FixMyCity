@@ -332,7 +332,7 @@ namespace FixMyCity.Repository
             {
                 DbCommand com = db.GetStoredProcCommand("FixMyCity.ComplaintDelete");
                 db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
-                db.AddInParameter(com, "ActorId", DbType.Int32, actorId);
+                db.AddInParameter(com, "ConsumerId", DbType.Int32, actorId);
                 db.ExecuteNonQuery(com);
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to delete complaint.", "Admin_DeleteComplaint", ex); }

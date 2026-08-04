@@ -1797,3 +1797,39 @@ a {
     padding: 16px;
   }
 }
+
+.dash-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+    z-index: 1000; align-items: center; justify-content: center;
+}
+.dash-modal {
+    background: var(--bg2); border: 1px solid var(--bd); border-radius: 14px;
+    width: 92%; max-width: 560px; max-height: 88vh; overflow-y: auto;
+}
+.dash-modal-header, .dash-modal-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--bd);
+}
+.dash-modal-footer { border-bottom: none; border-top: 1px solid var(--bd); gap: 10px; justify-content: flex-end; }
+.dash-modal-body { padding: 20px; }
+.dash-modal-close { background: none; border: none; font-size: 1.4rem; color: var(--tx3); cursor: pointer; }
+.attachment-preview-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.attachment-chip { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid var(--bd); border-radius: 8px; font-size: 0.85rem; }
+.attachment-thumb { width: 28px; height: 28px; object-fit: cover; border-radius: 4px; }
+.attachment-chip button { background: none; border: none; color: var(--tx3); cursor: pointer; font-size: 1rem; line-height: 1; }
+
+.attachment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
+.attachment-card { border: 1px solid var(--bd); border-radius: 10px; padding: 12px; text-align: center; }
+.attachment-card-thumb { width: 100%; height: 90px; object-fit: cover; border-radius: 6px; }
+.attachment-card-icon { font-size: 2.5rem; display: block; margin: 10px 0; }
+.attachment-card-name { font-size: 0.8rem; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.attachment-card-size { font-size: 0.72rem; color: var(--tx3); }
+.attachment-card-actions { display: flex; justify-content: center; gap: 6px; margin-top: 8px; }
+
+/* Drawer overlay reuses .dash-modal-overlay; just scale the card */
+.drawer-card { max-width: 720px; max-height: 92vh; }
+.drawer-card-header { display: flex; justify-content: space-between; align-items: flex-start; padding: 20px; border-bottom: 1px solid var(--bd); }
+.drawer-card-body { padding: 20px; overflow-y: auto; }
+
+.complaint-num-link { color: var(--accent); font-weight: 600; text-decoration: none; cursor: pointer; }
+.complaint-num-link:hover { text-decoration: underline; }

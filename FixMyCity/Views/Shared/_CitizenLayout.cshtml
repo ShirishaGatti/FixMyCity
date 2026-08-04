@@ -169,6 +169,49 @@
     });
 </script>
 
-@RenderSection("scripts", required: false)
+    <script>
+        function confirmDialog(message, onOk) {
+            var overlay = document.getElementById('globalConfirmOverlay');
+            document.getElementById('globalConfirmMsg').textContent = message;
+            overlay.style.display = 'flex';
+            overlay._onOk = onOk;
+        }
+        function hideConfirmDialog() {
+            document.getElementById('globalConfirmOverlay').style.display = 'none';
+        }
+        function confirmOk() {
+            if (typeof document.getElementById('globalConfirmOverlay')._onOk === 'function') {
+                document.getElementById('globalConfirmOverlay')._onOk();
+            }
+            hideConfirmDialog();
+        }
+        function showPageLoading() {
+            document.getElementById('globalLoadingOverlay').style.display = 'flex';
+        }
+        function hidePageLoading() {
+            document.getElementById('globalLoadingOverlay').style.display = 'none';
+        }
+        $(document).ajaxStart(showPageLoading);
+        $(document).ajaxStop(hidePageLoading);
+    </script>
+    @RenderSection("scripts", required: false)
+    <!-- ── Global confirm dialog ─────────────────────────────── -->
+    <div class="dash-modal-overlay" id="globalConfirmOverlay" style="display:none;" onclick="hideConfirmDialog()">
+        <div class="dash-modal" style="max-width:400px;" onclick="event.stopPropagation()">
+            <div class="dash-modal-header"><h5>Confirm</h5></div>
+            <div class="dash-modal-body"><p id="globalConfirmMsg" class="mb-0"></p></div>
+            <div class="dash-modal-footer">
+                <button type="button" class="btn-dash-outline" onclick="hideConfirmDialog()">Cancel</button>
+                <button type="button" class="btn-dash-primary" onclick="confirmOk()">OK</button>
+            </div>
+        </div>
+    </div>
+    <!-- ── Global page loading overlay ───────────────────────── -->
+    <div class="dash-modal-overlay" id="globalLoadingOverlay" style="display:none;z-index:9999;background:rgba(0,0,0,0.35);" onclick="return false;">
+        <div class="text-center text-white"><div class="spinner-border spinner-border-lg mb-2" role="status"></div><p class="mb-0">Loading...</p></div>
+    </div>
+    @*@RenderSection("scripts", required: false)*@
+
+
 </body>
 </html>

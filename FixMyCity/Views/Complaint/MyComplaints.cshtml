@@ -20,41 +20,64 @@
 <!-- Filter bar -->
 @using (Html.BeginForm("MyComplaints", "Complaint", FormMethod.Get, new { id = "filterForm" }))
 {
-    <div class="dash-card mb-3">
-        <div class="row g-2 align-items-end">
+    <div class="dash-card p-3 mb-4">
+        <div class="row g-3 align-items-end">
             <div class="col-md-2">
-                <label class="dash-label">Title</label>
-                @Html.TextBoxFor(m => m.Filter.Title, new { @class = "dash-input", placeholder = "Search title..." })
-            </div>
-            <div class="col-md-2">
-                <label class="dash-label">Category</label>
-                @Html.DropDownListFor(m => m.Filter.CategoryId, new SelectList(Model.Categories, "CategoryId", "CategoryName", Model.Filter.CategoryId), "All", new { @class = "dash-input" })
+                <label class="dash-label">Search</label>
+                <input id="searchTerm" type="search" class="dash-input" placeholder="Number, title, category..." value="@Model.Filter.Title" />
             </div>
             <div class="col-md-2">
                 <label class="dash-label">Status</label>
-                @Html.DropDownListFor(m => m.Filter.StatusId, new SelectList(Model.Statuses, "StatusId", "StatusName", Model.Filter.StatusId), "All", new { @class = "dash-input" })
+                <select id="statusFilter" class="dash-input">
+                    <option value="">All Statuses</option>
+                    @foreach (var status in Model.Statuses)
+                    {
+                        <option value="@status.StatusId" @(Model.Filter.StatusId == status.StatusId ? "selected" : "")>@status.StatusName</option>
+                    }
+                </select>
             </div>
             <div class="col-md-2">
+                <label class="dash-label">Category</label>
+                <select id="categoryFilter" class="dash-input">
+                    <option value="">All Categories</option>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <option value="@category.CategoryId" @(Model.Filter.CategoryId == category.CategoryId ? "selected" : "")>@category.CategoryName</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-1">
                 <label class="dash-label">From</label>
-                @Html.TextBoxFor(m => m.Filter.DateFrom, "{0:yyyy-MM-dd}", new { type = "date", @class = "dash-input" })
+                <input type="date" id="dateFrom" class="dash-input" value="@(Model.Filter.DateFrom?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateFrom" />
             </div>
-            <div class="col-md-2">
+            <div class="col-md-1">
                 <label class="dash-label">To</label>
-                @Html.TextBoxFor(m => m.Filter.DateTo, "{0:yyyy-MM-dd}", new { type = "date", @class = "dash-input" })
+                <input type="date" id="dateTo" class="dash-input" value="@(Model.Filter.DateTo?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateTo" />
+            </div>
+            <div class="col-md-1">
+                <label class="dash-label">Page</label>
+                <input type="number" id="pageNumberFilter" class="dash-input" min="1" value="@Model.Filter.PageNumber" name="Filter.PageNumber" />
+            </div>
+            <div class="col-md-1">
+                <label class="dash-label">Size</label>
+                <select id="pageSizeFilter" class="dash-input" name="Filter.PageSize">
+                    <option value="5" @(Model.Filter.PageSize == 5 ? "selected" : "")>5</option>
+                    <option value="10" @(Model.Filter.PageSize == 10 ? "selected" : "")>10</option>
+                    <option value="20" @(Model.Filter.PageSize == 20 ? "selected" : "")>20</option>
+                    <option value="50" @(Model.Filter.PageSize == 50 ? "selected" : "")>50</option>
+                </select>
             </div>
             <div class="col-md-2 d-flex gap-1 align-items-end">
-                <button type="submit" class="btn-dash-primary btn-sm flex-fill" title="Search">
-                    <i class="bi bi-search"></i>
+                <button type="submit" class="btn-dash-primary btn-sm flex-fill">
+                    <i class="bi bi-search"></i> Search
                 </button>
-                <button type="button" id="btnClearFilters" class="btn-dash-outline btn-sm" title="Clear">
+                <button type="button" id="btnClearFilters" class="btn-dash-outline btn-sm" title="Clear filters">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
         </div>
         @Html.HiddenFor(m => m.Filter.SortField)
         @Html.HiddenFor(m => m.Filter.SortDirection)
-        @Html.HiddenFor(m => m.Filter.PageNumber)
-        @Html.HiddenFor(m => m.Filter.PageSize)
     </div>
 }
 <div id="complaintsContainer">
@@ -156,7 +179,7 @@
 @section scripts {
     <script>
         var isEditMode = false;
-        //var antiForgeryToken = $('input[name="__RequestVerificationToken"]').val();
+        var antiForgeryToken = $('input[name="__RequestVerificationToken"]').val();
         function openComplaintModal() {
             isEditMode = false;
             $('#complaintForm')[0].reset();
@@ -192,17 +215,18 @@
         }
 
         function deleteComplaint(id) {
-            if (!confirm('Delete this complaint? This cannot be undone.')) return;
-            $.ajax({
-                url: '/Complaint/DeleteComplaint/' + id, type: 'POST',
-                data: {
-                    __RequestVerificationToken: antiForgeryToken
-                },
-                success: function (res) {
-                    if (res.success) window.location.reload();
-                    else alert(res.message);
-                },
-                error: function () { alert('Failed to delete complaint.'); }
+            confirmDialog('Are you sure you want to delete this complaint?', function () {
+                $.ajax({
+                    url: '/Complaint/DeleteComplaint/' + id, type: 'POST',
+                    data: {
+                        __RequestVerificationToken: antiForgeryToken
+                    },
+                    success: function (res) {
+                        if (res.success) window.location.reload();
+                        else alert(res.message);
+                    },
+                    error: function () { alert('Failed to delete complaint.'); }
+                });
             });
         }
         $(function () {
@@ -390,19 +414,18 @@
                 input.files = dt.files;
                 renderPreview();
             }
-            $('#btnClearFilters').click(function () {
-
+$('#btnClearFilters').click(function () {
                 $('#filterForm')[0].reset();
-
                 $('#Filter_SortField').val('');
                 $('#Filter_SortDirection').val('');
-                
-                $('#Filter_PageNumber').val(1);
-                $('#Filter_PageSize').val(10);
-              //  $('input[name="PageNumber"]').val(1);
-
+                $('#searchTerm').val('');
+                $('#statusFilter').val('');
+                $('#categoryFilter').val('');
+                $('#dateFrom').val('');
+                $('#dateTo').val('');
+                $('#pageNumberFilter').val(1);
+                $('#pageSizeFilter').val(10);
                 $('#filterForm').submit();
-
             });
         })();
         $(document).on('click', '.sort-header', function (e) {
@@ -412,7 +435,7 @@
             $('#Filter_SortField').val($(this).data('field'));
             $('#Filter_SortDirection').val($(this).data('dir'));
 
-            $('#Filter_PageNumber').val(1);
+            $('#pageNumberFilter').val(1);
 
             $('#filterForm').submit();
 
@@ -421,32 +444,14 @@
 
             e.preventDefault();
 
-            $('#Filter_PageNumber').val($(this).data('page'));
+            $('#pageNumberFilter').val($(this).data('page'));
 
             $('#filterForm').submit();
 
         });
-        $(document).on("change", "#pageSize", function () {
+        $(document).on("change", "#pageSizeFilter", function () {
 
-            $('#Filter_PageSize').val($(this).val());
-            $('input[name="PageNumber"]').val(1);
-
-            $('#filterForm').submit();
-
-        });
-        $(document).on("change", "#Filter_PageNumber", function () {
-
-            var page = parseInt($(this).val());
-
-            if (isNaN(page) || page < 1)
-                page = 1;
-
-            var max = @Model.TotalPages;
-
-            if (page > max)
-                page = max;
-
-            $('#Filter_PageNumber').val(page);
+            $('#pageNumberFilter').val(1);
 
             $('#filterForm').submit();
 

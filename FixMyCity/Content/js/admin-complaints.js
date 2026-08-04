@@ -13,7 +13,6 @@
     var gridUrl = $form.data("grid-url");
 
     function loadGrid(params) {
-        $container.css("opacity", 0.5);
         $.ajax({
             url: gridUrl,
             method: "GET",
@@ -24,9 +23,6 @@
             },
             error: function () {
                 $container.html('<div class="alert alert-danger">Failed to load complaints. Please try again.</div>');
-            },
-            complete: function () {
-                $container.css("opacity", 1);
             }
         });
     }
@@ -87,24 +83,39 @@
         var id = $(this).data("id");
         var title = $(this).data("title") || "this complaint";
 
-        if (!confirm("Delete complaint \"" + title + "\"? This cannot be undone.")) return;
-
-        $.ajax({
-            url: window.adminComplaintsUrls.deleteComplaint,
-            method: "POST",
-            data: { id: id },
-            headers: getAntiForgeryHeader(),
-            success: function (res) {
-                if (res && res.success) {
-                    loadGrid($form.serialize());
-                } else {
-                    alert((res && res.message) || "Failed to delete complaint.");
+        confirmDialog('Are you sure you want to delete complaint "' + title + '"?', function () {
+           /* confirmDialog('Are you sure you want to delete this complaint?', function () {
+                $.ajax({
+                    url: '/Complaint/DeleteComplaint/' + id, type: 'POST',
+                    data: {
+                        __RequestVerificationToken: antiForgeryToken
+                    },
+                    success: function (res) {
+                        if (res.success) window.location.reload();
+                        else alert(res.message);
+                    },
+                    error: function () { alert('Failed to delete complaint.'); }
+                });
+            });*/
+            $.ajax({
+                url: window.adminComplaintsUrls.deleteComplaint,
+                method: "POST",
+                 
+                data: {
+                    __RequestVerificationToken: antiForgeryToken, id
+                },
+                success: function (res) {
+                    if (res && res.success) {
+                        loadGrid($form.serialize());
+                    } else {
+                        alert((res && res.message) || "Failed to delete complaint.");
+                    }
+                },
+                error: function (xhr) {
+                    var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Failed to delete complaint.";
+                    alert(msg);
                 }
-            },
-            error: function (xhr) {
-                var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Failed to delete complaint.";
-                alert(msg);
-            }
+            });
         });
     });
 

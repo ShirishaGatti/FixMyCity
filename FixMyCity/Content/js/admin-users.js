@@ -17,7 +17,6 @@
     // file just decides WHAT query string to send, and calls this.
     // ------------------------------------------------------------------
     function loadGrid(params) {
-        $container.css("opacity", 0.5);
         $.ajax({
             url: gridUrl,
             method: "GET",
@@ -28,9 +27,6 @@
             },
             error: function () {
                 $container.html('<div class="alert alert-danger">Failed to load users. Please try again.</div>');
-            },
-            complete: function () {
-                $container.css("opacity", 1);
             }
         });
     }
@@ -105,24 +101,24 @@
         var id = $(this).data("id");
         var name = $(this).data("name") || "this user";
 
-        if (!confirm("Delete user " + name + "? This cannot be undone.")) return;
-
-        $.ajax({
-            url: $container.data("delete-url") || window.adminUsersUrls.deleteUser,
-            method: "POST",
-            data: { id: id },
-            headers: getAntiForgeryHeader(),
-            success: function (res) {
-                if (res && res.success) {
-                    loadGrid($form.serialize());
-                } else {
-                    alert((res && res.message) || "Failed to delete user.");
+        confirmDialog('Are you sure you want to delete user ' + name + '?', function () {
+            $.ajax({
+                url: $container.data('delete-url') || window.adminUsersUrls.deleteUser,
+                method: "POST",
+                data: { id: id },
+                headers: getAntiForgeryHeader(),
+                success: function (res) {
+                    if (res && res.success) {
+                        loadGrid($form.serialize());
+                    } else {
+                        alert((res && res.message) || "Failed to delete user.");
+                    }
+                },
+                error: function (xhr) {
+                    var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Failed to delete user.";
+                    alert(msg);
                 }
-            },
-            error: function (xhr) {
-                var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Failed to delete user.";
-                alert(msg);
-            }
+            });
         });
     });
 
