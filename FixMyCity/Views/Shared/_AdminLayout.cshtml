@@ -19,6 +19,9 @@
     <link rel="stylesheet" href="~/Content/css/style.css" />
     <link rel="stylesheet" href="~/Content/css/citizen.css" />
     <link href="~/Content/css/admin-shell.css" rel="stylesheet" />
+    <link href="~/Content/css/officer.css" rel="stylesheet" />
+    <!-- ApexCharts CDN for Interactive Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     @RenderSection("adminStyles", required: false)
 </head>
 <body>
@@ -184,9 +187,63 @@
     function hidePageLoading() {
         document.getElementById('globalLoadingOverlay').style.display = 'none';
     }
-    $(document).ajaxStart(showPageLoading);
-    $(document).ajaxStop(hidePageLoading);
+    function showToast(message, type, title) {
+        type = type || 'success';
+        var container = document.getElementById('toastContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toastContainer';
+            document.body.appendChild(container);
+        }
+        var iconClass = 'bi-check-circle-fill';
+        var defaultTitle = 'Success';
+        var toastClass = 'toast-success';
+
+        if (type === 'error' || type === 'danger' || type === 'delete') {
+            toastClass = 'toast-error';
+            iconClass = 'bi-exclamation-triangle-fill';
+            defaultTitle = 'Error';
+        } else if (type === 'warning') {
+            toastClass = 'toast-warning';
+            iconClass = 'bi-exclamation-circle-fill';
+            defaultTitle = 'Warning';
+        } else if (type === 'info') {
+            toastClass = 'toast-info';
+            iconClass = 'bi-info-circle-fill';
+            defaultTitle = 'Information';
+        }
+
+        var toastTitle = title || defaultTitle;
+        var toast = document.createElement('div');
+        toast.className = 'fmc-toast ' + toastClass;
+        toast.innerHTML = 
+            '<i class="bi ' + iconClass + ' fmc-toast-icon"></i>' +
+            '<div class="fmc-toast-content">' +
+                '<div class="fmc-toast-title">' + toastTitle + '</div>' +
+                '<div>' + message + '</div>' +
+            '</div>' +
+            '<button type="button" class="fmc-toast-close" onclick="this.parentElement.remove()">&times;</button>';
+
+        container.appendChild(toast);
+        setTimeout(function() {
+            if (toast && toast.parentElement) {
+                toast.classList.add('toast-out');
+                setTimeout(function() { if (toast.parentElement) toast.remove(); }, 300);
+            }
+        }, 4500);
+    }
 </script>
+
+<div id="toastContainer"></div>
+
+@if (TempData["Success"] != null)
+{
+    <script>document.addEventListener("DOMContentLoaded", function() { showToast("@HttpUtility.JavaScriptStringEncode(TempData["Success"].ToString())", "success", "Success"); });</script>
+}
+@if (TempData["Error"] != null)
+{
+    <script>document.addEventListener("DOMContentLoaded", function() { showToast("@HttpUtility.JavaScriptStringEncode(TempData["Error"].ToString())", "error", "Error"); });</script>
+}
 
 @RenderSection("adminScripts", required: false)
 

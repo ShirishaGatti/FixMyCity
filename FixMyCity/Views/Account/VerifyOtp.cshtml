@@ -1,53 +1,193 @@
 @using FixMyCityModel.ViewModel
 @model VerifyOtpViewModel
 @{
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = null;
     ViewBag.Title = "Verify OTP";
 }
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-<link href="~/Content/css/auth.css" rel="stylesheet" />
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title — FixMyCity</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link href="~/Content/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/css/style.css" rel="stylesheet" />
+    <link href="~/Content/css/auth.css" rel="stylesheet" />
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--tx);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .otp-wrapper {
+            width: 100%;
+            max-width: 440px;
+        }
+        .otp-card {
+            background: var(--bg2);
+            border: 1px solid var(--bd);
+            border-radius: 16px;
+            padding: 40px 32px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.3);
+        }
+        .otp-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(21,116,224,.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+        .otp-card h3 {
+            font-weight: 700;
+            font-size: 1.4rem;
+            margin-bottom: 6px;
+        }
+        .otp-text {
+            color: var(--tx2);
+            font-size: .88rem;
+            line-height: 1.6;
+        }
+        .otp-input {
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: .5em;
+            text-align: center;
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: var(--bg3);
+            border: 2px solid var(--bd2);
+            color: var(--tx);
+            transition: all .2s;
+            font-family: 'Space Grotesk', monospace;
+        }
+        .otp-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 .25rem rgba(21,116,224,.2);
+            outline: none;
+        }
+        .otp-input::placeholder {
+            color: var(--tx3);
+            letter-spacing: .1em;
+        }
+        .btn-verify {
+            background: var(--grad);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-weight: 600;
+            padding: 12px 24px;
+            font-size: .95rem;
+            cursor: pointer;
+            transition: opacity .2s, transform .15s;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .btn-verify:hover { opacity: .88; transform: translateY(-1px); }
+        .btn-verify:active { opacity: 1; transform: none; }
+        .btn-verify:disabled { opacity: .6; cursor: not-allowed; }
+        .otp-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: .82rem;
+            color: var(--tx3);
+        }
+        .otp-footer a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .otp-footer a:hover { text-decoration: underline; }
+        .field-error {
+            color: #ef4444;
+            font-size: .78rem;
+            margin-top: 4px;
+        }
+        html.lm .otp-card {
+            background: #fff;
+            border-color: #e2e8f0;
+            box-shadow: 0 8px 32px rgba(0,0,0,.08);
+        }
+        html.lm .otp-input {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #0f172a;
+        }
+        html.lm .otp-input:focus {
+            border-color: #1574e0;
+            box-shadow: 0 0 0 .25rem rgba(21,116,224,.15);
+        }
+        html.lm .otp-input::placeholder {
+            color: #94a3b8;
+        }
+        html.lm .otp-footer {
+            color: #64748b;
+        }
+        html.lm .otp-footer a {
+            color: #1574e0;
+        }
+    </style>
+</head>
+<body>
 
-<div class="container otp-wrapper">
-    <div class="card otp-card">
-        <div class="card-body p-5">
-            <div class="text-center mb-4">
-                <div class="otp-icon mb-3"><i class="bi bi-shield-lock-fill text-primary"></i></div>
-                <h3 class="fw-bold">Verify OTP</h3>
-                <p class="otp-text">
-                    We've sent a 6-digit verification code to your registered email.
-                    It expires in 5 minutes.
-                </p>
+<div class="otp-wrapper">
+    <div class="otp-card">
+        <div class="text-center mb-4">
+            <div class="otp-icon"><i class="bi bi-shield-lock-fill"></i></div>
+            <h3>Verify OTP</h3>
+            <p class="otp-text">
+                We've sent a 6-digit verification code to your registered email.<br />
+                It expires in 5 minutes.
+            </p>
+        </div>
+        <div id="alertContainer"></div>
+        @using (Html.BeginForm("VerifyOtp", "Account", FormMethod.Post, new { id = "otpForm" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="mb-3">
+                @Html.LabelFor(m => m.EnteredOtp, "Enter Verification Code", new { @class = "form-label fw-semibold" })
+                @Html.TextBoxFor(m => m.EnteredOtp, new
+                {
+                    maxlength = "6",
+                    @class = "form-control otp-input",
+                    autocomplete = "one-time-code",
+                    inputmode = "numeric",
+                    placeholder = "000000"
+                })
+                @Html.ValidationMessageFor(m => m.EnteredOtp, "", new { @class = "field-error" })
             </div>
-            <div id="alertContainer"></div>
-            @using (Html.BeginForm("VerifyOtp", "Account", FormMethod.Post, new { id = "otpForm" }))
-            {
-                @Html.AntiForgeryToken()
 
-                <div class="form-group mb-2">
-                    @Html.LabelFor(m => m.EnteredOtp, "Enter Verification Code", new { @class = "form-label fw-semibold" })
-                    @Html.TextBoxFor(m => m.EnteredOtp, new
-                    {
-                        maxlength = "6",
-                        @class = "form-control otp-input",
-                        autocomplete = "one-time-code",
-                        inputmode = "numeric",
-                        placeholder = "000000"
-                    })
-                    @Html.ValidationMessageFor(m => m.EnteredOtp, "", new { @class = "field-error" })
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block btn-verify mt-4 w-100" id="otpSubmit">
-                    <span class="spinner-border spinner-border-sm d-none" id="otpSpinner"></span>
-                    Verify OTP
-                </button>
-            }
+            <button type="submit" class="btn btn-verify w-100" id="otpSubmit">
+                <span class="spinner-border spinner-border-sm d-none" id="otpSpinner"></span>
+                Verify OTP
+            </button>
+        }
+        <div class="otp-footer">
+            <i class="bi bi-arrow-left me-1"></i>
+            <a href="@Url.Action("Login", "Account")">Back to login</a>
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/Content/js/Auth.js"></script>
-}
+<script src="~/Content/js/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ajaxStart(function () { $('#otpSpinner').removeClass('d-none'); $('#otpSubmit').prop('disabled', true); });
+    $(document).ajaxStop(function () { $('#otpSpinner').addClass('d-none'); $('#otpSubmit').prop('disabled', false); });
+</script>
+
+</body>
+</html>

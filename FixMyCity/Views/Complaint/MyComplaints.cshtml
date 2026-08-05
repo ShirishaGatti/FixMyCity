@@ -1,4 +1,4 @@
-﻿@model FixMyCityModel.ViewModel.MyComplaintsViewModel
+@model FixMyCityModel.ViewModel.MyComplaintsViewModel
 @{
     Layout = "~/Views/Shared/_CitizenLayout.cshtml";
     ViewBag.Title = "My Complaints";
@@ -54,13 +54,15 @@
             <div class="col-md-2">
                 <label class="dash-label">From</label>
                 <input type="date" id="dateFrom" class="dash-input"
-                       value="@(Model.Filter.DateFrom?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateFrom" />
+                       value="@(Model.Filter.DateFrom?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateFrom"
+                       max="@DateTime.Today.ToString("yyyy-MM-dd")" />
             </div>
 
             <div class="col-md-2">
                 <label class="dash-label">To</label>
                 <input type="date" id="dateTo" class="dash-input"
-                       value="@(Model.Filter.DateTo?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateTo" />
+                       value="@(Model.Filter.DateTo?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateTo"
+                       max="@DateTime.Today.ToString("yyyy-MM-dd")" />
             </div>
 
             <div class="col-md-1">
@@ -243,7 +245,7 @@
 
         function openEditComplaint(id) {
             $.get('/Complaint/GetComplaintForEdit/' + id, function (res) {
-                if (!res.success) { alert(res.message); return; }
+                if (!res.success) { showToast(res.message || 'Could not load complaint.', 'error', 'Error'); return; }
                 isEditMode = true;
                 $('#complaintIdField').val(res.complaintId);
                 $('#fldTitle').val(res.title);
@@ -273,18 +275,50 @@
                         __RequestVerificationToken: antiForgeryToken
                     },
                     success: function (res) {
-                        if (res.success) window.location.reload();
-                        else alert(res.message);
+                        if (res.success) {
+                            showToast('Complaint deleted successfully.', 'error', 'Deleted');
+                            setTimeout(function() { window.location.reload(); }, 1200);
+                        }
+                        else showToast(res.message || 'Could not delete complaint.', 'error', 'Error');
                     },
-                    error: function () { alert('Failed to delete complaint.'); }
+                    error: function () { showToast('Failed to delete complaint. Please try again.', 'error', 'Error'); }
                 });
             });
         }
+        // ── Client-side date validation helper ────────────────────────
+        function validateFilterDates() {
+            var from = $('#dateFrom').val();
+            var to = $('#dateTo').val();
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (from) {
+                var fromDate = new Date(from);
+                if (fromDate > today) {
+                    showToast('"From" date cannot be a future date.', 'warning', 'Invalid Date');
+                    $('#dateFrom').focus();
+                    return false;
+                }
+            }
+            if (from && to) {
+                var fromDate2 = new Date(from);
+                var toDate = new Date(to);
+                if (fromDate2 > toDate) {
+                    showToast('"From" date must be before or equal to "To" date.', 'warning', 'Invalid Date Range');
+                    $('#dateTo').focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
         $(function () {
 
             $('#filterForm').on('submit', function (e) {
 
                 e.preventDefault();
+
+                if (!validateFilterDates()) return;
 
                 $.ajax({
                     url: '/Complaint/MyComplaints',
@@ -294,7 +328,7 @@
                         $('#complaintsContainer').html(html);
                     },
                     error: function () {
-                        alert('Unable to load complaints.');
+                        showToast('Unable to load complaints. Please try again.', 'error', 'Error');
                     }
                 });
 
@@ -313,11 +347,9 @@
         //}
         function openDetailsDrawer(id) {
             stopActiveChatPolling();
-
-            $('#detailsDrawerOverlay').show();
-            $('#detailsDrawerContent').html(
-                '<div class="text-center py-5"><span class="spinner-border"></span></div>'
-            );
+            document.getElementById('detailsDrawerOverlay').style.display = 'flex';
+            document.getElementById('detailsDrawerContent').innerHTML =
+                '<div class="text-center py-5"><span class="spinner-border"></span></div>';
             $.ajax({
                 url: '/Complaint/ComplaintDetailsPartial',
                 type: 'GET',
@@ -384,16 +416,17 @@
                 contentType: false,
                 success: function (res) {
 
-                    console.log(res);
-
                     submitBtn.prop('disabled', false);
                     spinner.addClass('d-none');
 
                     if (res.success) {
-                        window.location.reload();
+                        var isNew = !$('#complaintIdField').val();
+                        showToast(isNew ? 'Complaint filed successfully!' : 'Complaint updated successfully!', 'success', isNew ? 'Filed' : 'Saved');
+                        closeComplaintModal();
+                        setTimeout(function() { window.location.reload(); }, 1200);
                     }
                     else {
-                        alert(res.message || 'Failed to save complaint.');
+                        showToast(res.message || 'Failed to save complaint.', 'error', 'Error');
                     }
                 },
                 error: function (xhr, status, error) {
@@ -401,14 +434,7 @@
                     submitBtn.prop('disabled', false);
                     spinner.addClass('d-none');
 
-                    console.log(xhr);
-                    console.log(xhr.responseText);
-
-                    alert(
-                        "Status : " + xhr.status +
-                        "\nError : " + error +
-                        "\nResponse : " + xhr.responseText
-                    );
+                    showToast('Server error (' + xhr.status + '): ' + (error || 'Unknown error.'), 'error', 'Error');
                 }
             });
         });

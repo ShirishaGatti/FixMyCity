@@ -584,7 +584,7 @@
 }
 .dash-modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.55);
-    z-index: 1000; align-items: center; justify-content: center;
+    z-index: 1000; display: flex; align-items: center; justify-content: center;
 }
 .dash-modal {
     background: var(--bg2); border: 1px solid var(--bd); border-radius: 14px;
@@ -596,6 +596,22 @@
 }
 .dash-modal-footer { border-bottom: none; border-top: 1px solid var(--bd); gap: 10px; justify-content: flex-end; }
 .dash-modal-body { padding: 20px; }
+
+/* ── Complaint modal: body scrolls independently ── */
+#complaintModalOverlay .dash-modal {
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+#complaintModalOverlay .dash-modal-header,
+#complaintModalOverlay .dash-modal-footer {
+    flex-shrink: 0;
+}
+#complaintModalOverlay .dash-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(90vh - 120px);
+}
 .dash-modal-close { background: none; border: none; font-size: 1.4rem; color: var(--tx3); cursor: pointer; }
 .attachment-preview-list { display: flex; flex-wrap: wrap; gap: 8px; }
 .attachment-chip { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid var(--bd); border-radius: 8px; font-size: 0.85rem; }

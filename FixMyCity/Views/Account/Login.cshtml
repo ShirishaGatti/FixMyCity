@@ -58,10 +58,10 @@
 
                             <!-- DYNAMIC ALERT CONTAINER FOR AJAX MESSAGES -->
                             <div id="alertContainer">
-                                @if (TempData["SuccessMessage"] != null)
+                                @if (TempData["Success"] != null)
                                 {
                                     <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-                                        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+                                        <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
                                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                     </div>
                                 }

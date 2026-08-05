@@ -93,7 +93,7 @@ namespace FixMyCity.Controllers
                 if (Request.IsAjaxRequest())
                     return Json(new { success = true, message = "Registration successful! Please log in to continue.", redirectUrl = Url.Action("Login", "Account") });
 
-                TempData["SuccessMessage"] = "Registration successful. Please log in.";
+                TempData["Success"] = "Registration successful. Please log in.";
                 return RedirectToAction("Login", "Account");
             }
             catch (BusinessException ex)
@@ -232,11 +232,12 @@ namespace FixMyCity.Controllers
             switch (roleId)
             {
                 case RoleIds.Citizen: redirectUrl = Url.Action("MyComplaints", "Complaint"); break;
-                case RoleIds.SupportExecutive: redirectUrl = Url.Action("Queue", "Complaint"); break;
+                case RoleIds.SupportExecutive: redirectUrl = Url.Action("Queue", "Officer"); break;
                 case RoleIds.Admin: redirectUrl = Url.Action("Dashboard", "Admin"); break;
                 default: redirectUrl = Url.Action("Login", "Account"); break;
             }
 
+            TempData["Success"] = "Login successful! Welcome back.";
             return Json(new { success = true, redirectUrl });
         }
 
@@ -290,7 +291,7 @@ namespace FixMyCity.Controllers
             if (consumerId.HasValue)
             {
                 string otp = _authService.CreateOtp(consumerId.Value, "PASSWORD_RESET");
-                // new MailService().SendOtpEmail(vm.Email, otp);   // wire up your mail service here
+                _emailService.SendOtpEmail(vm.Email, otp);
             }
 
             Session["ResetEmail"] = vm.Email;

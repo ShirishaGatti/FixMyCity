@@ -244,7 +244,7 @@ namespace FixMyCity.Repository
 
         public List<Complaint> GetAssignedByOfficerId(int officerId)
         {
-            var list = new List<Complaint>();
+            var list = new List<Complaint>(); 
             try
             {
                 const string sql = @"SELECT c.ComplaintId, c.ComplaintNumber, c.Title, c.Description,
@@ -310,16 +310,16 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_Delete");
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.ComplaintDelete");
                 db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
                 db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
-                int rows = db.ExecuteNonQuery(com);
+                int rows = Convert.ToInt32(db.ExecuteScalar(com));
                 ClearComplaintCache(consumerId);
                 return rows > 0;
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to delete complaint.", "Complaint_Delete", ex);
+                throw new DataAccessException("Failed to delete complaint.", "ComplaintDelete", ex);
             }
         }
 

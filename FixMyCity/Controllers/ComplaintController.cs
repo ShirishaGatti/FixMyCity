@@ -40,6 +40,11 @@ namespace FixMyCity.Controllers
             filter = filter ?? new ComplaintListFilterViewModel();
             if (filter.PageNumber < 1) filter.PageNumber = 1;
             if (filter.PageSize < 1 || filter.PageSize > 100) filter.PageSize = 10;
+            string dateErr;
+            if (!filter.ValidateDates(out dateErr))
+            {
+                TempData["Error"] = dateErr;
+            }
 
             var vm = _complaintService.Search(CurrentActorId, filter);
             vm.AllowedExtensionsCsv = ConfigurationManager.AppSettings["AllowedAttachmentExtensions"] ?? ".jpg,.jpeg,.png,.pdf,.doc,.docx";
@@ -191,7 +196,9 @@ namespace FixMyCity.Controllers
         [HttpGet]
         public ActionResult Home()
         {
-            return View();
+            var filter = new ComplaintListFilterViewModel { PageSize = 100 };
+            var vm = _complaintService.Search(CurrentActorId, filter);
+            return View(vm);
         }
 
         [HttpGet]
@@ -233,7 +240,7 @@ namespace FixMyCity.Controllers
             {
                 _consumerService.UpdateProfile(CurrentActorId, vm.Name, vm.Contact,
                     vm.DOB, vm.AddressLine, vm.CityId, vm.WardId, vm.Designation);
-                TempData["SuccessMessage"] = "Profile updated successfully.";
+                TempData["Success"] = "Profile updated successfully.";
                 return RedirectToAction("Profile");
             }
             catch (BusinessException ex)

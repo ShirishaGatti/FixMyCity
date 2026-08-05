@@ -427,9 +427,16 @@ AS
 BEGIN  
     SET NOCOUNT ON;  
     UPDATE FixMyCity.Complaint  
-    SET IsActive = 0, LastModifiedAt = GETUTCDATE()  
-    WHERE ComplaintId = @ComplaintId AND IsActive = 1  
-      AND StatusId = (SELECT StatusId FROM FixMyCity.ComplaintStatus WHERE StatusName = 'Open');  
+    SET IsActive = 0,
+		LastModifiedAt = GETUTCDATE()  
+    WHERE ComplaintId = @ComplaintId 
+		AND IsActive = 1  
+		AND StatusId = 
+			(SELECT StatusId
+			 FROM FixMyCity.ComplaintStatus
+			 WHERE StatusName = 'Open'); 
+	SELECT @@ROWCOUNT;
+
 END  
 
 EXEC sp_rename 'FixMyCity.Complaint_Delete','FixMyCity.ComplaintDelete'

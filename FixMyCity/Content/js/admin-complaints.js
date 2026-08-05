@@ -100,20 +100,21 @@
             $.ajax({
                 url: window.adminComplaintsUrls.deleteComplaint,
                 method: "POST",
-                 
                 data: {
-                    __RequestVerificationToken: antiForgeryToken, id
+                    id: id,
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                 },
                 success: function (res) {
                     if (res && res.success) {
+                        showToast('Complaint deleted successfully.', 'error', 'Deleted');
                         loadGrid($form.serialize());
                     } else {
-                        alert((res && res.message) || "Failed to delete complaint.");
+                        showToast((res && res.message) || "Failed to delete complaint.", 'error', 'Error');
                     }
                 },
                 error: function (xhr) {
-                    var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Failed to delete complaint.";
-                    alert(msg);
+                    var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Failed to delete complaint. Status: " + xhr.status;
+                    showToast(msg, 'error', 'Error');
                 }
             });
         });
@@ -131,7 +132,7 @@
                 modal.show();
             },
             error: function () {
-                alert("Failed to load complaint details.");
+                showToast("Failed to load complaint details.", 'error', 'Error');
             }
         });
     });
@@ -160,14 +161,17 @@
             success: function (res) {
                 if (res && res.success) {
                     bootstrap.Modal.getInstance(document.getElementById("editComplaintModal")).hide();
+                    showToast('Complaint updated successfully!', 'success', 'Saved');
                     loadGrid($form.serialize());
                 } else {
                     $errBox.text((res && res.message) || "Failed to save changes.");
+                    showToast((res && res.message) || "Failed to save changes.", 'error', 'Error');
                 }
             },
             error: function (xhr) {
                 var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Failed to save changes.";
                 $errBox.text(msg);
+                showToast(msg, 'error', 'Error');
             },
             complete: function () {
                 $btn.prop("disabled", false);

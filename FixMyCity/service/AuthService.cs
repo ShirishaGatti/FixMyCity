@@ -139,7 +139,11 @@ namespace FixMyCity.Service
         // must not let this be used to enumerate registered accounts.
         public int? GetConsumerIdByEmail(string email)
         {
-            if (string.IsNullOrWhiteSpace(email) || !IsValidEmail(email))
+            if (string.IsNullOrWhiteSpace(email))
+                return null;
+
+            email = email.Trim();
+            if (!IsValidEmail(email))
                 return null;
 
             var cred = _repo.GetCredentialByEmail(email);

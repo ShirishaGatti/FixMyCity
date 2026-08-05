@@ -1,4 +1,4 @@
-﻿using FixMyCity.Exceptions;
+using FixMyCity.Exceptions;
 using FixMyCity.Filters;
 using FixMyCity.Infrastructure;
 using FixMyCity.service;
@@ -133,7 +133,7 @@ namespace FixMyCity.Controllers
             {
                 _consumerService.UpdateProfile(_session.ConsumerId, vm.Name, vm.Contact,
                     vm.DOB, vm.AddressLine, vm.CityId, vm.WardId, vm.Designation);
-                TempData["SuccessMessage"] = "Profile updated successfully.";
+                TempData["Success"] = "Profile updated successfully.";
                 return RedirectToAction("Profile");
             }
             catch (BusinessException ex)

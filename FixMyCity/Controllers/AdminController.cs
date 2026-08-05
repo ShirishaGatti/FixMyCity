@@ -169,6 +169,8 @@ namespace FixMyCity.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
+
         public JsonResult DeleteComplaint(int id)
         {
             try

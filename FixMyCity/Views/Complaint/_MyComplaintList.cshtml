@@ -9,46 +9,48 @@
     }
     else
     {
-        <table class="dash-table">
-            <thead>
-                <tr>
-                    @Html.Raw(SortHeader("ComplaintId", "ComplaintId", Model.Filter))
-                    <th>Title</th>
-                    @Html.Raw(SortHeader("CategoryName", "Category", Model.Filter))
-                    @Html.Raw(SortHeader("PriorityId", "Priority", Model.Filter))
-                    <th>Status</th>
-                    @Html.Raw(SortHeader("CreatedAt", "Filed On", Model.Filter))
-                    <th>Chat</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var c in Model.Complaints)
-                {
-                    bool isOpen = c.StatusName == "Open";
+        <div class="table-responsive">
+            <table class="dash-table">
+                <thead>
                     <tr>
-                        <td><a href="javascript:void(0)" class="complaint-num-link" onclick="openDetailsDrawer(@c.ComplaintId)">@c.ComplaintNumber</a></td>
-                        <td>@c.Title</td>
-                        <td>@c.CategoryName</td>
-                        <td><span class="priority-badge @c.PriorityName.ToLower()">@c.PriorityName</span></td>
-                        <td><span class="status-badge @c.StatusName.ToLower().Replace(" ", "")">@c.StatusName</span></td>
-                        <td>@c.CreatedAt.ToString("dd MMM yyyy")</td>
-                        <td>
-                            <button type="button" class="chat-row-btn"
-                                    title="Discussion"
-                                    onclick="openUserChatModal(@c.ComplaintId, '@c.ComplaintNumber')">
-                                <i class="bi bi-chat-dots-fill"></i>
-                            </button>
-                        </td>
-                        <td class="row-actions">
-                            <button type="button" class="row-action-btn" title="Edit" @(isOpen ? "" : "disabled") onclick="openEditComplaint(@c.ComplaintId)"><i class="bi bi-pencil-square"></i></button>
-                            <button type="button" class="row-action-btn text-danger" title="Delete" @(isOpen ? "" : "disabled") onclick="deleteComplaint(@c.ComplaintId)"><i class="bi bi-trash"></i></button>
-                            <a class="row-action-btn" title="Export PDF" href="@Url.Action("ExportComplaintPdf", "Complaint", new { id = c.ComplaintId })"><i class="bi bi-file-earmark-pdf"></i></a>
-                        </td>
+                        @Html.Raw(SortHeader("ComplaintId", "ComplaintId", Model.Filter))
+                        <th>Title</th>
+                        @Html.Raw(SortHeader("CategoryName", "Category", Model.Filter))
+                        @Html.Raw(SortHeader("PriorityId", "Priority", Model.Filter))
+                        <th>Status</th>
+                        @Html.Raw(SortHeader("CreatedAt", "Filed On", Model.Filter))
+                        <th>Chat</th>
+                        <th>Actions</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model.Complaints)
+                    {
+                        bool isOpen = c.StatusName == "Open";
+                        <tr>
+                            <td><a href="javascript:void(0)" class="complaint-num-link" onclick="openDetailsDrawer(@c.ComplaintId)">@c.ComplaintNumber</a></td>
+                            <td><span class="text-truncate-col-lg" title="@c.Title">@c.Title</span></td>
+                            <td><span class="text-truncate-col" title="@c.CategoryName">@c.CategoryName</span></td>
+                            <td><span class="priority-badge @c.PriorityName.ToLower()">@c.PriorityName</span></td>
+                            <td><span class="status-badge @c.StatusName.ToLower().Replace(" ", "")">@c.StatusName</span></td>
+                            <td>@c.CreatedAt.ToString("dd MMM yyyy")</td>
+                            <td>
+                                <button type="button" class="chat-row-btn"
+                                        title="Discussion"
+                                        onclick="openUserChatModal(@c.ComplaintId, '@c.ComplaintNumber')">
+                                    <i class="bi bi-chat-dots-fill"></i>
+                                </button>
+                            </td>
+                            <td class="row-actions">
+                                <button type="button" class="row-action-btn" title="Edit" @(isOpen ? "" : "disabled") onclick="openEditComplaint(@c.ComplaintId)"><i class="bi bi-pencil-square"></i></button>
+                                <button type="button" class="row-action-btn text-danger" title="Delete" @(isOpen ? "" : "disabled") onclick="deleteComplaint(@c.ComplaintId)"><i class="bi bi-trash"></i></button>
+                                <a class="row-action-btn" title="Export PDF" href="@Url.Action("ExportComplaintPdf", "Complaint", new { id = c.ComplaintId })"><i class="bi bi-file-earmark-pdf"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
         <!-- Pager -->
         @*if (Model.TotalPages > 1)

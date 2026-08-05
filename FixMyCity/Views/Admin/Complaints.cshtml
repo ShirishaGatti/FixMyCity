@@ -2,6 +2,7 @@
 
 @{
     ViewBag.Title = "Manage Complaints";
+    ViewBag.ActivePage = "Complaints";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
@@ -21,6 +22,7 @@
                 </div>
 
                 <form id="complaintsFilterForm" data-grid-url="@Url.Action("ComplaintsGrid","Admin")" class="filter-card mb-4">
+                    @Html.AntiForgeryToken()
 
                     <div class="row g-2">
                         <div class="col-md-3">
