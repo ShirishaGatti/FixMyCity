@@ -46,7 +46,12 @@ namespace FixMyCity.Controllers
             var vm = _complaintService.GetOfficerComplaints(_session.ConsumerId, query);
             return PartialView("_OfficerComplaintTable", vm);
         }
-
+        [HttpGet]
+        public ActionResult Queue()
+        {
+            // Reuse the Officer controller's Complaints action to show the assigned complaints/queue.
+            return RedirectToAction("Complaints", "Officer");
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo)

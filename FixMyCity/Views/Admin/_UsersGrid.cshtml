@@ -14,7 +14,7 @@
      data-total-pages="@Model.TotalPages"
      data-total-count="@Model.TotalCount">
 
-    <table class="table table-bordered table-hover align-middle">
+    <table class="table dash-table">
 
         <thead>
             <tr>
@@ -58,11 +58,11 @@
                         <td>
                             @if (item.IsActive)
                             {
-                                <span class="badge badge-success">Active</span>
+                                <span class="status-badge open">Active</span>
                             }
                             else
                             {
-                                <span class="badge badge-danger">Inactive</span>
+                                <span class="status-badge closed">Inactive</span>
                             }
                         </td>
                         <td>

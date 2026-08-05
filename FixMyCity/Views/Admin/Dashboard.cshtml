@@ -9,8 +9,8 @@
 @section adminStyles {
     <style>
         .dash-stat {
-            background: rgba(30,41,59,.55);
-            border: 1px solid rgba(148,163,184,.12);
+            background: var(--bg3);
+            border: 1px solid var(--bd);
             border-radius: 16px;
             padding: 20px 22px;
             display: flex;
@@ -24,33 +24,102 @@
             display: flex; align-items: center; justify-content: center;
             color: #fff; font-size: 1.4rem; flex-shrink: 0;
         }
-        .dash-stat .ds-val { font-size: 1.8rem; font-weight: 800; color: #f1f5f9; line-height: 1; }
-        .dash-stat .ds-lbl { font-size: .8rem; color: #64748b; margin-top: 2px; }
+        .dash-stat .ds-val { font-size: 1.8rem; font-weight: 800; color: var(--tx); line-height: 1; }
+        .dash-stat .ds-lbl { font-size: .8rem; color: var(--tx3); margin-top: 2px; }
         .dash-card {
-            background: rgba(30,41,59,.55);
-            border: 1px solid rgba(148,163,184,.12);
+            background: var(--bg3);
+            border: 1px solid var(--bd);
             border-radius: 16px; overflow: hidden;
         }
         .dash-card-header {
             padding: 14px 18px;
             font-weight: 700; font-size: .9rem;
-            border-bottom: 1px solid rgba(148,163,184,.1);
-            color: #f1f5f9;
+            border-bottom: 1px solid var(--bd);
+            color: var(--tx);
         }
         .dash-card-body { padding: 16px 18px; }
-        .dash-table { color: #e2e8f0; margin: 0; }
+        .dash-table { color: var(--tx); margin: 0; }
         .dash-table thead th {
-            background: rgba(148,163,184,.07); color: #94a3b8;
-            font-size: .75rem; text-transform: uppercase; letter-spacing: .05em;
-            padding: 10px 12px; border: 0; font-weight: 600;
+            background: transparent; color: var(--tx3);
+            font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
+            padding: 10px 16px; border: 0; font-weight: 600;
+            border-bottom: 1px solid var(--bd); text-align: left;
         }
-        .dash-table tbody td { padding: 10px 12px; border-color: rgba(148,163,184,.07); font-size: .875rem; vertical-align: middle; }
-        html.lm .dash-stat { background: #fff; border-color: #e2e8f0; }
-        html.lm .dash-stat .ds-val { color: #0f172a; }
-        html.lm .dash-card { background: #fff; border-color: #e2e8f0; }
-        html.lm .dash-card-header { color: #0f172a; border-color: #e2e8f0; }
-        html.lm .dash-table { color: #1e293b; }
-        html.lm .dash-table thead th { background: #f8fafc; color: #475569; }
+        .dash-table tbody td { padding: 14px 16px; border-bottom: 1px solid var(--bd); font-size: .875rem; vertical-align: middle; }
+        .dash-table tr:last-child td { border-bottom: none; }
+        .dash-table tbody tr:hover td { background: rgba(139, 92, 246, 0.04); }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+        .status-badge.open { background: rgba(245,158,11,.12); color: #f59e0b; }
+        .status-badge.inprogress { background: rgba(59,130,246,.12); color: #3b82f6; }
+        .status-badge.resolved { background: rgba(16,185,129,.12); color: #10b981; }
+        .status-badge.closed { background: rgba(107,114,128,.15); color: #9ca3af; }
+        .priority-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: .7rem;
+            font-weight: 600;
+        }
+        .priority-badge.high { background: rgba(239,68,68,.12); color: #ef4444; }
+        .priority-badge.medium { background: rgba(245,158,11,.12); color: #f59e0b; }
+        .priority-badge.low { background: rgba(16,185,129,.12); color: #10b981; }
+        .bar-chart-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 0;
+        }
+        .bar-chart-item .bcl {
+            width: 100px;
+            font-size: .78rem;
+            color: var(--tx3);
+            flex-shrink: 0;
+            text-align: right;
+        }
+        .bar-chart-item .bcf {
+            flex: 1;
+            height: 22px;
+            background: rgba(148,163,184,.08);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        .bar-chart-item .bcf .bar {
+            height: 100%;
+            border-radius: 6px;
+            transition: width .4s ease;
+            min-width: 2px;
+        }
+        .bar-chart-item .bcv {
+            width: 30px;
+            font-size: .78rem;
+            font-weight: 600;
+            color: #f1f5f9;
+            flex-shrink: 0;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(148,163,184,.08);
+        }
+        .stat-row:last-child { border-bottom: none; }
+        html.lm .dash-stat { background: var(--bg3); border-color: var(--bd); }
+        html.lm .dash-stat .ds-val { color: var(--tx); }
+        html.lm .dash-card { background: var(--bg3); border-color: var(--bd); }
+        html.lm .dash-card-header { color: var(--tx); border-color: var(--bd); }
+        html.lm .bar-chart-item .bcl { color: var(--tx3); }
+        html.lm .bar-chart-item .bcf { background: var(--bd); }
+        html.lm .bar-chart-item .bcv { color: var(--tx); }
+        html.lm .stat-row { border-color: var(--bd); }
     </style>
 }
 
@@ -94,7 +163,73 @@
 </div>
 
 <div class="row g-3">
-    <!-- Recent Complaints -->
+    <!-- Category Breakdown Chart -->
+    <div class="col-lg-6">
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <i class="bi bi-bar-chart-fill me-2 text-primary"></i>Complaints by Category
+            </div>
+            <div class="dash-card-body">
+                @if (Model?.TopCategories != null && Model.TopCategories.Any())
+                {
+                    int maxCount = Model.TopCategories.Max(c => c.Count);
+                    foreach (var cat in Model.TopCategories)
+                    {
+                        <div class="bar-chart-item">
+                            <div class="bcl">@cat.CategoryName</div>
+                            <div class="bcf">
+                                <div class="bar" style="width:@((double)cat.Count / maxCount * 100)%;background:linear-gradient(135deg,#1574e0,#38bdf8);"></div>
+                            </div>
+                            <div class="bcv">@cat.Count</div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted text-center py-3 mb-0">No category data available.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Breakdown -->
+    <div class="col-lg-6">
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <i class="bi bi-pie-chart-fill me-2 text-info"></i>Status Breakdown
+            </div>
+            <div class="dash-card-body">
+                <div class="stat-row">
+                    <span class="text-muted small">Open</span>
+                    <strong class="text-warning">@(Model?.OpenComplaints ?? 0)</strong>
+                </div>
+                <div class="stat-row">
+                    <span class="text-muted small">In Progress</span>
+                    <strong class="text-info">@(Model?.InProgressComplaints ?? 0)</strong>
+                </div>
+                <div class="stat-row">
+                    <span class="text-muted small">Resolved</span>
+                    <strong class="text-success">@(Model?.ResolvedComplaints ?? 0)</strong>
+                </div>
+                <div class="stat-row">
+                    <span class="text-muted small">Closed</span>
+                    <strong style="color:var(--tx3)">@(Model?.ClosedComplaints ?? 0)</strong>
+                </div>
+                <hr style="border-color:rgba(148,163,184,.1);margin:12px 0" />
+                <div class="stat-row">
+                    <span class="text-muted small">Total Cities</span>
+                    <strong class="text-white">@(Model?.TotalCities ?? 0)</strong>
+                </div>
+                <div class="stat-row">
+                    <span class="text-muted small">Departments</span>
+                    <strong class="text-white">@(Model?.TotalDepartments ?? 0)</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-4">
     <div class="col-lg-8">
         <div class="dash-card">
             <div class="dash-card-header">
@@ -103,69 +238,38 @@
             <div class="dash-card-body">
                 @if (Model != null && Model.RecentComplaints != null && Model.RecentComplaints.Any())
                 {
-                    <table class="table dash-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Number</th>
-                                <th>Title</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var c in Model.RecentComplaints)
-                            {
+                    <div class="table-responsive">
+                        <table class="table dash-table">
+                            <thead>
                                 <tr>
-                                    <td>@c.ComplaintId</td>
-                                    <td><code style="color:#38bdf8">@c.ComplaintNumber</code></td>
-                                    <td>@c.Title</td>
-                                    <td><span class="badge bg-secondary rounded-pill">@c.StatusName</span></td>
-                                    <td class="text-muted" style="font-size:.8rem">@c.CreatedAt.ToString("dd MMM yy")</td>
+                                    <th>#</th>
+                                    <th>Number</th>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                    <th>Date</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var c in Model.RecentComplaints)
+                                {
+                                    <tr>
+                                        <td>@c.ComplaintId</td>
+                                        <td><code style="color:#38bdf8">@c.ComplaintNumber</code></td>
+                                        <td>@c.Title</td>
+                                        <td><span class="status-badge @(c.StatusName?.ToLower().Replace(" ","") ?? "")">@(c.StatusName ?? "N/A")</span></td>
+                                        <td><span class="priority-badge @(c.PriorityName?.ToLower() ?? "")">@(c.PriorityName ?? "N/A")</span></td>
+                                        <td class="text-muted" style="font-size:.8rem">@c.CreatedAt.ToString("dd MMM yy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 }
                 else
                 {
                     <p class="text-muted text-center py-4 mb-0">No complaints yet.</p>
                 }
-            </div>
-        </div>
-    </div>
-
-    <!-- Mini stats column -->
-    <div class="col-lg-4">
-        <div class="dash-card">
-            <div class="dash-card-header">
-                <i class="bi bi-bar-chart-fill me-2 text-info"></i>Quick Stats
-            </div>
-            <div class="dash-card-body">
-                <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:rgba(148,163,184,.08)!important">
-                    <span class="text-muted small">Open</span>
-                    <strong class="text-warning">@(Model?.OpenComplaints ?? 0)</strong>
-                </div>
-                <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:rgba(148,163,184,.08)!important">
-                    <span class="text-muted small">In Progress</span>
-                    <strong class="text-info">@(Model?.InProgressComplaints ?? 0)</strong>
-                </div>
-                <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:rgba(148,163,184,.08)!important">
-                    <span class="text-muted small">Resolved</span>
-                    <strong class="text-success">@(Model?.ResolvedComplaints ?? 0)</strong>
-                </div>
-                <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:rgba(148,163,184,.08)!important">
-                    <span class="text-muted small">Closed</span>
-                    <strong style="color:#94a3b8">@(Model?.ClosedComplaints ?? 0)</strong>
-                </div>
-                <div class="d-flex justify-content-between py-2 border-bottom" style="border-color:rgba(148,163,184,.08)!important">
-                    <span class="text-muted small">Total Cities</span>
-                    <strong class="text-white">@(Model?.TotalCities ?? 0)</strong>
-                </div>
-                <div class="d-flex justify-content-between py-2">
-                    <span class="text-muted small">Departments</span>
-                    <strong class="text-white">@(Model?.TotalDepartments ?? 0)</strong>
-                </div>
             </div>
         </div>
     </div>

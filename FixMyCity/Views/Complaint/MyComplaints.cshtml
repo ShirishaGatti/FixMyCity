@@ -20,7 +20,7 @@
 <!-- Filter bar -->
 @using (Html.BeginForm("MyComplaints", "Complaint", FormMethod.Get, new { id = "filterForm" }))
 {
-    <div class="dash-card mb-4" style="padding:18px 20px;">
+    <div class="dash-card mb-4" style="padding:14px 18px;">
         <div class="row g-2 align-items-end">
 
             <div class="col-md">
@@ -63,13 +63,13 @@
                        value="@(Model.Filter.DateTo?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateTo" />
             </div>
 
-            <div class="col-md-1" style="width:70px; flex:none;">
+            <div class="col-md-1">
                 <label class="dash-label">Page</label>
                 <input type="number" id="pageNumberFilter" class="dash-input" min="1"
                        value="@Model.Filter.PageNumber" name="Filter.PageNumber" />
             </div>
 
-            <div class="col-md-1" style="width:80px; flex:none;">
+            <div class="col-md-1">
                 <label class="dash-label">Rows</label>
                 <select id="pageSizeFilter" class="dash-input" name="Filter.PageSize">
                     <option value="5" @(Model.Filter.PageSize == 5 ? "selected" : "")>5</option>
@@ -79,11 +79,11 @@
                 </select>
             </div>
 
-            <div class="col-md-auto d-flex gap-1 align-items-end">
-                <button type="submit" class="btn-dash-primary btn-sm" style="height:42px;">
-                    <i class="bi bi-search"></i> Search
+            <div class="col-md-1 d-flex gap-1 align-items-end">
+                <button type="submit" class="btn-dash-primary btn-sm flex-fill">
+                    <i class="bi bi-search"></i>
                 </button>
-                <button type="button" id="btnClearFilters" class="btn-dash-outline btn-sm" style="height:42px;" title="Clear filters">
+                <button type="button" id="btnClearFilters" class="btn-dash-outline btn-sm" title="Clear filters">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>

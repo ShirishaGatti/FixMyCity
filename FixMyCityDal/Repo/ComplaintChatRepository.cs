@@ -1,4 +1,5 @@
 using FixMyCity.Exceptions;
+using FixMyCity.Infrastructure;
 using FixMyCityModel.Model;
 using Microsoft.Practices.EnterpriseLibrary.Data;
 using System;
@@ -49,16 +50,19 @@ namespace FixMyCity.Repository
 
                 return result;
             }
-            catch (SqlException ex) when (ex.Number == 52000)
+            catch (SqlException ex) when (ex.Number == ChatSqlErrorCodes.PermissionDenied)
             {
-                // THROW 52000 in the SP = permission denial (not a participant).
-                // Translate to the same BusinessException type used elsewhere so the
-                // service/controller layers don't need to know about SQL error codes.
                 throw new BusinessException(ex.Message, "CHAT_ACCESS_DENIED");
             }
-            catch (SqlException ex)
+            catch (SqlException ex) when (ex.Number == ChatSqlErrorCodes.PermissionDenied ||
+                ex.Number == ChatSqlErrorCodes.MalformedContent ||
+                ex.Number == ChatSqlErrorCodes.ChatClosed)
             {
-                throw new DataAccessException("Failed to retrieve chat thread.", "ComplaintChat_GetByComplaintId", ex);
+                throw new BusinessException(ex.Message, "CHAT_WRITE_REJECTED");
+            }
+            catch (SqlException ex) when (ex.Number == ChatSqlErrorCodes.ChatClosed)
+            {
+                throw new BusinessException(ex.Message, "CHAT_WRITE_REJECTED");
             }
         }
 
@@ -87,16 +91,23 @@ namespace FixMyCity.Repository
                 db.ExecuteNonQuery(com);
                 return Convert.ToInt32(db.GetParameterValue(com, "NewChatMessageId"));
             }
-            catch (SqlException ex) when (ex.Number == 52000 || ex.Number == 52001 || ex.Number == 52002)
+            catch (SqlException ex) when (ex.Number == ChatSqlErrorCodes.PermissionDenied)
             {
-                // Custom THROW errors from the SP: 52000 permission, 52001 malformed
-                // content, 52002 chat closed. All are user-facing business rules, not
-                // infrastructure failures, so they map to BusinessException.
+                throw new BusinessException(ex.Message, "CHAT_ACCESS_DENIED");
+            }
+            catch (SqlException ex) when (ex.Number == ChatSqlErrorCodes.PermissionDenied ||
+                ex.Number == ChatSqlErrorCodes.MalformedContent ||
+                ex.Number == ChatSqlErrorCodes.ChatClosed)
+            {
+                throw new BusinessException(ex.Message, "CHAT_WRITE_REJECTED");
+            }
+            catch (SqlException ex) when (ex.Number == ChatSqlErrorCodes.ChatClosed)
+            {
                 throw new BusinessException(ex.Message, "CHAT_WRITE_REJECTED");
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to send chat message.", "ComplaintChat_Insert", ex);
+                throw new DataAccessException("Failed to save chat attachment.", "ComplaintChatAttachment_Create", ex);
             }
         }
 
@@ -115,7 +126,17 @@ namespace FixMyCity.Repository
                 db.ExecuteNonQuery(com);
                 return Convert.ToInt32(db.GetParameterValue(com, "NewAttachmentId"));
             }
-            catch (SqlException ex) when (ex.Number == 52002)
+            catch (SqlException ex) when (ex.Number == ChatSqlErrorCodes.PermissionDenied)
+            {
+                throw new BusinessException(ex.Message, "CHAT_ACCESS_DENIED");
+            }
+            catch (SqlException ex) when (ex.Number == ChatSqlErrorCodes.PermissionDenied ||
+                ex.Number == ChatSqlErrorCodes.MalformedContent ||
+                ex.Number == ChatSqlErrorCodes.ChatClosed)
+            {
+                throw new BusinessException(ex.Message, "CHAT_WRITE_REJECTED");
+            }
+            catch (SqlException ex) when (ex.Number == ChatSqlErrorCodes.ChatClosed)
             {
                 throw new BusinessException(ex.Message, "CHAT_WRITE_REJECTED");
             }
@@ -150,6 +171,20 @@ namespace FixMyCity.Repository
                 }
                 return null;
             }
+            catch (SqlException ex) when (ex.Number == ChatSqlErrorCodes.PermissionDenied)
+            {
+                throw new BusinessException(ex.Message, "CHAT_ACCESS_DENIED");
+            }
+            catch (SqlException ex) when (ex.Number == ChatSqlErrorCodes.PermissionDenied ||
+                ex.Number == ChatSqlErrorCodes.MalformedContent ||
+                ex.Number == ChatSqlErrorCodes.ChatClosed)
+            {
+                throw new BusinessException(ex.Message, "CHAT_WRITE_REJECTED");
+            }
+            catch (SqlException ex) when (ex.Number == ChatSqlErrorCodes.ChatClosed)
+            {
+                throw new BusinessException(ex.Message, "CHAT_WRITE_REJECTED");
+            }
             catch (SqlException ex)
             {
                 throw new DataAccessException("Failed to retrieve chat attachment.", "ComplaintChatAttachment_GetById", ex);
@@ -172,6 +207,22 @@ namespace FixMyCity.Repository
                 FileSizeBytes = row["FileSizeBytes"] is DBNull ? (long?)null : Convert.ToInt64(row["FileSizeBytes"]),
                 CreatedAt = Convert.ToDateTime(row["CreatedAt"])
             };
+        }
+        public void DeactivateAttachment(int attachmentId)
+        {
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.ComplaintChatAttachment_Deactivate");
+                db.AddInParameter(com, "ChatAttachmentId", DbType.Int32, attachmentId);
+                db.ExecuteNonQuery(com);
+            }
+            catch (SqlException ex)
+            {
+                // Best-effort cleanup — don't let a cleanup failure mask the original exception below.
+                throw new DataAccessException("ComplaintChatAttachment_Deactivate", "ComplaintChatAttachment_Deactivate", ex);
+
+
+            }
         }
     }
 }

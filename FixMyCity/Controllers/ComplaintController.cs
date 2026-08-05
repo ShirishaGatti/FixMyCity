@@ -14,6 +14,7 @@ using System.Web.UI.WebControls;
 
 namespace FixMyCity.Controllers
 {
+    [RoleAuthorize(RoleIds.Citizen)]
     public class ComplaintController : Controller
     {
         private readonly IConsumerService _consumerService;
@@ -33,7 +34,6 @@ namespace FixMyCity.Controllers
         private int roleId => _session.RoleId;
 
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpGet]
         public ActionResult MyComplaints(ComplaintListFilterViewModel filter)
         {
@@ -51,7 +51,6 @@ namespace FixMyCity.Controllers
             return View(vm);
         }
        
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult SaveComplaint(FileComplaintViewModel vm)
@@ -87,7 +86,6 @@ namespace FixMyCity.Controllers
             return Json(new { success = true, message = $"Complaint {verb} successfully.", complaintId = savedId });
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpGet]
         public JsonResult GetComplaintForEdit(int id)
         {
@@ -117,7 +115,6 @@ namespace FixMyCity.Controllers
             }
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteComplaint(int id)
@@ -131,7 +128,6 @@ namespace FixMyCity.Controllers
             catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpGet]
         public ActionResult ExportComplaintPdf(int id)
         {
@@ -144,7 +140,6 @@ namespace FixMyCity.Controllers
             return File(pdf, "application/pdf", fileName);
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpGet]
         public ActionResult ComplaintDetailsPartial(int id)
         {
@@ -165,7 +160,6 @@ namespace FixMyCity.Controllers
             }
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpGet]
         public ActionResult DownloadAttachment(int id)
         {
@@ -180,7 +174,6 @@ namespace FixMyCity.Controllers
             return File(physicalPath, contentType, attachment.FileName);
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteAttachment(int id)
@@ -195,14 +188,12 @@ namespace FixMyCity.Controllers
             catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpGet]
         public ActionResult Home()
         {
             return View();
         }
 
-        [RoleAuthorize]
         [HttpGet]
         public ActionResult Profile()
         {
@@ -226,15 +217,8 @@ namespace FixMyCity.Controllers
             return View(vm);
         }
         //Support executives expect a "Queue" landing page after login.Redirect to the officer complaints UI which implements the queue.
-        [RoleAuthorize(RoleIds.SupportExecutive)]
-        [HttpGet]
-        public ActionResult Queue()
-        {
-            // Reuse the Officer controller's Complaints action to show the assigned complaints/queue.
-            return RedirectToAction("Complaints", "Officer");
-        }
+      
 
-        [RoleAuthorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Profile(ProfileViewModel vm)

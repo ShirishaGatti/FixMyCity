@@ -129,26 +129,13 @@ namespace FixMyCity.Service
             }
             catch (Exception)
             {
-                // Message row failed after the file already landed on disk —
-                // clean up the orphaned file so it doesn't linger unreferenced.
                 if (File.Exists(physicalPath)) File.Delete(physicalPath);
+                _chatRepo.DeactivateAttachment(attachmentId);   // don't leave an orphaned metadata row either
                 throw;
             }
 
-            return new ChatMessageViewModel
-            {
-                ChatMessageId = chatMessageId,
-                SenderId = senderId,
-                SenderRoleId = senderRoleId,
-                IsAttachment = true,
-                AttachmentId = attachmentId,
-                FileName = originalName,
-                IsImage = ImageExtensions.Contains(ext),
-                FileSizeDisplay = FormatFileSize(file.ContentLength),
-                IconClass = IconClassFor(ext),
-                CreatedAt = DateTime.UtcNow,
-                IsMine = true
-            };
+            return BuildAttachmentViewModel(chatMessageId, senderId, senderRoleId, attachmentId,
+            originalName, ext, file.ContentLength, DateTime.UtcNow, isMine: true);
         }
 
         public string GetAttachmentPhysicalPath(int chatAttachmentId, int requesterId, int requesterRoleId, out string fileName, out string contentType)
@@ -174,7 +161,13 @@ namespace FixMyCity.Service
 
         private ChatMessageViewModel MapToViewModel(ComplaintChatMessage m, int viewerId)
         {
-            string ext = m.IsAttachment ? Path.GetExtension(m.FileName ?? string.Empty).ToLowerInvariant() : null;
+            if (m.IsAttachment)
+            {
+                string ext = Path.GetExtension(m.FileName ?? string.Empty).ToLowerInvariant();
+                return BuildAttachmentViewModel(m.ChatMessageId, m.SenderId, m.SenderRoleId,
+                    m.AttachmentId ?? 0, m.FileName, ext, m.FileSizeBytes ?? 0, m.CreatedAt,
+                    isMine: m.SenderId == viewerId);
+            }
 
             return new ChatMessageViewModel
             {
@@ -183,17 +176,29 @@ namespace FixMyCity.Service
                 SenderName = m.SenderName,
                 SenderRoleId = m.SenderRoleId,
                 MessageText = m.MessageText,
-                IsAttachment = m.IsAttachment,
-                AttachmentId = m.AttachmentId,
-                FileName = m.FileName,
-                IsImage = m.IsAttachment && ImageExtensions.Contains(ext),
-                FileSizeDisplay = m.IsAttachment ? FormatFileSize(m.FileSizeBytes ?? 0) : null,
-                IconClass = m.IsAttachment ? IconClassFor(ext) : null,
+                IsAttachment = false,
                 CreatedAt = m.CreatedAt,
                 IsMine = m.SenderId == viewerId
             };
         }
-
+        private ChatMessageViewModel BuildAttachmentViewModel(int chatMessageId, int senderId, int senderRoleId,
+        int attachmentId, string fileName, string ext, long fileSizeBytes, DateTime createdAt, bool isMine)
+        {
+            return new ChatMessageViewModel
+            {
+                ChatMessageId = chatMessageId,
+                SenderId = senderId,
+                SenderRoleId = senderRoleId,
+                IsAttachment = true,
+                AttachmentId = attachmentId,
+                FileName = fileName,
+                IsImage = ImageExtensions.Contains(ext),
+                FileSizeDisplay = FormatFileSize(fileSizeBytes),
+                IconClass = IconClassFor(ext),
+                CreatedAt = createdAt,
+                IsMine = isMine
+            };
+        }
         private static string FormatFileSize(long bytes)
         {
             if (bytes >= 1024 * 1024) return $"{bytes / (1024.0 * 1024.0):0.#} MB";
