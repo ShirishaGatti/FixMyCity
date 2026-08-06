@@ -391,7 +391,7 @@ namespace FixMyCity.Repository
                     foreach (DataRow r in ds.Tables[0].Rows)
                         list.Add(new City { CityId = ToInt(r["Id"]), CityName = r["Name"].ToString() });
             }
-            catch (SqlException ex) { throw new DataAccessException("Failed to load cities.", "City_GetAll", ex); }
+            catch (SqlException ex) { throw new DataAccessException("Failed to load cities.", "CitiesGetAll", ex); }
             return list;
         }
 

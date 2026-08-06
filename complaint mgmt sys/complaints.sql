@@ -440,7 +440,8 @@ BEGIN
 END  
 
 EXEC sp_rename 'FixMyCity.Complaint_Delete','FixMyCity.ComplaintDelete'
-SELECT * FROM FIXMYCITY.ComplaintStatus
+SELECT * FROM FIXMYCITY.Complaint
+update fixmycity.complaint set isactive=1
 
 CREATE   OR ALTER PROCEDURE FixMyCity.Complaint_Save  
     @ComplaintId INT = NULL,  

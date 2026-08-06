@@ -180,7 +180,7 @@ namespace FixMyCity.Repository
             var list = new List<City>();
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.City_GetAll");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.CitiesGetAll");
                 DataSet ds = this.db.ExecuteDataSet(com);
                 if (ds != null && ds.Tables.Count > 0)
                 {
@@ -196,7 +196,7 @@ namespace FixMyCity.Repository
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to load cities list.", "City_GetAll", ex);
+                throw new DataAccessException("Failed to load cities list.", "CitiesGetAll", ex);
             }
 
             return list;
@@ -210,7 +210,7 @@ namespace FixMyCity.Repository
             var list = new List<Ward>();
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Ward_GetByCityId");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.WardsGetByCity");
                 this.db.AddInParameter(com, "CityId", DbType.Int32, cityId);
                 DataSet ds = this.db.ExecuteDataSet(com);
                 if (ds != null && ds.Tables.Count > 0)
@@ -228,7 +228,7 @@ namespace FixMyCity.Repository
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to load wards list.", "Ward_GetByCityId", ex);
+                throw new DataAccessException("Failed to load wards list.", "WardsGetByCity", ex);
             }
 
             return list;

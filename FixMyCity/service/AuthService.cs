@@ -290,9 +290,17 @@ namespace FixMyCity.Service
             string refreshHash = JwtHelper.HashToken(rawRefresh);
 
             DateTime now = DateTime.UtcNow;
-            DateTime expiresAt = now.AddDays(JwtHelper.GetRefreshExpiryDays()); // normal rotation cycle
-            DateTime trustExpiresAt = rememberMe ? now.AddDays(RememberMeDays) : expiresAt;
+            DateTime trustExpiresAt = rememberMe
+                   ? now.AddDays(RememberMeDays)
+                   : now.AddDays(JwtHelper.GetRefreshExpiryDays());
 
+            // Rotation-cycle deadline. For remembered sessions this now equals the
+            // trust ceiling itself, so inactivity alone can't log the user out
+            // before the 30 days they were promised. Non-remembered sessions keep
+            // the original rolling 7-day window (unchanged behavior).
+            DateTime expiresAt = rememberMe
+                ? trustExpiresAt
+                : now.AddDays(JwtHelper.GetRefreshExpiryDays());
             _repo.CreateRefreshToken(refreshHash, consumerId, email, roleId, expiresAt, rememberMe, trustExpiresAt);
 
             return new TokenPair
@@ -342,14 +350,14 @@ namespace FixMyCity.Service
 
             string newRawRefresh = JwtHelper.GenerateRefreshToken();
             string newRefreshHash = JwtHelper.HashToken(newRawRefresh);
-            DateTime newExpiry = DateTime.UtcNow.AddDays(JwtHelper.GetRefreshExpiryDays());
+            // Remembered sessions keep ExpiresAt pinned to the (unmoving) trust
+            // ceiling; regular sessions keep sliding 7 days forward on each use.
+            DateTime newExpiry = stored.RememberMe
+                ? stored.TrustExpiresAt
+                : DateTime.UtcNow.AddDays(JwtHelper.GetRefreshExpiryDays());
 
-            // TrustExpiresAt is carried forward as-is, never recalculated —
-            // otherwise "remember me for 30 days" would silently become
-            // "30 more days on every visit" and never truly expire.
             _repo.RotateRefreshToken(hash, newRefreshHash, stored.ConsumerId, stored.Email, stored.RoleId,
                                       newExpiry, stored.RememberMe, stored.TrustExpiresAt);
-
             string newAccessToken = JwtHelper.GenerateToken(stored.ConsumerId, stored.RoleId, stored.Email);
 
             return new TokenPair
