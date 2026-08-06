@@ -230,12 +230,15 @@ html.lm .admin-content .complaint-num {
 /* ── Mobile collapse ───────────────────────────────────────────── */
 @media (max-width: 767px) {
     .admin-sidebar {
-        width: 200px;
-        flex: 0 0 200px;
+        transform: translateX(-100%);
+        box-shadow: none;
     }
-
+    .admin-sidebar.open {
+        transform: translateX(0);
+        box-shadow: 6px 0 30px rgba(0,0,0,0.5);
+    }
     .admin-content {
-        margin-left: 200px;
+        margin-left: 0;
     }
 
     .admin-nav-link {
@@ -244,12 +247,7 @@ html.lm .admin-content .complaint-num {
 }
 
 @media (max-width: 575px) {
-    .admin-sidebar {
-        position: fixed;
-        width: 180px;
-        flex: 0 0 180px;
-    }
     .admin-content {
-        margin-left: 180px;
+        padding: 1rem;
     }
 }

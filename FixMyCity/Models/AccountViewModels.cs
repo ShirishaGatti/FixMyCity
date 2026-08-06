@@ -56,6 +56,8 @@ namespace FixMyCity.Models
         [Required]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
+        [MinLength(8, ErrorMessage = "Password must be at least 8 characters.")]
+        [MaxLength(100, ErrorMessage = "Password cannot exceed 100 characters.")]
         public string Password { get; set; }
 
         [Display(Name = "Remember me?")]
@@ -70,7 +72,8 @@ namespace FixMyCity.Models
         public string Email { get; set; }
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
+        [MinLength(8, ErrorMessage = "Password must be at least 8 characters.")]
+        [MaxLength(100, ErrorMessage = "Password cannot exceed 100 characters.")]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }
@@ -89,13 +92,16 @@ namespace FixMyCity.Models
         public string Email { get; set; }
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]
+        [MinLength(8, ErrorMessage = "Password must be at least 8 characters.")]
+        [MaxLength(100, ErrorMessage = "Password cannot exceed 100 characters.")]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; }
 
         [DataType(DataType.Password)]
         [Display(Name = "Confirm password")]
+        [MinLength(8, ErrorMessage = "Password must be at least 8 characters.")]
+        [MaxLength(100, ErrorMessage = "Password cannot exceed 100 characters.")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
 

@@ -29,10 +29,7 @@ namespace FixMyCity.Service
         // PassSalt as two separate VARBINARY columns rather than one
         // self-salting BCrypt string, so this uses PBKDF2 (Rfc2898) with
         // a random 128-bit salt and 100k iterations to match that shape.
-        // If you'd rather standardise on BCrypt like the rest of the
-        // Foodies codebase, drop PassSalt and store BCrypt's own string
-        // output in PassHash instead — flagging this as a deliberate
-        // deviation, not an oversight.
+       
         private const int Pbkdf2Iterations = 100000;
         private const int SaltSizeBytes = 16;
         private const int HashSizeBytes = 32;
@@ -59,7 +56,7 @@ namespace FixMyCity.Service
             // Self-registration is restricted to Citizen; SupportExecutive/Admin
             vm.RoleId = RoleIds.Citizen;
             vm.DepartmentId = null;
-            vm.Designation = null;
+         //   vm.Designation = null;
 
             if (EmailExists(vm.Email))
                 throw new BusinessException("An account with this email already exists.", "EMAIL_EXISTS");
@@ -70,54 +67,6 @@ namespace FixMyCity.Service
             return _repo.Register(vm, hash, salt);
         }
 
-        // ===========================
-        // Register (Admin-only — SupportExecutive / Admin accounts)
-        // ===========================
-        // Deliberately a separate method rather than a "which role" flag on
-        // Register(), for two reasons:
-        //   1. RegisterViewModel and StaffRegisterViewModel are different
-        //      shapes (StaffRegisterViewModel legitimately exposes RoleId/
-        //      DeptId/Designation as bindable — RegisterViewModel must not).
-        //   2. It keeps the public, anonymous Register() path simple to audit:
-        //      there is no code path in it that can ever produce anything but
-        //      a Citizen, no matter what a caller posts.
-        // The repository call is reused because the underlying insert
-        // (Auth_Register sproc) doesn't care which controller action got it
-        // here — only the validation rules above it differ.
-        public int RegisterStaff(StaffRegisterViewModel vm)
-        {
-            ValidateName(vm.Name);
-            ValidateEmail(vm.Email);
-            ValidateNewPassword(vm.Password);
-
-            if (string.IsNullOrWhiteSpace(vm.Contact))
-                throw new BusinessException("Contact number is required.", "CONTACT_REQUIRED");
-
-            if (vm.RoleId != RoleIds.SupportExecutive && vm.RoleId != RoleIds.Admin)
-                throw new BusinessException("Role must be Support Executive or Admin.", "INVALID_ROLE");
-
-            if (vm.DeptId <= 0)
-                throw new BusinessException("Department is required for staff accounts.", "DEPT_REQUIRED");
-
-            if (EmailExists(vm.Email))
-                throw new BusinessException("An account with this email already exists.", "EMAIL_EXISTS");
-
-            byte[] salt = GenerateSalt();
-            byte[] hash = HashPassword(vm.Password, salt);
-
-            var registerVm = new RegisterViewModel
-            {
-                Name = vm.Name,
-                Email = vm.Email,
-                Password = vm.Password,
-                Contact = vm.Contact,
-                RoleId = vm.RoleId,
-                DepartmentId = vm.DeptId,
-                Designation = vm.Designation
-            };
-
-            return _repo.Register(registerVm, hash, salt);
-        }
 
         public bool EmailExists(string email)
         {

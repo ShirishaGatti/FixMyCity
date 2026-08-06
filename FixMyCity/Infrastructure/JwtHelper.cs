@@ -10,12 +10,11 @@ using System.Web;
 
 namespace FixMyCity.Infrastructure
 {
-    // Same rotating-refresh-token pattern used in FoodOrderingSystem:
     //   - Access token  = short-lived signed JWT, carries RoleId/ConsumerId/Email as claims
     //   - Refresh token = opaque random value; only its SHA-256 hash is ever stored in the DB
     //
-    // Web.config keys required (add under <appSettings>):
-    //   <add key="JwtSecretKey" value="{at least 32 random bytes, base64 or plain}" />
+    // Web.config keys :
+    //   <add key="JwtSecretKey" " />
     //   <add key="JwtExpiryMinutes" value="15" />
     //   <add key="JwtRefreshExpiryDays" value="7" />
     public static class JwtHelper

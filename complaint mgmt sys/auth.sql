@@ -8,52 +8,88 @@ SET IDENTITY_INSERT FixMyCity.Role ON;
 	select * from FixMyCity.role
 
 
-	CREATE PROCEDURE FixMyCity.Auth_Register
-    @Name        VARCHAR(100),
-    @Email       VARCHAR(150),
-    @Contact     VARCHAR(15) = NULL,
-    @DOB         DATETIME = NULL,
-    @AddressLine VARCHAR(250) = NULL,
-    @CityId      INT = NULL,
-    @WardId      INT = NULL,
-    @RoleId      INT,
-    @DeptId      INT = NULL,
-    @Designation VARCHAR(100) = NULL,
-    @PassHash    VARBINARY(64),
-    @PassSalt    VARBINARY(32),
-    @NewConsumerId INT OUTPUT
+CREATE or alter PROCEDURE FixMyCity.CitiesGetAll  
 /*
 ***********************************************************************************************
 	Date   			Modified By   	Purpose of Modification
-1	28jule2026		Shrisha Gatti	registeration
+1	28jule2026		Shrisha Gatti	CitiesGetAll
+***********************************************************************************************
+*/
+AS  
+BEGIN  
+    SET NOCOUNT ON;  
+    SELECT  
+        CityId,  
+        CityName  
+    FROM FixMyCity.City  
+    WHERE IsActive = 1          -- only surfaced cities  
+    ORDER BY CityName;  
+END  
+
+CREATE OR Alter PROCEDURE FixMyCity.WardsGetByCity
+    @CityId INT
+	/*
+***********************************************************************************************
+	Date   			Modified By   	Purpose of Modification
+1	28jule2026		Shrisha Gatti	WardsGetByCity
 ***********************************************************************************************
 */
 AS
 BEGIN
     SET NOCOUNT ON;
-    BEGIN TRY
-        BEGIN TRANSACTION;
- 
-        INSERT INTO FixMyCity.Consumer (Name, Email, Contact, DOB, AddressLine, CityId, WardId, RoleId, DeptId, Designation,CreatedDate,LastModifiedAt)
-        VALUES (@Name, @Email, @Contact, @DOB, @AddressLine, @CityId, @WardId, @RoleId, @DeptId, @Designation,GETDATE(),GETDATE());
- 
-        SET @NewConsumerId = SCOPE_IDENTITY();
- 
-        INSERT INTO FixMyCity.ConsumerCredential (ConsumerId, PassHash, PassSalt,CreatedDate,LastModifiedAt)
-        VALUES (@NewConsumerId, @PassHash, @PassSalt,GETDATE(),GETDATE());
- 
-        COMMIT TRANSACTION;
-    END TRYcr
-    BEGIN CATCH
-         IF @@TRANCOUNT > 0
-        ROLLBACK TRANSACTION;
-
-    THROW;
-    END CATCH
+    SELECT
+        WardId,
+        WardName,
+        CityId
+    FROM FixMyCity.Ward
+    WHERE CityId  = @CityId
+      AND IsActive = 1          -- only surfaced wards
+    ORDER BY WardName;
 END
 GO
- 
-CREATE PROCEDURE FixMyCity.Auth_GetCredentialByEmail
+
+ CREATE OR ALTER PROCEDURE Register  
+    @Name        VARCHAR(100),  
+    @Email       VARCHAR(150),  
+    @Contact     VARCHAR(15) = NULL,  
+    @DOB         DATETIME = NULL,  
+    @AddressLine VARCHAR(250) = NULL,  
+    @CityId      INT = NULL,  
+    @WardId      INT = NULL,  
+    @RoleId      INT,  
+    @DeptId      INT = NULL,  
+    @Designation VARCHAR(100) = NULL,  
+    @PassHash    VARBINARY(64),  
+    @PassSalt    VARBINARY(32),  
+    @NewConsumerId INT OUTPUT  
+/*  
+***********************************************************************************************  
+ Date      Modified By    Purpose of Modification  
+1 28jule2026  Shrisha Gatti registeration  
+***********************************************************************************************  
+*/  
+AS  
+BEGIN  
+    SET NOCOUNT ON;  
+    BEGIN TRY  
+        BEGIN TRANSACTION;  
+   
+        INSERT INTO FixMyCity.Consumer (Name, Email, Contact, DOB, AddressLine, CityId, WardId, RoleId, DeptId, Designation,CreatedDate,LastModifiedAt)  
+        VALUES (@Name, @Email, @Contact, @DOB, @AddressLine, @CityId, @WardId, @RoleId, @DeptId, @Designation,GETDATE(),GETDATE());  
+   
+        SET @NewConsumerId = SCOPE_IDENTITY();  
+   
+        INSERT INTO FixMyCity.ConsumerCredential (ConsumerId, PassHash, PassSalt,CreatedDate,LastModifiedAt)  
+        VALUES (@NewConsumerId, @PassHash, @PassSalt,GETDATE(),GETDATE());  
+   
+        COMMIT TRANSACTION;  
+    END TRY  
+    BEGIN CATCH  
+         IF @@TRANCOUNT > 0         ROLLBACK TRANSACTION;      THROW;  
+    END CATCH  
+END   
+
+CREATE OR ALTER PROCEDURE FixMyCity.GetCredentialByEmail
     @Email VARCHAR(150)
 /*
 ***********************************************************************************************
@@ -305,36 +341,6 @@ GO
  
  use Training_DB_Shirisha_Gatti
  exec City_GetAll
-
-CREATE PROCEDURE FixMyCity.City_GetAll
-AS
-BEGIN
-    SET NOCOUNT ON;
-    SELECT
-        CityId,
-        CityName
-    FROM FixMyCity.City
-    WHERE IsActive = 1          -- only surfaced cities
-    ORDER BY CityName;
-END
-GO
-
-exec Ward_GetByCityId 1
-Alter PROCEDURE FixMyCity.Ward_GetByCityId
-    @CityId INT
-AS
-BEGIN
-    SET NOCOUNT ON;
-    SELECT
-        WardId,
-        WardName,
-        CityId
-    FROM FixMyCity.Ward
-    WHERE CityId  = @CityId
-      AND IsActive = 1          -- only surfaced wards
-    ORDER BY WardName;
-END
-GO
 
 CREATE PROCEDURE FixMyCity.Consumer_UpdateProfile
     @ConsumerId    INT,

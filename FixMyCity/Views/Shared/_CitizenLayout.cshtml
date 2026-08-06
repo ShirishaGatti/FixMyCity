@@ -31,6 +31,9 @@
     <!-- ── TOP NAVBAR ─────────────────────────────────── -->
     <nav class="dash-navbar">
         <div class="d-flex align-items-center gap-3">
+            <button class="dash-sidebar-toggle" id="sidebarToggle" title="Menu">
+                <i class="bi bi-list"></i>
+            </button>
             <a href="@Url.Action("Home", "Complaint")" class="dash-brand">
                 <div class="dash-brand-icon"><i class="bi bi-building-fill"></i></div>
                 Fix<span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">MyCity</span>
@@ -148,6 +151,11 @@
         localStorage.setItem('fixmycity_theme', isLight ? 'light' : 'dark');
     });
 
+</script>
+<script>
+    document.getElementById('sidebarToggle').addEventListener('click', function () {
+        document.getElementById('dashSidebar').classList.toggle('open');
+    });
 </script>
 
     <script>

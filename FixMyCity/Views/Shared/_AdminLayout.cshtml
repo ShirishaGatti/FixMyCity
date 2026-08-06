@@ -29,6 +29,9 @@
 <!-- ── TOP NAVBAR (same style as citizen) ──────────────────────────── -->
 <nav class="dash-navbar">
     <div class="d-flex align-items-center gap-3">
+        <button class="dash-sidebar-toggle" id="sidebarToggle" title="Menu">
+            <i class="bi bi-list"></i>
+        </button>
         <a href="@Url.Action("Dashboard", "Admin")" class="dash-brand">
             <div class="dash-brand-icon"><i class="bi bi-building-fill"></i></div>
             Fix<span style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">MyCity</span>
@@ -162,6 +165,11 @@
         var isLight = !document.getElementById('htmlRoot').classList.contains('lm');
         applyDashTheme(isLight);
         localStorage.setItem('fixmycity_theme', isLight ? 'light' : 'dark');
+    });
+</script>
+<script>
+    document.getElementById('sidebarToggle').addEventListener('click', function () {
+        document.querySelector('.admin-sidebar').classList.toggle('open');
     });
 </script>
 

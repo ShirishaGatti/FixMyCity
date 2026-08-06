@@ -1934,7 +1934,7 @@ a {
 
 /* ── Truncated Table Columns ── */
 .text-truncate-col {
-    max-width: 180px;
+    max-width: 140px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1942,7 +1942,7 @@ a {
     vertical-align: middle;
 }
 .text-truncate-col-lg {
-    max-width: 260px;
+    max-width: 160px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

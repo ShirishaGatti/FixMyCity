@@ -131,6 +131,7 @@
             @Html.AntiForgeryToken()
             <input type="hidden" name="ComplaintId" id="complaintIdField" value="" />
             <div class="dash-modal-body">
+                <div class="dash-form-horizontal">
                 <div class="dash-form-group">
                     <label class="dash-label">Title *</label>
                     <input type="text" name="Title" id="fldTitle" class="dash-input" maxlength="150" required />
@@ -139,44 +140,40 @@
                     <label class="dash-label">Description *</label>
                     <textarea name="Description" id="fldDescription" rows="3" class="dash-input" maxlength="1000" required></textarea>
                 </div>
-                <div class="row g-2">
-                    <div class="col-6">
-                        <label class="dash-label">Category *</label>
-                        <select name="CategoryId" id="fldCategoryId" class="dash-input" required>
-                            <option value="">-- Select --</option>
-                            @foreach (var cat in Model.Categories)
-                            {
-                                <option value="@cat.CategoryId">@cat.CategoryName</option> }
-                        </select>
-                    </div>
-                    <div class="col-6">
-                        <label class="dash-label">Priority *</label>
-                        <select name="PriorityId" id="fldPriorityId" class="dash-input" required>
-                            <option value="">-- Select --</option>
-                            @foreach (var p in Model.Priorities)
-                            {
-                                <option value="@p.PriorityId">@p.PriorityName</option> }
-                        </select>
-                    </div>
+                <div class="dash-form-group">
+                    <label class="dash-label">Category *</label>
+                    <select name="CategoryId" id="fldCategoryId" class="dash-input" required>
+                        <option value="">-- Select --</option>
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <option value="@cat.CategoryId">@cat.CategoryName</option> }
+                    </select>
                 </div>
-                <div class="row g-2 mt-1">
-                    <div class="col-6">
-                        <label class="dash-label">City *</label>
-                        <select name="CityId" id="complaintCityId" class="dash-input" required>
-                            <option value="">-- Select --</option>
-                            @foreach (var city in Model.Cities)
-                            {
-                                <option value="@city.CityId">@city.CityName</option> }
-                        </select>
-                    </div>
-                    <div class="col-6">
-                        <label class="dash-label">Ward *</label>
-                        <select name="WardId" id="complaintWardId" class="dash-input" required>
-                            <option value="">-- Select City First --</option>
-                        </select>
-                    </div>
+                <div class="dash-form-group">
+                    <label class="dash-label">Priority *</label>
+                    <select name="PriorityId" id="fldPriorityId" class="dash-input" required>
+                        <option value="">-- Select --</option>
+                        @foreach (var p in Model.Priorities)
+                        {
+                            <option value="@p.PriorityId">@p.PriorityName</option> }
+                    </select>
                 </div>
-                <div class="dash-form-group mt-2">
+                <div class="dash-form-group">
+                    <label class="dash-label">City *</label>
+                    <select name="CityId" id="complaintCityId" class="dash-input" required>
+                        <option value="">-- Select --</option>
+                        @foreach (var city in Model.Cities)
+                        {
+                            <option value="@city.CityId">@city.CityName</option> }
+                    </select>
+                </div>
+                <div class="dash-form-group">
+                    <label class="dash-label">Ward *</label>
+                    <select name="WardId" id="complaintWardId" class="dash-input" required>
+                        <option value="">-- Select City First --</option>
+                    </select>
+                </div>
+                <div class="dash-form-group">
                     <label class="dash-label">Address *</label>
                     <input type="text" name="AddressLine" id="fldAddressLine" class="dash-input" maxlength="250" required />
                 </div>
@@ -184,12 +181,13 @@
                     <label class="dash-label">Landmark</label>
                     <input type="text" name="Landmark" id="fldLandmark" class="dash-input" maxlength="150" />
                 </div>
-                <div class="dash-form-group mt-2">
-                    <label class="dash-label">Attachments (optional)</label>
+                <div class="dash-form-group">
+                    <label class="dash-label">Attachments</label>
                     <input type="file" name="Attachments" id="complaintAttachments" class="dash-input" multiple
                            data-max-size-mb="@Model.MaxAttachmentSizeMB" data-allowed-ext="@Model.AllowedExtensionsCsv" />
                     <small style="color:var(--tx3);">jpg, jpeg, png, pdf, doc, docx — up to @Model.MaxAttachmentSizeMB MB each.</small>
                     <div id="attachmentPreviewList" class="attachment-preview-list mt-2"></div>
+                </div>
                 </div>
             </div>
             <div class="dash-modal-footer">

@@ -10,10 +10,6 @@ namespace FixMyCity.Service
     {
         int Register(RegisterViewModel vm);
 
-        // Admin-only provisioning path — see AuthService.RegisterStaff for why
-        // this is a separate method rather than a flag on Register().
-        int RegisterStaff(StaffRegisterViewModel vm);
-
         LoginViewModel Login(LoginViewModel vm);
         bool EmailExists(string email);
         int? GetConsumerIdByEmail(string email);
