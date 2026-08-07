@@ -924,4 +924,43 @@ html.lm .chat-attach-btn { background:#f8fafc; border-color:#d1d5db; color:#3741
 html.lm .chat-dropzone { border-color:#d1d5db; color:#6b7280; }
 html.lm .chat-bubble.theirs .chat-bubble-inner { background:#f1f5f9; color:#0f172a; border-color:#e2e8f0; }
 html.lm .chat-closed-banner { background:rgba(239,68,68,0.06); }
-html.lm .chat-thread { scrollbar-color:#d1d5db transparent; }
+html.lm .chat-thread { scrollbar-color:#d1d5db transparent; }.cd-confirm-card {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 18px;
+    margin: 18px 0;
+    border-radius: 14px;
+    background: #f8fbff;
+    border: 1px solid #d7e9ff;
+}
+
+.cd-confirm-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #eaf4ff;
+    color: #0d6efd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.45rem;
+    flex-shrink: 0;
+}
+
+.cd-confirm-content h6 {
+    margin-bottom: 6px;
+    font-weight: 700;
+}
+
+.cd-confirm-content p {
+    margin-bottom: 14px;
+    color: #6c757d;
+    font-size: .92rem;
+}
+
+.cd-confirm-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}

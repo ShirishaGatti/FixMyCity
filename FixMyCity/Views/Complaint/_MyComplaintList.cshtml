@@ -27,12 +27,22 @@
                     @foreach (var c in Model.Complaints)
                     {
                         bool isOpen = c.StatusName == "Open";
+                        bool isAwaitingConfirmation = c.StatusName == "Awaiting Customer Confirmation";
                         <tr>
                             <td><a href="javascript:void(0)" class="complaint-num-link" onclick="openDetailsDrawer(@c.ComplaintId)">@c.ComplaintNumber</a></td>
                             <td><span class="text-truncate-col-lg" title="@c.Title">@c.Title</span></td>
                             <td><span class="text-truncate-col" title="@c.CategoryName">@c.CategoryName</span></td>
                             <td><span class="priority-badge @c.PriorityName.ToLower()">@c.PriorityName</span></td>
-                            <td><span class="status-badge @c.StatusName.ToLower().Replace(" ", "")">@c.StatusName</span></td>
+                            <td>
+                                <span class="status-badge status-badge-wrap @c.StatusName.ToLower().Replace(" ", "")">@c.StatusName</span>
+                                @if (isAwaitingConfirmation && c.DaysLeftToRespond>0)
+                                {
+                                    <div class="text-muted" style="font-size:0.72rem; margin-top:2px; white-space:nowrap;">
+                                        <i class="bi bi-hourglass-split"></i>
+                                        @(c.DaysLeftToRespond == 0 ? "Closes today if no response" : $"{c.DaysLeftToRespond} day{(c.DaysLeftToRespond == 1 ? "" : "s")} to respond")
+                                    </div>
+                                }
+                            </td>
                             <td>@c.CreatedAt.ToString("dd MMM yyyy")</td>
                             <td>
                                 <button type="button" class="chat-row-btn"
@@ -42,9 +52,19 @@
                                 </button>
                             </td>
                             <td class="row-actions">
-                                <button type="button" class="row-action-btn" title="Edit" @(isOpen ? "" : "disabled") onclick="openEditComplaint(@c.ComplaintId)"><i class="bi bi-pencil-square"></i></button>
-                                <button type="button" class="row-action-btn text-danger" title="Delete" @(isOpen ? "" : "disabled") onclick="deleteComplaint(@c.ComplaintId)"><i class="bi bi-trash"></i></button>
-                                <a class="row-action-btn" title="Export PDF" href="@Url.Action("ExportComplaintPdf", "Complaint", new { id = c.ComplaintId })"><i class="bi bi-file-earmark-pdf"></i></a>
+                                @if (isAwaitingConfirmation)
+                                {
+                                    <div class="d-flex gap-1">
+                                        <button type="button" class="row-action-btn text-success" title="Confirm resolution" onclick="confirmResolution(@c.ComplaintId)"><i class="bi bi-check2-circle"></i></button>
+                                        <button type="button" class="row-action-btn text-danger" title="Reject resolution" onclick="rejectResolution(@c.ComplaintId)"><i class="bi bi-x-circle"></i></button>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <button type="button" class="row-action-btn" title="Edit" @(isOpen ? "" : "disabled") onclick="openEditComplaint(@c.ComplaintId)"><i class="bi bi-pencil-square"></i></button>
+                                    <button type="button" class="row-action-btn text-danger" title="Delete" @(isOpen ? "" : "disabled") onclick="deleteComplaint(@c.ComplaintId)"><i class="bi bi-trash"></i></button>
+                                    <a class="row-action-btn" title="Export PDF" href="@Url.Action("ExportComplaintPdf", "Complaint", new { id = c.ComplaintId })"><i class="bi bi-file-earmark-pdf"></i></a>
+                                }
                             </td>
                         </tr>
                     }
@@ -54,32 +74,32 @@
 
         <!-- Pager -->
         @*if (Model.TotalPages > 1)
-        {
-            <div class="dash-pager">
-                <span>
-                    Showing
-                    @((Model.Filter.PageNumber - 1) * Model.Filter.PageSize + 1)
-                    –
-                    @(Math.Min(Model.Filter.PageNumber * Model.Filter.PageSize, Model.TotalCount))
-                    of @Model.TotalCount
-                </span>
+                {
+                    <div class="dash-pager">
+                        <span>
+                            Showing
+                            @((Model.Filter.PageNumber - 1) * Model.Filter.PageSize + 1)
+                            –
+                            @(Math.Min(Model.Filter.PageNumber * Model.Filter.PageSize, Model.TotalCount))
+                            of @Model.TotalCount
+                        </span>
 
-                <div class="dash-pager-controls">
-                    @Html.Raw(PagerLink(1, "«", Model.Filter, Model.Filter.PageNumber > 1))
-                    @Html.Raw(PagerLink(Model.Filter.PageNumber - 1, "‹", Model.Filter, Model.Filter.PageNumber > 1))
+                        <div class="dash-pager-controls">
+                            @Html.Raw(PagerLink(1, "«", Model.Filter, Model.Filter.PageNumber > 1))
+                            @Html.Raw(PagerLink(Model.Filter.PageNumber - 1, "‹", Model.Filter, Model.Filter.PageNumber > 1))
 
-                    <span class="dash-pager-current">
-                        Page @Model.Filter.PageNumber of @Model.TotalPages
-                    </span>
+                            <span class="dash-pager-current">
+                                Page @Model.Filter.PageNumber of @Model.TotalPages
+                            </span>
 
-                    @Html.Raw(PagerLink(Model.Filter.PageNumber + 1, "›", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
-                    @Html.Raw(PagerLink(Model.TotalPages, "»", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
-                </div>
-            </div>
-        }
-    }*@
-     if (Model.TotalPages > 0)
-     {
+                            @Html.Raw(PagerLink(Model.Filter.PageNumber + 1, "›", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
+                            @Html.Raw(PagerLink(Model.TotalPages, "»", Model.Filter, Model.Filter.PageNumber < Model.TotalPages))
+                        </div>
+                    </div>
+                }
+            }*@
+    if (Model.TotalPages > 0)
+    {
         <div class="dash-pager d-flex justify-content-between align-items-center flex-wrap">
 
             <div>
@@ -95,33 +115,33 @@
             <div class="d-flex align-items-center gap-3">
 
                 @*<div class="d-flex align-items-center gap-2">
-                    <label class="mb-0">Page</label>
+                        <label class="mb-0">Page</label>
 
-                    <input type="number"
-                           id="pageNumber"
-                           min="1"
-                           max="@Model.TotalPages"
-                           value="@Model.Filter.PageNumber"
-                           class="form-control form-control-sm"
-                           style="width:70px;" />
+                        <input type="number"
+                               id="pageNumber"
+                               min="1"
+                               max="@Model.TotalPages"
+                               value="@Model.Filter.PageNumber"
+                               class="form-control form-control-sm"
+                               style="width:70px;" />
 
-                    <span>of <strong>@Model.TotalPages</strong></span>
-                </div>
+                        <span>of <strong>@Model.TotalPages</strong></span>
+                    </div>
 
-                <div class="d-flex align-items-center gap-2">
-                    <label class="mb-0">Rows</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="mb-0">Rows</label>
 
-                    <select id="pageSize"
-                            class="form-select form-select-sm"
-                            style="width:80px;">
+                        <select id="pageSize"
+                                class="form-select form-select-sm"
+                                style="width:80px;">
 
-                        <option value="5" @(Model.Filter.PageSize == 5 ? "selected" : "")>5</option>
-                        <option value="2" @(Model.Filter.PageSize == 2 ? "selected" : "")>2</option>
-                        <option value="20" @(Model.Filter.PageSize == 20 ? "selected" : "")>20</option>
-                        <option value="50" @(Model.Filter.PageSize == 50 ? "selected" : "")>50</option>
+                            <option value="5" @(Model.Filter.PageSize == 5 ? "selected" : "")>5</option>
+                            <option value="2" @(Model.Filter.PageSize == 2 ? "selected" : "")>2</option>
+                            <option value="20" @(Model.Filter.PageSize == 20 ? "selected" : "")>20</option>
+                            <option value="50" @(Model.Filter.PageSize == 50 ? "selected" : "")>50</option>
 
-                    </select>
-                </div>*@
+                        </select>
+                    </div>*@
 
                 <div class="dash-pager-controls">
                     @Html.Raw(PagerLink(1, "<<", Model.Filter, Model.Filter.PageNumber > 1))
@@ -134,7 +154,7 @@
             </div>
 
         </div>
-     }
+        }
     }
 </div>
 

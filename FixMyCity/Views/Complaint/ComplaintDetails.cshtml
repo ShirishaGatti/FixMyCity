@@ -138,6 +138,7 @@
 .drawer-card .cd-body { flex: 1; overflow-y: auto; min-height: 0; }
 </style>
 
+
 <div class="cd-hero">
     <div class="cd-hero-left">
         <div class="cd-hero-number">
@@ -157,6 +158,43 @@
     <button type="button" class="dash-modal-close" onclick="closeDetailsDrawer()" style="flex-shrink:0;">&times;</button>
 </div>
 
+@if (Model.Complaint.IsAwaitingConfirmation)
+{
+    <div class="cd-confirm-card">
+        <div class="cd-confirm-icon">
+            <i class="bi bi-patch-check-fill"></i>
+        </div>
+
+        <div class="cd-confirm-content">
+            <h6>Officer marked this complaint as <strong>Resolved</strong></h6>
+
+            <p>
+                Please review the resolution.
+                You have
+                <strong>@(Model.Complaint.DaysLeftToRespond ?? 0) day(s)</strong>
+                remaining to respond.
+            </p>
+
+            <div class="cd-confirm-actions">
+                <button type="button"
+                        class="btn btn-success btn-sm"
+                        id="btnConfirmComplaint"
+                        data-id="@Model.Complaint.ComplaintId">
+                    <i class="bi bi-check-circle"></i>
+                    Confirm - It's Fixed
+                </button>
+
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm"
+                        id="btnRejectComplaint"
+                        data-id="@Model.Complaint.ComplaintId">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Reject - Reopen
+                </button>
+            </div>
+        </div>
+    </div>
+}
 <div class="cd-body">
 
     <!-- Description -->
@@ -262,5 +300,48 @@
                 error: function (xhr) { showToast('Unable to remove attachment. Status: ' + xhr.status, 'error', 'Error'); }
             });
         });
+    });
+
+    $(document).on("click", "#btnConfirmComplaint", function () {
+
+        var id = $(this).data("id");
+
+        confirmDialog("Confirm that your complaint has been resolved?", function () {
+
+            $.post("/Complaint/ConfirmComplaint", { id: id }, function (res) {
+
+                if (res.success) {
+                    showToast("Complaint closed successfully.", "success", "Success");
+                    location.reload();
+                } else {
+                    showToast(res.message, "error", "Error");
+                }
+
+            });
+
+        });
+
+    });
+
+
+    $(document).on("click", "#btnRejectComplaint", function () {
+
+        var id = $(this).data("id");
+
+        confirmDialog("Reopen this complaint?", function () {
+
+            $.post("/Complaint/RejectComplaint", { id: id }, function (res) {
+
+                if (res.success) {
+                    showToast("Complaint reopened.", "success", "Success");
+                    location.reload();
+                } else {
+                    showToast(res.message, "error", "Error");
+                }
+
+            });
+
+        });
+
     });
 </script>

@@ -102,10 +102,14 @@
                             <td><span class="text-truncate-col-lg" title="@item.Title">@item.Title</span></td>
                             <td><span class="text-truncate-col" title="@item.CategoryName">@item.CategoryName</span></td>
                             <td><span class="priority-badge @item.PriorityName.ToLower()">@item.PriorityName</span></td>
-                            <td><span class="status-badge @item.StatusName.ToLower().Replace(" ", "")">@item.StatusName</span></td>
+                            <td><span class="status-badge status-badge-wrap awaitingcustomerconfirmation @item.StatusName.ToLower().Replace(" ", "")">@item.StatusName</span></td>
                             <td><span class="text-truncate-col" title="@(string.IsNullOrWhiteSpace(item.AssignedName) ? "N/A" : item.AssignedName)">@(string.IsNullOrWhiteSpace(item.AssignedName) ? "N/A" : item.AssignedName)</span></td>
                             <td>@item.CreatedAt.ToString("dd MMM yyyy")</td>
                             <td class="row-actions">
+                                @{
+                                    bool canEdit = item.StatusName != "Awaiting Customer Confirmation" && item.StatusName != "Closed";
+                                    bool canResolve = item.StatusName == "Open" || item.StatusName == "In Progress" || item.StatusName == "Reopened";
+                                }
                                 <div class="d-flex gap-1">
                                     <button type="button" class="row-action-btn complaint-edit-btn"
                                             title="Edit complaint"
@@ -114,9 +118,19 @@
                                             data-priority-id="@item.PriorityId"
                                             data-category-id="@item.CategoryId"
                                             data-complaint-number="@item.ComplaintNumber"
-                                            data-title="@item.Title">
+                                            data-title="@item.Title"
+                                            @(canEdit ? "" : "disabled")>
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
+                                    @if (canResolve)
+                                    {
+                                        <button type="button" class="row-action-btn text-success complaint-resolve-btn"
+                                                title="Mark Resolved � sends it to the citizen for confirmation"
+                                                data-complaint-id="@item.ComplaintId"
+                                                data-complaint-number="@item.ComplaintNumber">
+                                            <i class="bi bi-check2-circle"></i>
+                                        </button>
+                                    }
                                     <button type="button" class="chat-row-btn complaint-chat-btn"
                                             title="Discussion"
                                             data-complaint-id="@item.ComplaintId"
@@ -124,9 +138,16 @@
                                         <i class="bi bi-chat-dots-fill"></i>
                                     </button>
                                 </div>
+                                @if (item.IsAwaitingConfirmation && item.DaysLeftToRespond.HasValue)
+                                {
+                                    <div class="text-muted" style="font-size:0.72rem; margin-top:4px; white-space:nowrap;">
+                                        <i class="bi bi-hourglass-split"></i>
+                                        @(item.DaysLeftToRespond.Value == 0 ? "Closes today if no response" : $"Auto-closes in {item.DaysLeftToRespond} day{(item.DaysLeftToRespond == 1 ? "" : "s")}")
+                                    </div>
+                                }
                             </td>
                         </tr>
-                    }
+                                    }
                 </tbody>
             </table>
         </div>
@@ -147,5 +168,5 @@
                 </ul>
             </nav>
         </div>
-    }
+                                    }
 </div>

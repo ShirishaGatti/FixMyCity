@@ -29,7 +29,7 @@ namespace FixMyCity.Controllers
         public ActionResult Dashboard()
         {
             ViewBag.ActivePage = "Home";
-            var vm = _complaintService.GetOfficerDashboard(_session.ConsumerId,_session.RoleId);
+            var vm = _complaintService.GetOfficerDashboard(_session.ConsumerId, _session.RoleId);
             return View(vm);
         }
 
@@ -80,6 +80,34 @@ namespace FixMyCity.Controllers
             catch (Exception)
             {
                 return Json(new { success = false, message = "Unable to update complaint. Please try again." });
+            }
+        }
+
+        // Dedicated transition for the resolution-confirmation workflow.
+        // Deliberately separate from UpdateComplaint: an officer may only ever
+        // push a complaint into "Awaiting Customer Confirmation" via this
+        // action — Closed/Reopened only ever happen through the citizen's
+        // Confirm/Reject actions or the 7-day auto-expiry.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ResolveComplaint(int complaintId)
+        {
+            try
+            {
+                _complaintService.ResolveComplaint(complaintId, CurrentActorId);
+                return Json(new { success = true, message = "Complaint marked Resolved. Awaiting the citizen's confirmation." });
+            }
+            catch (BusinessException ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+            catch (DataAccessException ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "Unable to mark the complaint as resolved. Please try again." });
             }
         }
 
