@@ -113,7 +113,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Consumer_GetById");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.ConsumerGetById");
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 DataSet ds = this.db.ExecuteDataSet(com);
                 if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
@@ -138,7 +138,7 @@ namespace FixMyCity.Repository
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to retrieve consumer profile.", "Consumer_GetById", ex);
+                throw new DataAccessException("Failed to retrieve consumer profile.", "ConsumerGetById", ex);
             }
         }
 
@@ -150,7 +150,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Consumer_UpdateProfile");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.ConsumerUpdateProfile");
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 this.db.AddInParameter(com, "Name", DbType.String, name);
                 this.db.AddInParameter(com, "Contact", DbType.String, contact);
@@ -239,7 +239,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Auth_UpdateLoginState");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.UpdateLoginState");
                 this.db.AddInParameter(com, "ConsumerCredId", DbType.Int32, consumerCredId);
                 this.db.AddInParameter(com, "FailedLoginCount", DbType.Int32, failedCount);
                 this.db.AddInParameter(com, "IsLocked", DbType.Boolean, isLocked);
@@ -266,7 +266,7 @@ namespace FixMyCity.Repository
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to update login state.", "Auth_UpdateLoginState", ex);
+                throw new DataAccessException("Failed to update login state.", "UpdateLoginState", ex);
             }
 
             return true;
@@ -280,7 +280,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Auth_UpdatePassword");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.UpdatePassword");
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 this.db.AddInParameter(com, "PassHash", DbType.Binary, passHash);
                 this.db.AddInParameter(com, "PassSalt", DbType.Binary, passSalt);
@@ -288,7 +288,7 @@ namespace FixMyCity.Repository
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to update password.", "Auth_UpdatePassword", ex);
+                throw new DataAccessException("Failed to update password.", "UpdatePassword", ex);
             }
 
             return true;
@@ -302,7 +302,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Otp_Set");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.OtpInsert");
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 this.db.AddInParameter(com, "OTPHash", DbType.Binary, otpHash);
                 this.db.AddInParameter(com, "ValidTill", DbType.DateTime, validTill);
@@ -310,7 +310,7 @@ namespace FixMyCity.Repository
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to set OTP.", "Otp_Set", ex);
+                throw new DataAccessException("Failed to set OTP.", "OtpInsert", ex);
             }
 
             return true;
@@ -324,7 +324,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Otp_GetState");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.OtpGetState");
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 DataSet ds = this.db.ExecuteDataSet(com);
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
@@ -334,7 +334,7 @@ namespace FixMyCity.Repository
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to load OTP state.", "Otp_GetState", ex);
+                throw new DataAccessException("Failed to load OTP state.", "OtpGetState", ex);
             }
 
             return null;
@@ -348,13 +348,13 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Otp_IncrementAttempts");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.OtpIncrementAttempts");
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 this.db.ExecuteNonQuery(com);
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to increment OTP attempts.", "Otp_IncrementAttempts", ex);
+                throw new DataAccessException("Failed to increment OTP attempts.", "OtpIncrementAttempts", ex);
             }
 
             return true;
@@ -368,13 +368,13 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Otp_MarkUsed");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.OtpMarkUsed");
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 this.db.ExecuteNonQuery(com);
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to mark OTP as used.", "Otp_MarkUsed", ex);
+                throw new DataAccessException("Failed to mark OTP as used.", "OtpMarkUsed", ex);
             }
 
             return true;
@@ -389,7 +389,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.RefreshToken_Create");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.RefreshTokenCreate");
                 this.db.AddInParameter(com, "TokenHash", DbType.String, tokenHash);
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 this.db.AddInParameter(com, "Email", DbType.String, email);
@@ -401,7 +401,7 @@ namespace FixMyCity.Repository
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to create refresh token.", "RefreshToken_Create", ex);
+                throw new DataAccessException("Failed to create refresh token.", "RefreshTokenCreate", ex);
             }
 
             return true;
@@ -415,7 +415,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.RefreshToken_GetByHash");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.RefreshTokenGetByHash");
                 this.db.AddInParameter(com, "TokenHash", DbType.String, tokenHash);
                 DataSet ds = this.db.ExecuteDataSet(com);
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
@@ -437,7 +437,7 @@ namespace FixMyCity.Repository
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to load refresh token.", "RefreshToken_GetByHash", ex);
+                throw new DataAccessException("Failed to load refresh token.", "RefreshTokenGetByHash", ex);
             }
 
             return null;
@@ -452,7 +452,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.RefreshToken_Rotate");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.RefreshTokenRotate");
                 this.db.AddInParameter(com, "OldTokenHash", DbType.String, oldHash);
                 this.db.AddInParameter(com, "NewTokenHash", DbType.String, newHash);
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
@@ -465,7 +465,7 @@ namespace FixMyCity.Repository
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to rotate refresh token.", "RefreshToken_Rotate", ex);
+                throw new DataAccessException("Failed to rotate refresh token.", "RefreshTokenRotate", ex);
             }
 
             return true;
@@ -479,13 +479,13 @@ namespace FixMyCity.Repository
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.RefreshToken_RevokeAllForConsumer");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.RefreshTokenRevokeAllForConsumer");
                 this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
                 this.db.ExecuteNonQuery(com);
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to revoke refresh tokens.", "RefreshToken_RevokeAllForConsumer", ex);
+                throw new DataAccessException("Failed to revoke refresh tokens.", "RefreshTokenRevokeAllForConsumer", ex);
             }
 
             return true;

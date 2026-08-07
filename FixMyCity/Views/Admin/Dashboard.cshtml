@@ -110,7 +110,7 @@
 <div class="row g-3 mb-4">
     <div class="col-lg-3 col-sm-6">
         <div class="dash-stat">
-            <div class="ds-icon" style="background:linear-gradient(135deg,#1574e0,#38bdf8)"><i class="bi bi-people-fill"></i></div>
+            <div class="ds-icon" style="background:linear-gradient(135deg,#f59e0b,#ea580c)"><i class="bi bi-people-fill"></i></div>
             <div>
                 <div class="ds-val">@(Model?.TotalUsers ?? 0)</div>
                 <div class="ds-lbl">Total Registered Users</div>
@@ -137,7 +137,7 @@
     </div>
     <div class="col-lg-3 col-sm-6">
         <div class="dash-stat">
-            <div class="ds-icon" style="background:linear-gradient(135deg,#8b5cf6,#c084fc)"><i class="bi bi-shield-fill-check"></i></div>
+            <div class="ds-icon" style="background:linear-gradient(135deg,#1574e0,#38bdf8)"><i class="bi bi-shield-fill-check"></i></div>
             <div>
                 <div class="ds-val">@(Model?.TotalOfficers ?? 0)</div>
                 <div class="ds-lbl">Active Municipal Officers</div>
@@ -245,7 +245,7 @@
 </div>
 
 <!-- Recent Complaints Feed Table -->
-<div class="row g-3">
+@*<div class="row g-3">
     <div class="col-12">
         <div class="dash-card">
             <div class="dash-card-header">
@@ -290,7 +290,7 @@
             </div>
         </div>
     </div>
-</div>
+</div>*@
 
 @section adminScripts {
     <script>
@@ -376,7 +376,7 @@
                 chart: { type: 'bar', height: 280, toolbar: { show: false }, background: 'transparent' },
                 series: [{ name: 'Complaints', data: catCounts }],
                 plotOptions: { bar: { borderRadius: 6, horizontal: true, distributed: true } },
-                colors: ['#1574e0', '#38bdf8', '#10b981', '#f59e0b', '#8b5cf6'],
+                colors: ['#f59e0b', '#38bdf8', '#10b981', '#ea580c', '#3b82f6'],
                 xaxis: { categories: catNames, labels: { style: { colors: textColor } } },
                 yaxis: { labels: { style: { colors: textColor } } },
                 grid: { borderColor: borderColor },

@@ -191,7 +191,7 @@
 
 /* ── Add button ──────────────────────────────────────────────── */
 .md-btn-add {
-    background: linear-gradient(135deg, #1574e0, #38bdf8);
+    background: var(--grad);
     color: #fff;
     border: 0;
     border-radius: 10px;
@@ -431,7 +431,7 @@
 }
 
 .md-btn-save {
-    background: linear-gradient(135deg, #1574e0, #38bdf8);
+    background: var(--grad);
     border: 0;
     color: #fff;
     border-radius: 10px;

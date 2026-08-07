@@ -52,7 +52,7 @@ body {
     transition: border-color 0.2s, background 0.2s;
     outline: none;
 }
-.dash-input:focus { border-color: #1574e0; box-shadow: 0 0 0 3px rgba(21,116,224,0.12); }
+.dash-input:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.15); }
 .dash-input::placeholder { color: var(--tx3); }
 
 /* ── Buttons ─────────────────────────────────────────────── */
@@ -61,7 +61,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    background: linear-gradient(135deg, #1574e0, #38bdf8);
+    background: var(--grad);
     color: #fff;
     border: none;
     border-radius: 8px;
@@ -92,7 +92,7 @@ body {
     cursor: pointer;
     transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
-.btn-dash-outline:hover { background: var(--bd); border-color: #1574e0; color: var(--tx); }
+.btn-dash-outline:hover { background: rgba(245,158,11,0.08); border-color: #f59e0b; color: var(--tx); }
 .btn-dash-outline.btn-sm { height: 36px; padding: 0 12px; font-size: 0.82rem; }
 
 /* ── Filter bar ──────────────────────────────────────────── */
@@ -183,8 +183,8 @@ body {
 }
 .pagination .page-link:hover { background: var(--bd); color: var(--tx); }
 .pagination .active .page-link {
-    background: #1574e0;
-    border-color: #1574e0;
+    background: var(--grad);
+    border-color: transparent;
     color: #fff;
 }
 
@@ -303,7 +303,7 @@ html.lm .dash-card {
 }
 html.lm .dash-label { color: #374151; }
 html.lm .dash-input { background: #fff; border-color: #d1d5db; color: #0f172a; }
-html.lm .dash-input:focus { border-color: #1574e0; box-shadow: 0 0 0 3px rgba(21,116,224,0.1); }
+html.lm .dash-input:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,0.12); }
 html.lm .dash-input::placeholder { color: #9ca3af; }
 html.lm .dash-table thead { background: #f8fafc; }
 html.lm .dash-table th { color: #374151; border-color: #e5e7eb; }
@@ -331,7 +331,7 @@ html.lm .dash-pager { color: #374151; }
 html.lm .dash-pager-link { background: #fff; border-color: #e2e8f0; color: #374151; }
 html.lm .dash-pager-link:hover { background: #f1f5f9; color: #0f172a; }
 html.lm .btn-dash-outline { border-color: #d1d5db; color: #374151; }
-html.lm .btn-dash-outline:hover { background: #f1f5f9; border-color: #1574e0; color: #0f172a; }
+html.lm .btn-dash-outline:hover { background: #fef3c7; border-color: #f59e0b; color: #92400e; }
 html.lm .row-action-btn { border-color: #e2e8f0; color: #6b7280; }
 html.lm .row-action-btn:hover { background: #f1f5f9; color: #0f172a; }
 html.lm .row-action-btn.text-danger { color: #dc2626; border-color: #fca5a5; }

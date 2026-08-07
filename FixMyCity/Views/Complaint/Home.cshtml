@@ -58,7 +58,7 @@
         }
         .dash-table tbody td { padding: 12px 16px; border-bottom: 1px solid var(--bd); font-size: .875rem; vertical-align: middle; }
         .dash-table tr:last-child td { border-bottom: none; }
-        .dash-table tbody tr:hover td { background: rgba(56, 189, 248, 0.04); }
+        .dash-table tbody tr:hover td { background: rgba(245, 158, 11, 0.05); }
 
         .status-badge {
             display: inline-block; padding: 3px 10px; border-radius: 20px;
@@ -74,11 +74,11 @@
 <!-- Welcome Header Banner -->
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
     <div>
-        <h2 class="fw-bold mb-1" style="color:var(--tx)">Welcome back, @firstName 👋</h2>
+        <h2 class="fw-bold mb-1" style="color:var(--tx)">Welcome back, @firstName</h2>
         <p class="text-muted small mb-0">Track your submitted civic issues, ward resolution statistics, and municipal impact.</p>
     </div>
     <div>
-        <a href="@Url.Action("MyComplaints", "Complaint")" class="btn btn-primary px-3 py-2" style="border-radius:10px;font-weight:600;">
+        <a href="@Url.Action("MyComplaints", "Complaint")" class="btn-dash-primary">
             <i class="bi bi-plus-circle-fill me-1"></i> File New Complaint
         </a>
     </div>
@@ -88,7 +88,7 @@
 <div class="row g-3 mb-4">
     <div class="col-lg-3 col-sm-6">
         <div class="citizen-kpi">
-            <div class="ck-icon" style="background:linear-gradient(135deg,#1574e0,#38bdf8)"><i class="bi bi-journal-text"></i></div>
+            <div class="ck-icon" style="background:linear-gradient(135deg,#f59e0b,#ea580c)"><i class="bi bi-journal-text"></i></div>
             <div>
                 <div class="ck-val">@totalFiled</div>
                 <div class="ck-lbl">My Total Complaints</div>
@@ -168,7 +168,19 @@
         </div>
     </div>
 
-   
+    <div class="col-lg-5">
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <span><i class="bi bi-speedometer2 me-2 text-success"></i>Ward Health Rating</span>
+                <span class="badge bg-dark text-muted fw-normal" style="font-size:0.75rem;">Radial Gauge</span>
+            </div>
+            <div class="dash-card-body d-flex flex-column align-items-center justify-content-center">
+                <div id="citizenHealthGaugeChart" class="chart-box"></div>
+                <p class="text-muted small text-center mb-0 mt-2">Overall resolution index across your ward.</p>
+            </div>
+        </div>
+    </div>
+
 </div>
 <script>
     document.addEventListener("DOMContentLoaded", function () {

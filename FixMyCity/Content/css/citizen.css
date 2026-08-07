@@ -201,8 +201,8 @@
 }
 
 .sidebar-nav .nav-link.active {
-    background: var(--accent-glow);
-    color: var(--accent);
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
     font-weight: 600;
 }
 
@@ -213,7 +213,7 @@
     top: 4px;
     bottom: 4px;
     width: 3px;
-    background: var(--accent);
+    background: var(--grad);
     border-radius: 0 3px 3px 0;
 }
 
@@ -293,7 +293,7 @@
 .stat-icon.blue   { background: rgba(59,130,246,0.15); color: #3b82f6; }
 .stat-icon.amber  { background: rgba(245,158,11,0.15); color: #f59e0b; }
 .stat-icon.green  { background: rgba(16,185,129,0.15); color: #10b981; }
-.stat-icon.purple { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+.stat-icon.purple { background: rgba(21,116,224,0.15); color: #1574e0; }
 
 .stat-info .stat-val {
     font-size: 1.55rem;
@@ -510,8 +510,8 @@
     transition: border-color 0.2s, box-shadow 0.2s !important;
 }
 .dash-input:focus {
-    border-color: var(--accent) !important;
-    box-shadow: 0 0 0 3px var(--accent-glow) !important;
+    border-color: #f59e0b !important;
+    box-shadow: 0 0 0 3px rgba(245,158,11,0.15) !important;
     outline: none;
 }
 .dash-input option { background: var(--bg2); }
@@ -545,6 +545,38 @@
 .dash-form-horizontal .dash-input-wrap {
     flex: 1;
     min-width: 0;
+}
+
+/* ── File input field (attachments) ─────────────────────── */
+.attachment-field {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+input[type="file"].dash-input {
+    padding: 7px 10px !important;
+    height: auto !important;
+    line-height: normal !important;
+    cursor: pointer;
+}
+input[type="file"].dash-input::-webkit-file-upload-button,
+input[type="file"].dash-input::file-selector-button {
+    background: var(--grad);
+    border: none;
+    color: #fff;
+    padding: 7px 14px;
+    border-radius: 7px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-right: 12px;
+    cursor: pointer;
+    font-family: inherit;
+}
+input[type="file"].dash-input::-webkit-file-upload-button:hover,
+input[type="file"].dash-input::file-selector-button:hover {
+    filter: brightness(1.08);
 }
 
 /* ── Buttons ─────────────────────────────────────────────── */
