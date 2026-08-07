@@ -384,3 +384,20 @@ BEGIN
         N'@Name NVARCHAR(100), @Designation NVARCHAR(100), @CityId INT, @WardId INT, @RoleId INT, @PageNumber INT, @PageSize INT',  
         @Name, @Designation, @CityId, @WardId, @RoleId, @PageNumber, @PageSize;  
 END  
+
+use Training_DB_Shirisha_Gatti
+CREATE PROCEDURE FixMyCity.ComplaintChatAttachment_Deactivate
+    @ChatAttachmentId INT,
+    @ModifiedBy       INT = NULL   -- optional: pass the uploader's ConsumerId for audit trail
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE FixMyCity.ComplaintChatAttachment
+    SET IsActive       = 0,
+        LastModifiedAt = GETUTCDATE(),
+        LastModifiedBy = @ModifiedBy
+    WHERE ChatAttachmentId = @ChatAttachmentId
+      AND IsActive = 1;   -- idempotent: no-op if already deactivated, avoids a redundant write
+END
+GO

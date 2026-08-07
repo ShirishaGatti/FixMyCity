@@ -207,7 +207,7 @@
                     updateSortIndicators();
                 },
                 error: function () {
-                    alert('Unable to load complaints. Please try again.');
+                    showToast('Unable to load complaints. Please try again.', 'error', 'Error');
                 }
             });
         }
@@ -269,11 +269,11 @@
             $('#editStatusId').val(row.data('status-id'));
             $('#editPriorityId').val(row.data('priority-id'));
             $('#editCategoryId').val(row.data('category-id'));
-            $('#editComplaintModal').show();
+            document.getElementById('editComplaintModal').style.display = 'flex';
         }
 
         function closeEditModal() {
-            $('#editComplaintModal').hide();
+            document.getElementById('editComplaintModal').style.display = 'none';
         }
 
         $(document).on('click', '.complaint-edit-btn', function () {
@@ -302,15 +302,16 @@
 
                     if (res.success) {
                         closeEditModal();
+                        showToast('Complaint updated successfully!', 'success', 'Saved');
                         loadOfficerComplaints(currentPage);
                     } else {
-                        alert(res.message || 'Unable to save complaint changes.');
+                        showToast(res.message || 'Unable to save complaint changes.', 'error', 'Error');
                     }
                 },
                 error: function () {
                     submitBtn.prop('disabled', false);
                     spinner.addClass('d-none');
-                    alert('An error occurred while updating the complaint. Please try again.');
+                    showToast('An error occurred while updating the complaint. Please try again.', 'error', 'Error');
                 }
             });
         });

@@ -342,7 +342,15 @@ html.lm .dash-card .text-muted { color: #6b7280 !important; }
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 768px) {
-    .dash-table { min-width: 800px; }
+    .dash-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .dash-table { min-width: 600px; font-size: 0.82rem; }
     .dash-card { overflow-x: auto; }
     .dash-page-header h1 { font-size: 22px; }
+    .dash-modal-overlay { align-items: flex-end; }
+    .dash-modal {
+        width: 100%;
+        max-width: 100%;
+        max-height: 100vh;
+        border-radius: 14px 14px 0 0;
+    }
 }

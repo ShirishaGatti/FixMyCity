@@ -1,4 +1,4 @@
-﻿using FixMyCity.Exceptions;
+using FixMyCity.Exceptions;
 using FixMyCity.Filters;
 using FixMyCity.Infrastructure;
 using FixMyCity.service;
@@ -46,7 +46,12 @@ namespace FixMyCity.Controllers
             var vm = _complaintService.GetOfficerComplaints(_session.ConsumerId, query);
             return PartialView("_OfficerComplaintTable", vm);
         }
-
+        [HttpGet]
+        public ActionResult Queue()
+        {
+            // Reuse the Officer controller's Complaints action to show the assigned complaints/queue.
+            return RedirectToAction("Complaints", "Officer");
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo)
@@ -128,7 +133,7 @@ namespace FixMyCity.Controllers
             {
                 _consumerService.UpdateProfile(_session.ConsumerId, vm.Name, vm.Contact,
                     vm.DOB, vm.AddressLine, vm.CityId, vm.WardId, vm.Designation);
-                TempData["SuccessMessage"] = "Profile updated successfully.";
+                TempData["Success"] = "Profile updated successfully.";
                 return RedirectToAction("Profile");
             }
             catch (BusinessException ex)

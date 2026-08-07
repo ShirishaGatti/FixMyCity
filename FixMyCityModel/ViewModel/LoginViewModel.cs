@@ -15,6 +15,8 @@ namespace FixMyCityModel.ViewModel
 
         [Required(ErrorMessage = "Password is required.")]
         [DataType(DataType.Password)]
+        [MinLength(8, ErrorMessage = "Password must be at least 8 characters.")]
+        [MaxLength(100, ErrorMessage = "Password cannot exceed 100 characters.")]
         public string Password { get; set; }
 
         public bool RememberMe { get; set; }

@@ -34,17 +34,15 @@ namespace FixMyCity.Repository
         }
 
 
-        /// <summary>
         /// Inserts a new Consumer + ConsumerCredential row for Register.
         /// Saves newly created Id in the returned int.
-        /// </summary>
         /// <returns>New ConsumerId if Insert operation is successful; Else 0.</returns>
         public int Register(RegisterViewModel vm, byte[] passHash, byte[] passSalt)
         {
             int newConsumerId = 0;
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Auth_Register");
+                DbCommand com = this.db.GetStoredProcCommand("Register");
                 this.db.AddOutParameter(com, "NewConsumerId", DbType.Int32, 4);
 
                 // Nullable string/int parameters collapsed to one-liners.
@@ -78,22 +76,20 @@ namespace FixMyCity.Repository
             catch (SqlException ex)
             {
                 if (ex.Number == 2627 || ex.Number == 2601)
-                    throw new DataAccessException("An account with this email address already exists.", "Auth_Register", ex);
-                throw new DataAccessException("Registration failed due to a database error.", "Auth_Register", ex);
+                    throw new DataAccessException("An account with this email address already exists.", "Register", ex);
+                throw new DataAccessException("Registration failed due to a database error.", "Register", ex);
             }
 
             return newConsumerId;
         }
 
-        /// <summary>
         /// Loads the ConsumerCredential (+ Consumer/Role convenience fields) for the given email.
-        /// </summary>
         /// <returns>Populated ConsumerCredential if found; Else null.</returns>
         public ConsumerCredential GetCredentialByEmail(string email)
         {
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Auth_GetCredentialByEmail");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.GetCredentialByEmail");
                 this.db.AddInParameter(com, "Email", DbType.String, email);
                 DataSet ds = this.db.ExecuteDataSet(com);
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
@@ -106,7 +102,7 @@ namespace FixMyCity.Repository
                 // A real DB outage must not silently collapse into "user not found".
                 throw new DataAccessException(
                     "Failed to retrieve credentials. Please try again later.",
-                    "Auth_GetCredentialByEmail", ex);
+                    "GetCredentialByEmail", ex);
             }
         }
 
@@ -180,7 +176,7 @@ namespace FixMyCity.Repository
             var list = new List<City>();
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.City_GetAll");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.CitiesGetAll");
                 DataSet ds = this.db.ExecuteDataSet(com);
                 if (ds != null && ds.Tables.Count > 0)
                 {
@@ -196,7 +192,7 @@ namespace FixMyCity.Repository
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to load cities list.", "City_GetAll", ex);
+                throw new DataAccessException("Failed to load cities list.", "CitiesGetAll", ex);
             }
 
             return list;
@@ -210,7 +206,7 @@ namespace FixMyCity.Repository
             var list = new List<Ward>();
             try
             {
-                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.Ward_GetByCityId");
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.WardsGetByCity");
                 this.db.AddInParameter(com, "CityId", DbType.Int32, cityId);
                 DataSet ds = this.db.ExecuteDataSet(com);
                 if (ds != null && ds.Tables.Count > 0)
@@ -228,7 +224,7 @@ namespace FixMyCity.Repository
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to load wards list.", "Ward_GetByCityId", ex);
+                throw new DataAccessException("Failed to load wards list.", "WardsGetByCity", ex);
             }
 
             return list;
@@ -495,10 +491,8 @@ namespace FixMyCity.Repository
             return true;
         }
 
-        /// <summary>
-        /// Maps one ConsumerCredential row (from either Auth_GetCredentialByEmail
+        /// Maps one ConsumerCredential row (from either GetCredentialByEmail
         /// or Otp_GetState — same column shape) onto the model.
-        /// </summary>
         private static ConsumerCredential MapCredential(DataRow row)
         {
             return new ConsumerCredential

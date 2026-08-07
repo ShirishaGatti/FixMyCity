@@ -109,14 +109,15 @@
                 headers: getAntiForgeryHeader(),
                 success: function (res) {
                     if (res && res.success) {
+                        showToast('User deleted successfully.', 'error', 'Deleted');
                         loadGrid($form.serialize());
                     } else {
-                        alert((res && res.message) || "Failed to delete user.");
+                        showToast((res && res.message) || "Failed to delete user.", 'error', 'Error');
                     }
                 },
                 error: function (xhr) {
                     var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Failed to delete user.";
-                    alert(msg);
+                    showToast(msg, 'error', 'Error');
                 }
             });
         });
@@ -137,7 +138,7 @@
                 modal.show();
             },
             error: function () {
-                alert("Failed to load user details.");
+                showToast("Failed to load user details.", 'error', 'Error');
             }
         });
     });
@@ -168,14 +169,17 @@
             success: function (res) {
                 if (res && res.success) {
                     bootstrap.Modal.getInstance(document.getElementById("editUserModal")).hide();
+                    showToast('User updated successfully!', 'success', 'Saved');
                     loadGrid($form.serialize());
                 } else {
                     $errBox.text((res && res.message) || "Failed to save changes.");
+                    showToast((res && res.message) || "Failed to save changes.", 'error', 'Error');
                 }
             },
             error: function (xhr) {
                 var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Failed to save changes.";
                 $errBox.text(msg);
+                showToast(msg, 'error', 'Error');
             },
             complete: function () {
                 $btn.prop("disabled", false);

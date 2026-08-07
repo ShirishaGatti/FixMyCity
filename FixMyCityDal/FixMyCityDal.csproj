@@ -59,6 +59,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repo\AdminRepository.cs" />
     <Compile Include="Repo\AuthRepository.cs" />
+    <Compile Include="Repo\ChatSqlErrorCodes.cs" />
     <Compile Include="Repo\ComplaintChatRepository.cs" />
     <Compile Include="Repo\ComplaintRepository.cs" />
     <Compile Include="Repo\IAdminRepository.cs" />

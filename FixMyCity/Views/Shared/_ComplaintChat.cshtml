@@ -47,14 +47,14 @@
 
     @if (Model.IsChatOpen)
     {
-        if (!textOnly)
+        @*if (!textOnly)
         {
             <div class="chat-dropzone" id="chatDropzone-@domId">
                 <div class="chat-dropzone-hint">
                     <i class="bi bi-cloud-arrow-up"></i> Drag a file here, or use the paperclip below
                 </div>
             </div>
-        }
+        }*@
 
         <form id="chatForm-@domId" class="chat-composer" autocomplete="off">
             @Html.AntiForgeryToken()
@@ -63,8 +63,8 @@
                 <button type="button" class="chat-attach-btn" title="Attach a file" onclick="document.getElementById('chatFile-@domId').click()">
                     <i class="bi bi-paperclip"></i>
                 </button>
-                <input type="file" id="chatFile-@domId" class="d-none"
-                       data-allowed-ext="@Model.AllowedExtensionsCsv" data-max-size-mb="@Model.MaxAttachmentSizeMB" />
+                @*<input type="file" id="chatFile-@domId" class="d-none"
+                       data-allowed-ext="@Model.AllowedExtensionsCsv" data-max-size-mb="@Model.MaxAttachmentSizeMB" />*@
             }
             <input type="text" id="chatInput-@domId" class="chat-input" placeholder="Type a message..." maxlength="1000" />
             <button type="submit" class="chat-send-btn" title="Send">
@@ -121,7 +121,13 @@
                         if (dropzone) dropzone.style.display = 'none';
                         clearInterval(pollTimer);
                     }
-                }
+                },
+                error: function () {
+                    // Deliberately silent to the user (a single missed poll every 5s isn't worth
+                    // an alert()), but logged so a persistent failure is visible in devtools/telemetry
+                    // instead of the chat just going quiet with no signal anywhere.
+                console.warn('Chat poll failed for complaint ' + complaintId + '; will retry on next interval.');
+            }
             });
         }
 
@@ -132,8 +138,20 @@
             panel.dataset.lastId = existingBubbles[existingBubbles.length - 1].getAttribute('data-message-id');
         }
 
-        pollTimer = setInterval(poll, 5000);
+        var ACTIVE_INTERVAL_MS = 5000;
+        var BACKGROUND_INTERVAL_MS = 20000;
 
+        function startPolling(intervalMs) {
+            if (pollTimer) clearInterval(pollTimer);
+            pollTimer = setInterval(poll, intervalMs);
+        }
+
+        startPolling(document.hidden ? BACKGROUND_INTERVAL_MS : ACTIVE_INTERVAL_MS);
+
+        document.addEventListener('visibilitychange', function () {
+            startPolling(document.hidden ? BACKGROUND_INTERVAL_MS : ACTIVE_INTERVAL_MS);
+            if (!document.hidden) poll(); // catch up immediately on returning to the tab
+        });
         // Expose a stop handle on the panel node itself so a host page that
         // tears this partial's markup down (e.g. closing a modal) can stop
         // the interval explicitly, instead of leaking a timer that keeps
@@ -147,7 +165,10 @@
                 e.preventDefault();
                 var text = input.value.trim();
                 if (!text) return;
-
+                if (text.length > 1000) {
+                    alert('Message cannot exceed 1000 characters.');
+                    return;
+                }
                 var token = $(form).find('input[name="__RequestVerificationToken"]').val();
                 input.value = '';
 

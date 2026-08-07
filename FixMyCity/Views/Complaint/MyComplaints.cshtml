@@ -1,4 +1,4 @@
-﻿@model FixMyCityModel.ViewModel.MyComplaintsViewModel
+@model FixMyCityModel.ViewModel.MyComplaintsViewModel
 @{
     Layout = "~/Views/Shared/_CitizenLayout.cshtml";
     ViewBag.Title = "My Complaints";
@@ -20,7 +20,7 @@
 <!-- Filter bar -->
 @using (Html.BeginForm("MyComplaints", "Complaint", FormMethod.Get, new { id = "filterForm" }))
 {
-    <div class="dash-card mb-4" style="padding:18px 20px;">
+    <div class="dash-card mb-4" style="padding:14px 18px;">
         <div class="row g-2 align-items-end">
 
             <div class="col-md">
@@ -54,22 +54,24 @@
             <div class="col-md-2">
                 <label class="dash-label">From</label>
                 <input type="date" id="dateFrom" class="dash-input"
-                       value="@(Model.Filter.DateFrom?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateFrom" />
+                       value="@(Model.Filter.DateFrom?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateFrom"
+                       max="@DateTime.Today.ToString("yyyy-MM-dd")" />
             </div>
 
             <div class="col-md-2">
                 <label class="dash-label">To</label>
                 <input type="date" id="dateTo" class="dash-input"
-                       value="@(Model.Filter.DateTo?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateTo" />
+                       value="@(Model.Filter.DateTo?.ToString("yyyy-MM-dd") ?? "")" name="Filter.DateTo"
+                       max="@DateTime.Today.ToString("yyyy-MM-dd")" />
             </div>
 
-            <div class="col-md-1" style="width:70px; flex:none;">
+            <div class="col-md-1">
                 <label class="dash-label">Page</label>
                 <input type="number" id="pageNumberFilter" class="dash-input" min="1"
                        value="@Model.Filter.PageNumber" name="Filter.PageNumber" />
             </div>
 
-            <div class="col-md-1" style="width:80px; flex:none;">
+            <div class="col-md-1">
                 <label class="dash-label">Rows</label>
                 <select id="pageSizeFilter" class="dash-input" name="Filter.PageSize">
                     <option value="5" @(Model.Filter.PageSize == 5 ? "selected" : "")>5</option>
@@ -79,11 +81,11 @@
                 </select>
             </div>
 
-            <div class="col-md-auto d-flex gap-1 align-items-end">
-                <button type="submit" class="btn-dash-primary btn-sm" style="height:42px;">
-                    <i class="bi bi-search"></i> Search
+            <div class="col-md-1 d-flex gap-1 align-items-end">
+                <button type="submit" class="btn-dash-primary btn-sm flex-fill">
+                    <i class="bi bi-search"></i>
                 </button>
-                <button type="button" id="btnClearFilters" class="btn-dash-outline btn-sm" style="height:42px;" title="Clear filters">
+                <button type="button" id="btnClearFilters" class="btn-dash-outline btn-sm" title="Clear filters">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
@@ -129,6 +131,7 @@
             @Html.AntiForgeryToken()
             <input type="hidden" name="ComplaintId" id="complaintIdField" value="" />
             <div class="dash-modal-body">
+                <div class="dash-form-horizontal">
                 <div class="dash-form-group">
                     <label class="dash-label">Title *</label>
                     <input type="text" name="Title" id="fldTitle" class="dash-input" maxlength="150" required />
@@ -137,44 +140,40 @@
                     <label class="dash-label">Description *</label>
                     <textarea name="Description" id="fldDescription" rows="3" class="dash-input" maxlength="1000" required></textarea>
                 </div>
-                <div class="row g-2">
-                    <div class="col-6">
-                        <label class="dash-label">Category *</label>
-                        <select name="CategoryId" id="fldCategoryId" class="dash-input" required>
-                            <option value="">-- Select --</option>
-                            @foreach (var cat in Model.Categories)
-                            {
-                                <option value="@cat.CategoryId">@cat.CategoryName</option> }
-                        </select>
-                    </div>
-                    <div class="col-6">
-                        <label class="dash-label">Priority *</label>
-                        <select name="PriorityId" id="fldPriorityId" class="dash-input" required>
-                            <option value="">-- Select --</option>
-                            @foreach (var p in Model.Priorities)
-                            {
-                                <option value="@p.PriorityId">@p.PriorityName</option> }
-                        </select>
-                    </div>
+                <div class="dash-form-group">
+                    <label class="dash-label">Category *</label>
+                    <select name="CategoryId" id="fldCategoryId" class="dash-input" required>
+                        <option value="">-- Select --</option>
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <option value="@cat.CategoryId">@cat.CategoryName</option> }
+                    </select>
                 </div>
-                <div class="row g-2 mt-1">
-                    <div class="col-6">
-                        <label class="dash-label">City *</label>
-                        <select name="CityId" id="complaintCityId" class="dash-input" required>
-                            <option value="">-- Select --</option>
-                            @foreach (var city in Model.Cities)
-                            {
-                                <option value="@city.CityId">@city.CityName</option> }
-                        </select>
-                    </div>
-                    <div class="col-6">
-                        <label class="dash-label">Ward *</label>
-                        <select name="WardId" id="complaintWardId" class="dash-input" required>
-                            <option value="">-- Select City First --</option>
-                        </select>
-                    </div>
+                <div class="dash-form-group">
+                    <label class="dash-label">Priority *</label>
+                    <select name="PriorityId" id="fldPriorityId" class="dash-input" required>
+                        <option value="">-- Select --</option>
+                        @foreach (var p in Model.Priorities)
+                        {
+                            <option value="@p.PriorityId">@p.PriorityName</option> }
+                    </select>
                 </div>
-                <div class="dash-form-group mt-2">
+                <div class="dash-form-group">
+                    <label class="dash-label">City *</label>
+                    <select name="CityId" id="complaintCityId" class="dash-input" required>
+                        <option value="">-- Select --</option>
+                        @foreach (var city in Model.Cities)
+                        {
+                            <option value="@city.CityId">@city.CityName</option> }
+                    </select>
+                </div>
+                <div class="dash-form-group">
+                    <label class="dash-label">Ward *</label>
+                    <select name="WardId" id="complaintWardId" class="dash-input" required>
+                        <option value="">-- Select City First --</option>
+                    </select>
+                </div>
+                <div class="dash-form-group">
                     <label class="dash-label">Address *</label>
                     <input type="text" name="AddressLine" id="fldAddressLine" class="dash-input" maxlength="250" required />
                 </div>
@@ -182,12 +181,13 @@
                     <label class="dash-label">Landmark</label>
                     <input type="text" name="Landmark" id="fldLandmark" class="dash-input" maxlength="150" />
                 </div>
-                <div class="dash-form-group mt-2">
-                    <label class="dash-label">Attachments (optional)</label>
+                <div class="dash-form-group">
+                    <label class="dash-label">Attachments</label>
                     <input type="file" name="Attachments" id="complaintAttachments" class="dash-input" multiple
                            data-max-size-mb="@Model.MaxAttachmentSizeMB" data-allowed-ext="@Model.AllowedExtensionsCsv" />
                     <small style="color:var(--tx3);">jpg, jpeg, png, pdf, doc, docx — up to @Model.MaxAttachmentSizeMB MB each.</small>
                     <div id="attachmentPreviewList" class="attachment-preview-list mt-2"></div>
+                </div>
                 </div>
             </div>
             <div class="dash-modal-footer">
@@ -243,7 +243,7 @@
 
         function openEditComplaint(id) {
             $.get('/Complaint/GetComplaintForEdit/' + id, function (res) {
-                if (!res.success) { alert(res.message); return; }
+                if (!res.success) { showToast(res.message || 'Could not load complaint.', 'error', 'Error'); return; }
                 isEditMode = true;
                 $('#complaintIdField').val(res.complaintId);
                 $('#fldTitle').val(res.title);
@@ -273,18 +273,50 @@
                         __RequestVerificationToken: antiForgeryToken
                     },
                     success: function (res) {
-                        if (res.success) window.location.reload();
-                        else alert(res.message);
+                        if (res.success) {
+                            showToast('Complaint deleted successfully.', 'error', 'Deleted');
+                            setTimeout(function() { window.location.reload(); }, 1200);
+                        }
+                        else showToast(res.message || 'Could not delete complaint.', 'error', 'Error');
                     },
-                    error: function () { alert('Failed to delete complaint.'); }
+                    error: function () { showToast('Failed to delete complaint. Please try again.', 'error', 'Error'); }
                 });
             });
         }
+        // ── Client-side date validation helper ────────────────────────
+        function validateFilterDates() {
+            var from = $('#dateFrom').val();
+            var to = $('#dateTo').val();
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (from) {
+                var fromDate = new Date(from);
+                if (fromDate > today) {
+                    showToast('"From" date cannot be a future date.', 'warning', 'Invalid Date');
+                    $('#dateFrom').focus();
+                    return false;
+                }
+            }
+            if (from && to) {
+                var fromDate2 = new Date(from);
+                var toDate = new Date(to);
+                if (fromDate2 > toDate) {
+                    showToast('"From" date must be before or equal to "To" date.', 'warning', 'Invalid Date Range');
+                    $('#dateTo').focus();
+                    return false;
+                }
+            }
+            return true;
+        }
+
         $(function () {
 
             $('#filterForm').on('submit', function (e) {
 
                 e.preventDefault();
+
+                if (!validateFilterDates()) return;
 
                 $.ajax({
                     url: '/Complaint/MyComplaints',
@@ -294,7 +326,7 @@
                         $('#complaintsContainer').html(html);
                     },
                     error: function () {
-                        alert('Unable to load complaints.');
+                        showToast('Unable to load complaints. Please try again.', 'error', 'Error');
                     }
                 });
 
@@ -313,11 +345,9 @@
         //}
         function openDetailsDrawer(id) {
             stopActiveChatPolling();
-
-            $('#detailsDrawerOverlay').show();
-            $('#detailsDrawerContent').html(
-                '<div class="text-center py-5"><span class="spinner-border"></span></div>'
-            );
+            document.getElementById('detailsDrawerOverlay').style.display = 'flex';
+            document.getElementById('detailsDrawerContent').innerHTML =
+                '<div class="text-center py-5"><span class="spinner-border"></span></div>';
             $.ajax({
                 url: '/Complaint/ComplaintDetailsPartial',
                 type: 'GET',
@@ -384,16 +414,17 @@
                 contentType: false,
                 success: function (res) {
 
-                    console.log(res);
-
                     submitBtn.prop('disabled', false);
                     spinner.addClass('d-none');
 
                     if (res.success) {
-                        window.location.reload();
+                        var isNew = !$('#complaintIdField').val();
+                        showToast(isNew ? 'Complaint filed successfully!' : 'Complaint updated successfully!', 'success', isNew ? 'Filed' : 'Saved');
+                        closeComplaintModal();
+                        setTimeout(function() { window.location.reload(); }, 1200);
                     }
                     else {
-                        alert(res.message || 'Failed to save complaint.');
+                        showToast(res.message || 'Failed to save complaint.', 'error', 'Error');
                     }
                 },
                 error: function (xhr, status, error) {
@@ -401,14 +432,7 @@
                     submitBtn.prop('disabled', false);
                     spinner.addClass('d-none');
 
-                    console.log(xhr);
-                    console.log(xhr.responseText);
-
-                    alert(
-                        "Status : " + xhr.status +
-                        "\nError : " + error +
-                        "\nResponse : " + xhr.responseText
-                    );
+                    showToast('Server error (' + xhr.status + '): ' + (error || 'Unknown error.'), 'error', 'Error');
                 }
             });
         });

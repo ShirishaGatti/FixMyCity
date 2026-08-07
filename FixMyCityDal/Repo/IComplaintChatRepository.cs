@@ -12,7 +12,7 @@ namespace FixMyCity.Repository
         /// the SP itself throws a SQL error which the repo translates.
         /// </summary>
         ComplaintThreadResult GetThread(int complaintId, int requesterId, int requesterRoleId, int sinceMessageId);
-
+        void DeactivateAttachment(int attachmentId);
         int InsertTextMessage(int complaintId, int senderId, int senderRoleId, string messageText);
 
         int InsertAttachmentMessage(int complaintId, int senderId, int senderRoleId, int attachmentId);

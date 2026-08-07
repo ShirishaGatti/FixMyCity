@@ -14,7 +14,7 @@
      data-total-pages="@Model.TotalPages"
      data-total-count="@Model.TotalCount">
 
-    <table class="table table-bordered table-hover align-middle">
+    <table class="table dash-table">
 
         <thead>
             <tr>
@@ -46,23 +46,23 @@
                 {
                     <tr data-user-id="@item.ConsumerId">
                         <td>@item.ConsumerId</td>
-                        <td>@Na(item.Name)</td>
-                        <td>@Na(item.Email)</td>
+                        <td><span class="text-truncate-col" title="@Na(item.Name)">@Na(item.Name)</span></td>
+                        <td><span class="text-truncate-col-lg" title="@Na(item.Email)">@Na(item.Email)</span></td>
                         <td>@Na(item.Contact)</td>
                         <td>@(item.DOB.HasValue ? item.DOB.Value.ToString("dd/MM/yyyy") : "N/A")</td>
                         <td>@Na(item.RoleName)</td>
                         <td>@Na(item.CityName)</td>
                         <td>@Na(item.WardName)</td>
-                        <td>@Na(item.DepartmentName)</td>
-                        <td>@Na(item.Designation)</td>
+                        <td><span class="text-truncate-col" title="@Na(item.DepartmentName)">@Na(item.DepartmentName)</span></td>
+                        <td><span class="text-truncate-col" title="@Na(item.Designation)">@Na(item.Designation)</span></td>
                         <td>
                             @if (item.IsActive)
                             {
-                                <span class="badge badge-success">Active</span>
+                                <span class="status-badge open">Active</span>
                             }
                             else
                             {
-                                <span class="badge badge-danger">Inactive</span>
+                                <span class="status-badge closed">Inactive</span>
                             }
                         </td>
                         <td>

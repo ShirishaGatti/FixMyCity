@@ -26,7 +26,7 @@
      data-total-pages="@Model.TotalPages"
      data-total-count="@Model.TotalCount">
 
-    <table class="table table-bordered table-hover align-middle">
+    <table class="table dash-table">
 
         <thead>
             <tr>
@@ -60,15 +60,15 @@
                 foreach (var item in Model.Rows)
                 {
                     <tr data-complaint-id="@item.ComplaintId">
-                        <td>@item.ComplaintId</td>
+                        <td class="complaint-num">@item.ComplaintId</td>
                         <td>@Na(item.ComplaintNumber)</td>
-                        <td>@Na(item.Title)</td>
-                        <td>@Na(item.CategoryName)</td>
-                        <td>@Na(item.PriorityName)</td>
-                        <td><span class="badge bg-info text-dark">@Na(item.StatusName)</span></td>
-                        <td>@Na(item.AssignedName)</td>
-                        <td>@Na(item.CityName)</td>
-                        <td>@Na(item.WardName)</td>
+                        <td><span class="text-truncate-col-lg" title="@Na(item.Title)">@Na(item.Title)</span></td>
+                        <td><span class="text-truncate-col" title="@Na(item.CategoryName)">@Na(item.CategoryName)</span></td>
+                        <td><span class="priority-badge @item.PriorityName.ToLower()">@Na(item.PriorityName)</span></td>
+                        <td><span class="status-badge @item.StatusName.ToLower().Replace(" ","")">@Na(item.StatusName)</span></td>
+                        <td><span class="text-truncate-col" title="@Na(item.AssignedName)">@Na(item.AssignedName)</span></td>
+                        <td><span class="text-truncate-col" title="@Na(item.CityName)">@Na(item.CityName)</span></td>
+                        <td><span class="text-truncate-col" title="@Na(item.WardName)">@Na(item.WardName)</span></td>
                         <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
                         <td>
                             <button type="button" class="btn btn-warning btn-sm action-btn js-edit-complaint" data-id="@item.ComplaintId" title="Edit">

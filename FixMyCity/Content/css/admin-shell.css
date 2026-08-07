@@ -152,15 +152,93 @@ html.lm .admin-content {
     background: #f5f7fb;
 }
 
+/* ── Table overrides (match officer dash-table) ─── */
+.admin-content .table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent;
+}
+
+.admin-content .table thead {
+    background: var(--bg3);
+}
+
+.admin-content .table th {
+    padding: 12px 14px;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--tx2);
+    border-bottom: 1px solid var(--bd);
+    white-space: nowrap;
+}
+
+.admin-content .table td {
+    padding: 13px 14px;
+    border-bottom: 1px solid var(--bd);
+    color: var(--tx);
+    vertical-align: middle;
+    font-size: 0.88rem;
+        background: var(--bg3);
+
+}
+
+.admin-content .table tbody tr {
+    transition: background 0.12s;
+}
+
+.admin-content .table tbody tr:hover {
+    background: var(--bg3);
+}
+
+.admin-content .table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ── Light-mode table overrides ─────────────────── */
+html.lm .admin-content .table thead {
+    background: #f8fafc;
+}
+
+html.lm .admin-content .table th {
+    color: #374151;
+    border-color: #e5e7eb;
+}
+
+html.lm .admin-content .table td {
+    color: #1f2937;
+    border-color: #f1f5f9;
+}
+
+html.lm .admin-content .table tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* ── Complaint number ────────────────────── */
+.admin-content .complaint-num {
+    font-weight: 700;
+    color: #38bdf8;
+    font-family: monospace;
+    font-size: 0.8rem;
+}
+
+html.lm .admin-content .complaint-num {
+    color: #1d4ed8;
+}
+
 /* ── Mobile collapse ───────────────────────────────────────────── */
 @media (max-width: 767px) {
     .admin-sidebar {
-        width: 200px;
-        flex: 0 0 200px;
+        transform: translateX(-100%);
+        box-shadow: none;
     }
-
+    .admin-sidebar.open {
+        transform: translateX(0);
+        box-shadow: 6px 0 30px rgba(0,0,0,0.5);
+    }
     .admin-content {
-        margin-left: 200px;
+        margin-left: 0;
     }
 
     .admin-nav-link {
@@ -169,12 +247,7 @@ html.lm .admin-content {
 }
 
 @media (max-width: 575px) {
-    .admin-sidebar {
-        position: fixed;
-        width: 180px;
-        flex: 0 0 180px;
-    }
     .admin-content {
-        margin-left: 180px;
+        padding: 1rem;
     }
 }

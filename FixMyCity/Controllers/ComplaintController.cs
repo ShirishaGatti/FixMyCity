@@ -14,6 +14,7 @@ using System.Web.UI.WebControls;
 
 namespace FixMyCity.Controllers
 {
+    [RoleAuthorize(RoleIds.Citizen)]
     public class ComplaintController : Controller
     {
         private readonly IConsumerService _consumerService;
@@ -33,13 +34,17 @@ namespace FixMyCity.Controllers
         private int roleId => _session.RoleId;
 
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpGet]
         public ActionResult MyComplaints(ComplaintListFilterViewModel filter)
         {
             filter = filter ?? new ComplaintListFilterViewModel();
             if (filter.PageNumber < 1) filter.PageNumber = 1;
             if (filter.PageSize < 1 || filter.PageSize > 100) filter.PageSize = 10;
+            string dateErr;
+            if (!filter.ValidateDates(out dateErr))
+            {
+                TempData["Error"] = dateErr;
+            }
 
             var vm = _complaintService.Search(CurrentActorId, filter);
             vm.AllowedExtensionsCsv = ConfigurationManager.AppSettings["AllowedAttachmentExtensions"] ?? ".jpg,.jpeg,.png,.pdf,.doc,.docx";
@@ -51,7 +56,6 @@ namespace FixMyCity.Controllers
             return View(vm);
         }
        
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult SaveComplaint(FileComplaintViewModel vm)
@@ -87,7 +91,6 @@ namespace FixMyCity.Controllers
             return Json(new { success = true, message = $"Complaint {verb} successfully.", complaintId = savedId });
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpGet]
         public JsonResult GetComplaintForEdit(int id)
         {
@@ -117,7 +120,6 @@ namespace FixMyCity.Controllers
             }
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteComplaint(int id)
@@ -131,7 +133,6 @@ namespace FixMyCity.Controllers
             catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpGet]
         public ActionResult ExportComplaintPdf(int id)
         {
@@ -144,7 +145,6 @@ namespace FixMyCity.Controllers
             return File(pdf, "application/pdf", fileName);
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpGet]
         public ActionResult ComplaintDetailsPartial(int id)
         {
@@ -165,7 +165,6 @@ namespace FixMyCity.Controllers
             }
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpGet]
         public ActionResult DownloadAttachment(int id)
         {
@@ -180,7 +179,6 @@ namespace FixMyCity.Controllers
             return File(physicalPath, contentType, attachment.FileName);
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteAttachment(int id)
@@ -195,14 +193,14 @@ namespace FixMyCity.Controllers
             catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }
         }
 
-        [RoleAuthorize(RoleIds.Citizen)]
         [HttpGet]
         public ActionResult Home()
         {
-            return View();
+            var filter = new ComplaintListFilterViewModel { PageSize = 100 };
+            var vm = _complaintService.Search(CurrentActorId, filter);
+            return View(vm);
         }
 
-        [RoleAuthorize]
         [HttpGet]
         public ActionResult Profile()
         {
@@ -226,15 +224,8 @@ namespace FixMyCity.Controllers
             return View(vm);
         }
         //Support executives expect a "Queue" landing page after login.Redirect to the officer complaints UI which implements the queue.
-        [RoleAuthorize(RoleIds.SupportExecutive)]
-        [HttpGet]
-        public ActionResult Queue()
-        {
-            // Reuse the Officer controller's Complaints action to show the assigned complaints/queue.
-            return RedirectToAction("Complaints", "Officer");
-        }
+      
 
-        [RoleAuthorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Profile(ProfileViewModel vm)
@@ -249,7 +240,7 @@ namespace FixMyCity.Controllers
             {
                 _consumerService.UpdateProfile(CurrentActorId, vm.Name, vm.Contact,
                     vm.DOB, vm.AddressLine, vm.CityId, vm.WardId, vm.Designation);
-                TempData["SuccessMessage"] = "Profile updated successfully.";
+                TempData["Success"] = "Profile updated successfully.";
                 return RedirectToAction("Profile");
             }
             catch (BusinessException ex)
