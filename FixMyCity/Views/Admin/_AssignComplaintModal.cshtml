@@ -74,9 +74,9 @@
                 <option value="">Unassigned</option>
                 @foreach (var o in Model.Officers)
                 {
-                    var suffix = string.Join(".", new[]
+                    var suffix = string.Join(" . ", new[]
                     {
-                        o.Designation,
+                       // o.Designation,
                         o.DepartmentName,
                         string.IsNullOrWhiteSpace(o.CityName) ? null : o.CityName
                     }.Where(s => !string.IsNullOrWhiteSpace(s)));
