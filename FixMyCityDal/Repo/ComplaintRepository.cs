@@ -1,4 +1,5 @@
 ﻿using FixMyCity.Exceptions;
+using FixMyCity.Infrastructure;
 using FixMyCityModel.Model;
 using FixMyCityModel.ViewModel;
 using Microsoft.Practices.EnterpriseLibrary.Data;
@@ -22,7 +23,7 @@ namespace FixMyCity.Repository
             db = DatabaseFactory.CreateDatabase();
         }
 
-        public List<Complaint> GetComplaints(int? consumerId , int ? assignedTo, int roleId)
+        public List<Complaint> GetComplaints(int? consumerId, int? assignedTo, int roleId)
         {
             var list = new List<Complaint>();
             try
@@ -195,7 +196,7 @@ namespace FixMyCity.Repository
         }
         // ComplaintRepository.cs — cache field, same shape as ItemRepository
 
-        public int SaveComplaint(Complaint c,int roleId,int consumerId)
+        public int SaveComplaint(Complaint c, int roleId, int consumerId)
         {
             try
             {
@@ -242,9 +243,116 @@ namespace FixMyCity.Repository
             return true;
         }
 
+        public bool ResolveComplaint(int complaintId, int officerId)
+        {
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_Resolve");
+                db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
+                db.AddInParameter(com, "OfficerId", DbType.Int32, officerId);
+                db.AddOutParameter(com, "RaisedBy", DbType.Int32, 4);
+                db.ExecuteNonQuery(com);
+                // Bust the citizen's cache (not the officer's — officer lists aren't cached),
+                // so their MyComplaints view reflects "Awaiting Confirmation" immediately.
+                object raisedByValue = db.GetParameterValue(com, "RaisedBy");
+                if (raisedByValue != null && raisedByValue != DBNull.Value)
+                    ClearComplaintCache(Convert.ToInt32(raisedByValue));
+                return true;
+            }
+            catch (SqlException ex) when (ex.Number == ComplaintWorkflowSqlErrorCodes.ResolveNotFound ||
+                                           ex.Number == ComplaintWorkflowSqlErrorCodes.ResolveInvalidState ||
+                                           ex.Number == ComplaintWorkflowSqlErrorCodes.ResolveStatusMissing)
+            {
+                throw new BusinessException(ex.Message, "COMPLAINT_RESOLVE_REJECTED");
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to mark complaint as resolved.", "Complaint_Resolve", ex);
+            }
+        }
+
+        public bool ConfirmResolution(int complaintId, int consumerId)
+        {
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_ConfirmResolution");
+                db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
+                db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
+                db.ExecuteNonQuery(com);
+                ClearComplaintCache(consumerId);
+                return true;
+            }
+            catch (SqlException ex) when (ex.Number == ComplaintWorkflowSqlErrorCodes.ConfirmNotFound ||
+                                           ex.Number == ComplaintWorkflowSqlErrorCodes.ConfirmInvalidState ||
+                                           ex.Number == ComplaintWorkflowSqlErrorCodes.ConfirmStatusMissing)
+            {
+                throw new BusinessException(ex.Message, "COMPLAINT_CONFIRM_REJECTED");
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to confirm the resolution.", "Complaint_ConfirmResolution", ex);
+            }
+        }
+
+        public bool RejectResolution(int complaintId, int consumerId, string reason)
+        {
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_RejectResolution");
+                db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
+                db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
+                db.AddInParameter(com, "Reason", DbType.String, string.IsNullOrWhiteSpace(reason) ? (object)DBNull.Value : reason.Trim());
+                db.ExecuteNonQuery(com);
+                ClearComplaintCache(consumerId);
+                return true;
+            }
+            catch (SqlException ex) when (ex.Number == ComplaintWorkflowSqlErrorCodes.RejectNotFound ||
+                                           ex.Number == ComplaintWorkflowSqlErrorCodes.RejectInvalidState ||
+                                           ex.Number == ComplaintWorkflowSqlErrorCodes.RejectStatusMissing)
+            {
+                throw new BusinessException(ex.Message, "COMPLAINT_REJECT_REJECTED");
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to reject the resolution.", "Complaint_RejectResolution", ex);
+            }
+        }
+
+        // Lazy trigger for the 7-day auto-close: called opportunistically before
+        // Officer/Citizen/Admin complaint lists load (see ComplaintService /
+        // AdminService). Complaint_AutoExpireResolutions is also safe to run
+        // standalone (e.g. from a SQL Agent job) if that's wired up later.
+        public List<int> ExpireOverdueResolutions()
+        {
+            var affectedConsumerIds = new List<int>();
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_AutoExpireResolutions");
+                DataSet ds = db.ExecuteDataSet(com);
+                if (ds != null && ds.Tables.Count > 0)
+                {
+                    foreach (DataRow row in ds.Tables[0].Rows)
+                    {
+                        int raisedBy = Convert.ToInt32(row["RaisedBy"]);
+                        affectedConsumerIds.Add(raisedBy);
+                        ClearComplaintCache(raisedBy);
+                    }
+                }
+            }
+            catch (SqlException ex) when (ex.Number == ComplaintWorkflowSqlErrorCodes.AutoExpireStatusMissing)
+            {
+                // Statuses not seeded yet — nothing to expire, don't blow up list pages over it.
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to auto-expire overdue resolutions.", "Complaint_AutoExpireResolutions", ex);
+            }
+            return affectedConsumerIds;
+        }
+
         public List<Complaint> GetAssignedByOfficerId(int officerId)
         {
-            var list = new List<Complaint>(); 
+            var list = new List<Complaint>();
             try
             {
                 const string sql = @"SELECT c.ComplaintId, c.ComplaintNumber, c.Title, c.Description,
@@ -274,7 +382,7 @@ namespace FixMyCity.Repository
             }
             return list;
         }
-          public Complaint GetAssignedComplaintById(int complaintId, int officerId)
+        public Complaint GetAssignedComplaintById(int complaintId, int officerId)
         {
             try
             {

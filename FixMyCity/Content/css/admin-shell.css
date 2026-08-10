@@ -37,7 +37,7 @@
     width: 36px;
     height: 36px;
     border-radius: 9px;
-    background: linear-gradient(135deg, #1574e0, #38bdf8);
+    background: var(--grad);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -84,15 +84,15 @@
 }
 
 .admin-nav-link:hover {
-    background: rgba(56, 189, 248, .08);
-    color: #e2e8f0;
+    background: rgba(245, 158, 11, .1);
+    color: #fbbf24;
     transform: translateX(2px);
 }
 
 .admin-nav-link.active {
-    background: linear-gradient(135deg, rgba(21, 116, 224, .3), rgba(56, 189, 248, .15));
-    color: #38bdf8;
-    border-left: 2px solid #38bdf8;
+    background: linear-gradient(135deg, rgba(245, 158, 11, .28), rgba(234, 88, 12, .14));
+    color: #fbbf24;
+    border-left: 2px solid #f59e0b;
     padding-left: 12px;
 }
 
@@ -133,14 +133,14 @@ html.lm .admin-nav-link {
 }
 
 html.lm .admin-nav-link:hover {
-    background: #f1f5f9;
-    color: #0f172a;
+    background: #fef3c7;
+    color: #92400e;
 }
 
 html.lm .admin-nav-link.active {
-    background: rgba(21, 116, 224, .08);
-    color: #1574e0;
-    border-color: #1574e0;
+    background: rgba(245, 158, 11, .14);
+    color: #b45309;
+    border-color: #f59e0b;
 }
 
 html.lm .admin-topbar {

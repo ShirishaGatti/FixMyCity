@@ -35,5 +35,18 @@ namespace FixMyCityModel.Model
         public string WardName { get; set; }
         public string CityName { get; set; }
         public string AssignedName { get; set; }
+
+        // Resolution-confirmation workflow — computed, not stored.
+        // The citizen has 7 days from ResolvedDate to confirm/reject
+        // before Complaint_AutoExpireResolutions closes it for them.
+        public bool IsAwaitingConfirmation =>
+            string.Equals(StatusName, "Awaiting Customer Confirmation", StringComparison.OrdinalIgnoreCase);
+
+        public DateTime? ResolutionDeadlineUtc => ResolvedDate?.AddDays(7);
+
+        public int? DaysLeftToRespond =>
+            ResolutionDeadlineUtc.HasValue
+                ? (int?)Math.Max(0, (int)Math.Ceiling((ResolutionDeadlineUtc.Value - DateTime.UtcNow).TotalDays))
+                : null;
     }
 }

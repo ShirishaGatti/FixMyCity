@@ -1,4 +1,5 @@
 @model FixMyCityModel.ViewModel.MyComplaintsViewModel
+@using System.Linq
 @{
     Layout = "~/Views/Shared/_OfficerLayout.cshtml";
     ViewBag.Title = "Assigned Complaints";
@@ -62,7 +63,7 @@
         <div class="col-md-1">
             <label class="dash-label">Rows</label>
             <select id="pageSizeFilter" class="dash-input">
-                <option value="5"  @(Model.PageSize == 5  ? "selected" : "")>5</option>
+                <option value="5" @(Model.PageSize == 5 ? "selected" : "")>5</option>
                 <option value="10" @(Model.PageSize == 10 ? "selected" : "")>10</option>
                 <option value="20" @(Model.PageSize == 20 ? "selected" : "")>20</option>
                 <option value="50" @(Model.PageSize == 50 ? "selected" : "")>50</option>
@@ -132,8 +133,11 @@
                     </div>
                     <div class="col-md-4 dash-form-group">
                         <label class="dash-label">Status</label>
+                        @* Only Open / In Progress are hand-picked here. "Resolved" goes through the
+                            dedicated Mark Resolved action; Awaiting Confirmation, Closed and Reopened
+                            only ever happen via the citizen's Confirm/Reject or the 7-day auto-expiry. *@
                         <select id="editStatusId" name="statusId" class="dash-input" required>
-                            @foreach (var status in Model.Statuses)
+                            @foreach (var status in Model.Statuses.Where(s => s.StatusName == "Open" || s.StatusName == "In Progress"))
                             {
                                 <option value="@status.StatusId">@status.StatusName</option>
                             }
@@ -171,6 +175,7 @@
         var currentSortColumn = '@Model.SortColumn';
         var currentSortDirection = '@Model.SortDirection';
         var currentPage = @Model.CurrentPage;
+        var antiForgeryToken = $('input[name="__RequestVerificationToken"]').val();
 
         function gatherOfficerFilters() {
             return {
@@ -352,6 +357,36 @@
 
         $(document).on('click', '.complaint-chat-btn', function () {
             openChatModal(this);
+        });
+
+        // ── Mark Resolved ─────────────────────────────────────────────
+        // Delegated for the same reason as the chat/edit buttons — rows
+        // are replaced wholesale on every filter/sort/page action.
+        $(document).on('click', '.complaint-resolve-btn', function () {
+            var btn = $(this);
+            var complaintId = btn.data('complaint-id');
+            var complaintNumber = btn.data('complaint-number');
+            confirmDialog('Mark complaint #' + complaintNumber + ' as Resolved? The citizen will be asked to confirm or reject it.', function () {
+                $.ajax({
+                    url: '@Url.Action("ResolveComplaint", "Officer")',
+                    type: 'POST',
+                    data: {
+                        complaintId: complaintId,
+                        __RequestVerificationToken: antiForgeryToken
+                    },
+                    success: function (res) {
+                        if (res.success) {
+                            showToast(res.message || 'Complaint marked Resolved.', 'success', 'Resolved');
+                            loadOfficerComplaints(currentPage);
+                        } else {
+                            showToast(res.message || 'Unable to mark the complaint as resolved.', 'error', 'Error');
+                        }
+                    },
+                    error: function () {
+                        showToast('An error occurred while resolving the complaint. Please try again.', 'error', 'Error');
+                    }
+                });
+            });
         });
     </script>
 }

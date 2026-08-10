@@ -3,8 +3,8 @@
 <style>
     /* ── Complaint Detail Drawer Styles ─────────────────────────── */
     .cd-hero {
-        background: linear-gradient(135deg, rgba(21,116,224,0.18) 0%, rgba(21,116,224,0.04) 100%);
-        border-bottom: 1px solid rgba(255,255,255,0.07);
+        background: linear-gradient(135deg, rgba(245,158,11,0.14) 0%, rgba(234,88,12,0.04) 100%);
+        border-bottom: 1px solid var(--bd);
         padding: 20px 24px 18px;
         display: flex;
         align-items: flex-start;
@@ -17,7 +17,7 @@
         font-weight: 700;
         letter-spacing: 0.12em;
         text-transform: uppercase;
-        color: #1574e0;
+        color: #f59e0b;
         margin-bottom: 4px;
     }
     .cd-hero-title {
@@ -49,7 +49,7 @@
         gap: 6px;
     }
     .cd-description {
-        background: rgba(255,255,255,0.03);
+        background: var(--bg3);
         border: 1px solid var(--bd);
         border-radius: 10px;
         padding: 14px 16px;
@@ -66,7 +66,7 @@
         margin-top: 4px;
     }
     .cd-info-item {
-        background: rgba(255,255,255,0.03);
+        background: var(--bg3);
         border: 1px solid var(--bd);
         border-radius: 10px;
         padding: 11px 13px;
@@ -94,7 +94,7 @@
         margin-top: 4px;
     }
     .cd-attach-card {
-        background: rgba(255,255,255,0.03);
+        background: var(--bg3);
         border: 1px solid var(--bd);
         border-radius: 10px;
         overflow: hidden;
@@ -102,7 +102,7 @@
         flex-direction: column;
         transition: border-color 0.2s, transform 0.15s;
     }
-    .cd-attach-card:hover { border-color: #1574e0; transform: translateY(-2px); }
+    .cd-attach-card:hover { border-color: #f59e0b; transform: translateY(-2px); }
     .cd-attach-thumb {
         width: 100%;
         aspect-ratio: 4/3;
@@ -115,7 +115,7 @@
         justify-content: center;
         aspect-ratio: 4/3;
         font-size: 2rem;
-        color: #1574e0;
+        color: #f59e0b;
     }
     .cd-attach-info {
         padding: 8px 10px;
@@ -138,6 +138,7 @@
 .drawer-card .cd-body { flex: 1; overflow-y: auto; min-height: 0; }
 </style>
 
+
 <div class="cd-hero">
     <div class="cd-hero-left">
         <div class="cd-hero-number">
@@ -157,6 +158,43 @@
     <button type="button" class="dash-modal-close" onclick="closeDetailsDrawer()" style="flex-shrink:0;">&times;</button>
 </div>
 
+@if (Model.Complaint.IsAwaitingConfirmation)
+{
+    <div class="cd-confirm-card">
+        <div class="cd-confirm-icon">
+            <i class="bi bi-patch-check-fill"></i>
+        </div>
+
+        <div class="cd-confirm-content">
+            <h6>Officer marked this complaint as <strong>Resolved</strong></h6>
+
+            <p>
+                Please review the resolution.
+                You have
+                <strong>@(Model.Complaint.DaysLeftToRespond ?? 0) day(s)</strong>
+                remaining to respond.
+            </p>
+
+            <div class="cd-confirm-actions">
+                <button type="button"
+                        class="btn btn-success btn-sm"
+                        id="btnConfirmComplaint"
+                        data-id="@Model.Complaint.ComplaintId">
+                    <i class="bi bi-check-circle"></i>
+                    Confirm - It's Fixed
+                </button>
+
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm"
+                        id="btnRejectComplaint"
+                        data-id="@Model.Complaint.ComplaintId">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                    Reject - Reopen
+                </button>
+            </div>
+        </div>
+    </div>
+}
 <div class="cd-body">
 
     <!-- Description -->
@@ -262,5 +300,48 @@
                 error: function (xhr) { showToast('Unable to remove attachment. Status: ' + xhr.status, 'error', 'Error'); }
             });
         });
+    });
+
+    $(document).on("click", "#btnConfirmComplaint", function () {
+
+        var id = $(this).data("id");
+
+        confirmDialog("Confirm that your complaint has been resolved?", function () {
+
+            $.post("/Complaint/ConfirmComplaint", { id: id }, function (res) {
+
+                if (res.success) {
+                    showToast("Complaint closed successfully.", "success", "Success");
+                    location.reload();
+                } else {
+                    showToast(res.message, "error", "Error");
+                }
+
+            });
+
+        });
+
+    });
+
+
+    $(document).on("click", "#btnRejectComplaint", function () {
+
+        var id = $(this).data("id");
+
+        confirmDialog("Reopen this complaint?", function () {
+
+            $.post("/Complaint/RejectComplaint", { id: id }, function (res) {
+
+                if (res.success) {
+                    showToast("Complaint reopened.", "success", "Success");
+                    location.reload();
+                } else {
+                    showToast(res.message, "error", "Error");
+                }
+
+            });
+
+        });
+
     });
 </script>

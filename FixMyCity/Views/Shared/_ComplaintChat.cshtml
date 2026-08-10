@@ -47,24 +47,25 @@
 
     @if (Model.IsChatOpen)
     {
-        @*if (!textOnly)
+        if (!textOnly)
         {
             <div class="chat-dropzone" id="chatDropzone-@domId">
                 <div class="chat-dropzone-hint">
-                    <i class="bi bi-cloud-arrow-up"></i> Drag a file here, or use the paperclip below
+                    <i class="bi bi-cloud-arrow-up"></i> Drag up to 10 files here, or use the paperclip below
                 </div>
             </div>
-        }*@
+        }
 
         <form id="chatForm-@domId" class="chat-composer" autocomplete="off">
             @Html.AntiForgeryToken()
             @if (!textOnly)
             {
-                <button type="button" class="chat-attach-btn" title="Attach a file" onclick="document.getElementById('chatFile-@domId').click()">
+                <button type="button" class="chat-attach-btn" title="Attach up to 10 files" onclick="document.getElementById('chatFile-@domId').click()">
                     <i class="bi bi-paperclip"></i>
                 </button>
-                @*<input type="file" id="chatFile-@domId" class="d-none"
-                       data-allowed-ext="@Model.AllowedExtensionsCsv" data-max-size-mb="@Model.MaxAttachmentSizeMB" />*@
+                <input type="file" id="chatFile-@domId" class="d-none" multiple
+                       data-allowed-ext="@Model.AllowedExtensionsCsv" data-max-size-mb="@Model.MaxAttachmentSizeMB"
+                       data-max-count="10" />
             }
             <input type="text" id="chatInput-@domId" class="chat-input" placeholder="Type a message..." maxlength="1000" />
             <button type="submit" class="chat-send-btn" title="Send">
@@ -190,7 +191,7 @@
 
             if (fileInput) {
                 fileInput.addEventListener('change', function () {
-                    if (fileInput.files.length) uploadFile(fileInput.files[0]);
+                    if (fileInput.files.length) uploadFiles(fileInput.files);
                     fileInput.value = '';
                 });
             }
@@ -211,22 +212,38 @@
             });
             dropzone.addEventListener('drop', function (e) {
                 var files = e.dataTransfer.files;
-                if (files && files.length) uploadFile(files[0]);
+                if (files && files.length) uploadFiles(files);
             });
         }
 
-        function uploadFile(file) {
+        // files: a FileList (from <input multiple> or a drag-drop event).
+        // Validates the whole batch client-side (count/ext/size) before
+        // sending — mirrors the server-side batch validation in
+        // ComplaintChatService.SendAttachments, so the user finds out about
+        // a problem before anything uploads rather than after a partial send.
+        function uploadFiles(fileList) {
             var allowedExt = (fileInput.dataset.allowedExt || '').split(',').map(function (x) { return x.trim().toLowerCase(); });
             var maxBytes = parseFloat(fileInput.dataset.maxSizeMb) * 1024 * 1024;
-            var ext = '.' + file.name.split('.').pop().toLowerCase();
+            var maxCount = parseInt(fileInput.dataset.maxCount, 10) || 10;
 
-            if (allowedExt.indexOf(ext) === -1) { alert(file.name + ' is not an allowed file type.'); return; }
-            if (file.size > maxBytes) { alert(file.name + ' exceeds the size limit.'); return; }
+            var files = Array.prototype.slice.call(fileList);
+            if (files.length > maxCount) {
+                alert('You can attach up to ' + maxCount + ' files at a time. You selected ' + files.length + '.');
+                return;
+            }
+
+            var errors = [];
+            files.forEach(function (file) {
+                var ext = '.' + file.name.split('.').pop().toLowerCase();
+                if (allowedExt.indexOf(ext) === -1) errors.push(file.name + ' is not an allowed file type.');
+                else if (file.size > maxBytes) errors.push(file.name + ' exceeds the size limit.');
+            });
+            if (errors.length) { alert(errors.join('\n')); return; }
 
             var token = $(form).find('input[name="__RequestVerificationToken"]').val();
             var formData = new FormData();
             formData.append('complaintId', complaintId);
-            formData.append('file', file);
+            files.forEach(function (file) { formData.append('files', file); });
             formData.append('__RequestVerificationToken', token);
 
             $.ajax({
@@ -237,13 +254,15 @@
                 contentType: false,
                 success: function (res) {
                     if (res.success) {
-                        appendMessage(res.html);
-                        panel.dataset.lastId = res.chatMessageId;
+                        res.messages.forEach(function (m) {
+                            appendMessage(m.html);
+                            panel.dataset.lastId = m.chatMessageId;
+                        });
                     } else {
-                        alert(res.message || 'Failed to upload file.');
+                        alert(res.message || 'Failed to upload file(s).');
                     }
                 },
-                error: function () { alert('Failed to upload file.'); }
+                error: function () { alert('Failed to upload file(s).'); }
             });
         }
     })();

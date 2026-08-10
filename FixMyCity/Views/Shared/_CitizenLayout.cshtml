@@ -1,4 +1,4 @@
-@{
+﻿@{
     Layout = null; // standalone layout — no public _Layout
     var activePage = ViewBag.ActivePage as string ?? "";
 }
@@ -7,7 +7,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@(ViewBag.Title ?? "Dashboard") — FixMyCity</title>
+    <title>@(ViewBag.Title ?? "Dashboard") FixMyCity</title>
     <meta name="description" content="FixMyCity Citizen Dashboard" />
 
     <!-- Fonts & Icons -->
@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
     <!-- Styles -->
+    <link rel="stylesheet" href="~/Content/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/Content/css/style.css" />
     <link rel="stylesheet" href="~/Content/css/citizen.css" />
     <link href="~/Content/css/officer.css" rel="stylesheet" />
@@ -124,6 +125,7 @@
 
 <!-- Scripts -->
 <script src="~/Content/js/jquery-3.7.1.min.js"></script>
+<script src="~/Content/js/bootstrap.bundle.min.js"></script>
 <script>
     // ── Theme ────────────────────────────────────────────
     function applyDashTheme(isLight) {

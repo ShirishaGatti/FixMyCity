@@ -132,62 +132,65 @@
             <input type="hidden" name="ComplaintId" id="complaintIdField" value="" />
             <div class="dash-modal-body">
                 <div class="dash-form-horizontal">
-                <div class="dash-form-group">
-                    <label class="dash-label">Title *</label>
-                    <input type="text" name="Title" id="fldTitle" class="dash-input" maxlength="150" required />
-                </div>
-                <div class="dash-form-group">
-                    <label class="dash-label">Description *</label>
-                    <textarea name="Description" id="fldDescription" rows="3" class="dash-input" maxlength="1000" required></textarea>
-                </div>
-                <div class="dash-form-group">
-                    <label class="dash-label">Category *</label>
-                    <select name="CategoryId" id="fldCategoryId" class="dash-input" required>
-                        <option value="">-- Select --</option>
-                        @foreach (var cat in Model.Categories)
-                        {
-                            <option value="@cat.CategoryId">@cat.CategoryName</option> }
-                    </select>
-                </div>
-                <div class="dash-form-group">
-                    <label class="dash-label">Priority *</label>
-                    <select name="PriorityId" id="fldPriorityId" class="dash-input" required>
-                        <option value="">-- Select --</option>
-                        @foreach (var p in Model.Priorities)
-                        {
-                            <option value="@p.PriorityId">@p.PriorityName</option> }
-                    </select>
-                </div>
-                <div class="dash-form-group">
-                    <label class="dash-label">City *</label>
-                    <select name="CityId" id="complaintCityId" class="dash-input" required>
-                        <option value="">-- Select --</option>
-                        @foreach (var city in Model.Cities)
-                        {
-                            <option value="@city.CityId">@city.CityName</option> }
-                    </select>
-                </div>
-                <div class="dash-form-group">
-                    <label class="dash-label">Ward *</label>
-                    <select name="WardId" id="complaintWardId" class="dash-input" required>
-                        <option value="">-- Select City First --</option>
-                    </select>
-                </div>
-                <div class="dash-form-group">
-                    <label class="dash-label">Address *</label>
-                    <input type="text" name="AddressLine" id="fldAddressLine" class="dash-input" maxlength="250" required />
-                </div>
-                <div class="dash-form-group">
-                    <label class="dash-label">Landmark</label>
-                    <input type="text" name="Landmark" id="fldLandmark" class="dash-input" maxlength="150" />
-                </div>
-                <div class="dash-form-group">
-                    <label class="dash-label">Attachments</label>
-                    <input type="file" name="Attachments" id="complaintAttachments" class="dash-input" multiple
-                           data-max-size-mb="@Model.MaxAttachmentSizeMB" data-allowed-ext="@Model.AllowedExtensionsCsv" />
-                    <small style="color:var(--tx3);">jpg, jpeg, png, pdf, doc, docx — up to @Model.MaxAttachmentSizeMB MB each.</small>
-                    <div id="attachmentPreviewList" class="attachment-preview-list mt-2"></div>
-                </div>
+                    <div class="dash-form-group">
+                        <label class="dash-label">Title *</label>
+                        <input type="text" name="Title" id="fldTitle" class="dash-input" maxlength="150" required />
+                    </div>
+                    <div class="dash-form-group">
+                        <label class="dash-label">Description *</label>
+                        <textarea name="Description" id="fldDescription" rows="3" class="dash-input" maxlength="1000" required></textarea>
+                    </div>
+                    <div class="dash-form-group">
+                        <label class="dash-label">Category *</label>
+                        <select name="CategoryId" id="fldCategoryId" class="dash-input" required>
+                            <option value="">-- Select --</option>
+                            @foreach (var cat in Model.Categories)
+                            {
+                                <option value="@cat.CategoryId">@cat.CategoryName</option> }
+                        </select>
+                    </div>
+                    <div class="dash-form-group">
+                        <label class="dash-label">Priority *</label>
+                        <select name="PriorityId" id="fldPriorityId" class="dash-input" required>
+                            <option value="">-- Select --</option>
+                            @foreach (var p in Model.Priorities)
+                            {
+                                <option value="@p.PriorityId">@p.PriorityName</option> }
+                        </select>
+                    </div>
+                    <div class="dash-form-group">
+                        <label class="dash-label">City *</label>
+                        <select name="CityId" id="complaintCityId" class="dash-input" required>
+                            <option value="">-- Select --</option>
+                            @foreach (var city in Model.Cities)
+                            {
+                                <option value="@city.CityId">@city.CityName</option> }
+                        </select>
+                    </div>
+                    <div class="dash-form-group">
+                        <label class="dash-label">Ward *</label>
+                        <select name="WardId" id="complaintWardId" class="dash-input" required>
+                            <option value="">-- Select City First --</option>
+                        </select>
+                    </div>
+                    <div class="dash-form-group">
+                        <label class="dash-label">Address *</label>
+                        <input type="text" name="AddressLine" id="fldAddressLine" class="dash-input" maxlength="250" required />
+                    </div>
+                    <div class="dash-form-group">
+                        <label class="dash-label">Landmark</label>
+                        <input type="text" name="Landmark" id="fldLandmark" class="dash-input" maxlength="150" />
+                    </div>
+                    <div class="dash-form-group">
+                        <label class="dash-label">Attachments</label>
+                        <div class="attachment-field">
+                            <input type="file" name="Attachments" id="complaintAttachments" class="dash-input" multiple
+                                   data-max-size-mb="@Model.MaxAttachmentSizeMB" data-allowed-ext="@Model.AllowedExtensionsCsv"
+                                   data-max-count="5" />
+                            <small style="color:var(--tx3);">jpg, jpeg, png, pdf, doc, docx — up to 5 files, @Model.MaxAttachmentSizeMB MB each.</small>
+                            <div id="attachmentPreviewList" class="attachment-preview-list mt-2"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="dash-modal-footer">
@@ -281,6 +284,43 @@
                     },
                     error: function () { showToast('Failed to delete complaint. Please try again.', 'error', 'Error'); }
                 });
+            });
+        }
+
+        // ── Resolution confirmation workflow ──────────────────────────
+        function confirmResolution(id) {
+            confirmDialog('Confirm that this complaint has been resolved to your satisfaction? It will be closed.', function () {
+                $.ajax({
+                    url: '/Complaint/ConfirmResolution/' + id, type: 'POST',
+                    data: { __RequestVerificationToken: antiForgeryToken },
+                    success: function (res) {
+                        if (res.success) {
+                            showToast(res.message || 'Complaint closed.', 'success', 'Confirmed');
+                            setTimeout(function () { window.location.reload(); }, 1200);
+                        } else {
+                            showToast(res.message || 'Could not confirm the resolution.', 'error', 'Error');
+                        }
+                    },
+                    error: function () { showToast('Unable to confirm the resolution. Please try again.', 'error', 'Error'); }
+                });
+            });
+        }
+
+        function rejectResolution(id) {
+            var reason = window.prompt('Optional: tell us why this isn\'t resolved yet. This is sent back to the officer.', '');
+            if (reason === null) return; // user cancelled
+            $.ajax({
+                url: '/Complaint/RejectResolution/' + id, type: 'POST',
+                data: { reason: reason, __RequestVerificationToken: antiForgeryToken },
+                success: function (res) {
+                    if (res.success) {
+                        showToast(res.message || 'Complaint reopened.', 'warning', 'Reopened');
+                        setTimeout(function () { window.location.reload(); }, 1200);
+                    } else {
+                        showToast(res.message || 'Could not reject the resolution.', 'error', 'Error');
+                    }
+                },
+                error: function () { showToast('Unable to reject the resolution. Please try again.', 'error', 'Error'); }
             });
         }
         // ── Client-side date validation helper ────────────────────────
@@ -443,6 +483,7 @@
             if (!input) return;
             var allowedExt = (input.dataset.allowedExt || '').split(',').map(function (e) { return e.trim().toLowerCase(); });
             var maxSizeBytes = parseFloat(input.dataset.maxSizeMb) * 1024 * 1024;
+            var maxCount = parseInt(input.dataset.maxCount, 10) || 5;
 
             input.addEventListener('change', function () {
                 var dt = new DataTransfer(); var errors = []; var seenNames = {};
@@ -452,10 +493,14 @@
                     if (allowedExt.indexOf(ext) === -1) { errors.push(file.name + ' — not allowed.'); return; }
                     if (file.size > maxSizeBytes) { errors.push(file.name + ' — too large.'); return; }
                     if (seenNames[key]) { errors.push(file.name + ' — duplicate.'); return; }
+                    if (dt.items.length >= maxCount) {
+                        errors.push('You can upload a maximum of ' + maxCount + ' attachments.');
+                        return;
+                    }
                     seenNames[key] = true; dt.items.add(file);
                 });
                 input.files = dt.files;
-                if (errors.length) alert(errors.join('\n'));
+                if (errors.length) confirmDialog(errors.join('\n'), function () { });
                 renderPreview();
             });
 

@@ -10,7 +10,7 @@
 .custom-input:focus {
     background-color: var(--bg2) !important;
     border-color: var(--pur) !important;
-    box-shadow: 0 0 0 0.25rem rgba(21, 116, 224, 0.25) !important;
+    box-shadow: 0 0 0 0.25rem rgba(21, 116, 224, 0.2) !important;
     color: var(--tx) !important;
 }
 
@@ -34,5 +34,5 @@
 }
 
 .text-hover-white:hover {
-    color: #ffffff !important;
+    color: var(--tx) !important;
 }

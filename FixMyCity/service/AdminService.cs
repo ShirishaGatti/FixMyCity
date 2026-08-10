@@ -12,9 +12,15 @@ namespace FixMyCity.service
     public class AdminService : IAdminService
     {
         private readonly IAdminRepository _repo;
+        private readonly IComplaintRepository _complaintRepo;
 
-        public AdminService() : this(new AdminRepository()) { }
-        public AdminService(IAdminRepository repo) { _repo = repo; }
+        public AdminService() : this(new AdminRepository(), new ComplaintRepository()) { }
+        public AdminService(IAdminRepository repo) : this(repo, new ComplaintRepository()) { }
+        public AdminService(IAdminRepository repo, IComplaintRepository complaintRepo)
+        {
+            _repo = repo;
+            _complaintRepo = complaintRepo;
+        }
 
         public AdminDashboardViewModel GetDashboard() => _repo.GetDashboardStats();
 
@@ -97,6 +103,8 @@ namespace FixMyCity.service
                 filter.SortBy = "ComplaintId";
 
             filter.SortDir = string.Equals(filter.SortDir, "ASC", StringComparison.OrdinalIgnoreCase) ? "ASC" : "DESC";
+
+            _complaintRepo.ExpireOverdueResolutions();
 
             var vm = _repo.ListComplaints(filter);
             vm.Filter = filter;
@@ -189,52 +197,52 @@ namespace FixMyCity.service
             var all = _repo.GetWardsFull();
             return all.FindAll(w => w.CityId == cityId);
         }
-       /* public void UpdateOfficer(int consumerId, string designation, int? wardId, int? deptId, int actorId)
+        /* public void UpdateOfficer(int consumerId, string designation, int? wardId, int? deptId, int actorId)
+         {
+             if (consumerId <= 0) throw new BusinessException("Invalid officer.", "INVALID_USER");
+             if (!deptId.HasValue || deptId.Value <= 0)
+                 throw new BusinessException("Department is required.", "DEPT_REQUIRED");
+             _repo.UpdateOfficer(consumerId, designation, wardId, deptId, actorId);
+         }  */
+        public MasterDataViewModel GetMasterData()
         {
-            if (consumerId <= 0) throw new BusinessException("Invalid officer.", "INVALID_USER");
-            if (!deptId.HasValue || deptId.Value <= 0)
-                throw new BusinessException("Department is required.", "DEPT_REQUIRED");
-            _repo.UpdateOfficer(consumerId, designation, wardId, deptId, actorId);
-        }  */
-       public MasterDataViewModel GetMasterData()
-   {
-       return new MasterDataViewModel
-       {
-           States = _repo.GetStates(),
-           Districts = _repo.GetDistricts(null),
-           Cities = _repo.GetCitiesFull(),
-           Wards = _repo.GetWardsFull(),
-           Categories = _repo.GetCategories(),
-           Departments = _repo.GetDepartments()
-       };
-   }
-       /* public AdminUserListViewModel GetOfficers(AdminUserListFilterViewModel filter)
-        {
-            filter = filter ?? new AdminUserListFilterViewModel();
-
-            // Officer Role Id
-            filter.RoleId = 3;   // Replace with your actual Officer RoleId
-
-            return _adminRepository.GetUsers(filter);
+            return new MasterDataViewModel
+            {
+                States = _repo.GetStates(),
+                Districts = _repo.GetDistricts(null),
+                Cities = _repo.GetCitiesFull(),
+                Wards = _repo.GetWardsFull(),
+                Categories = _repo.GetCategories(),
+                Departments = _repo.GetDepartments()
+            };
         }
+        /* public AdminUserListViewModel GetOfficers(AdminUserListFilterViewModel filter)
+         {
+             filter = filter ?? new AdminUserListFilterViewModel();
 
-        public void UpdateOfficer(
-            int consumerId,
-            string designation,
-            int? wardId,
-            int? deptId,
-            int actorId)
-        {
-            if (consumerId <= 0)
-                throw new BusinessException("Invalid officer.");
+             // Officer Role Id
+             filter.RoleId = 3;   // Replace with your actual Officer RoleId
 
-            _adminRepository.UpdateOfficer(
-                consumerId,
-                designation,
-                wardId,
-                deptId,
-                actorId);
-        }*/
+             return _adminRepository.GetUsers(filter);
+         }
+
+         public void UpdateOfficer(
+             int consumerId,
+             string designation,
+             int? wardId,
+             int? deptId,
+             int actorId)
+         {
+             if (consumerId <= 0)
+                 throw new BusinessException("Invalid officer.");
+
+             _adminRepository.UpdateOfficer(
+                 consumerId,
+                 designation,
+                 wardId,
+                 deptId,
+                 actorId);
+         }*/
 
         public List<Department> GetDepartments() => _repo.GetDepartments();
         public List<Role> GetRoles() => _repo.GetRoles();

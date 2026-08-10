@@ -16,7 +16,7 @@ namespace FixMyCity.Repository
         Attachment GetAttachmentById(int attachmentId, int consumerId);
         void DeleteAttachment(int attachmentId, int consumerId);
         // Interface additions
-        int SaveComplaint(Complaint complaint,int roleId,int consumerId);
+        int SaveComplaint(Complaint complaint, int roleId, int consumerId);
         // upsert — Complaint.ComplaintId null/0 = create
         bool UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId, int roleId);
 
@@ -25,5 +25,13 @@ namespace FixMyCity.Repository
         ComplaintSearchResult Search(int consumerId, ComplaintListFilterViewModel filter); List<ComplaintStatus> GetStatuses();
         List<Complaint> GetAssignedByOfficerId(int officerId);
         //Complaint GetAssignedComplaintById(int complaintId, int officerId);
+
+        // Resolution-confirmation workflow
+        bool ResolveComplaint(int complaintId, int officerId);
+        bool ConfirmResolution(int complaintId, int consumerId);
+        bool RejectResolution(int complaintId, int consumerId, string reason);
+        // Auto-closes complaints past their 7-day confirmation window; returns
+        // the RaisedBy ids that were affected so callers can bust their cache.
+        List<int> ExpireOverdueResolutions();
     }
 }

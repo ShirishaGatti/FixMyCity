@@ -23,7 +23,7 @@ namespace FixMyCity.service
             _complaintRepo = new ComplaintRepository();
             _consumerService = new ConsumerService();
         }
-           
+
         //public ComplaintService(IComplaintRepository complaintRepo,
         //                        IConsumerService consumerService)
         //{
@@ -31,7 +31,7 @@ namespace FixMyCity.service
         //    _consumerService = consumerService;
         //}
 
-        public MyComplaintsViewModel GetComplaints(int consumerId,int assignedTo,int roleId)
+        public MyComplaintsViewModel GetComplaints(int consumerId, int assignedTo, int roleId)
         {
             return new MyComplaintsViewModel
             {
@@ -185,7 +185,27 @@ namespace FixMyCity.service
                 throw new BusinessException("Category, priority and status are required.", "INVALID_INPUT");
             _complaintRepo.UpdateComplaint(complaintId, categoryId, priorityId, statusId, assignedTo, actorId, roleId);
         }
-        public int SaveComplaint(FileComplaintViewModel vm, int consumerId,int roleId)
+
+        public void ResolveComplaint(int complaintId, int officerId)
+        {
+            if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
+            _complaintRepo.ResolveComplaint(complaintId, officerId);
+        }
+
+        public void ConfirmResolution(int complaintId, int consumerId)
+        {
+            if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
+            _complaintRepo.ConfirmResolution(complaintId, consumerId);
+        }
+
+        public void RejectResolution(int complaintId, int consumerId, string reason)
+        {
+            if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
+            if (!string.IsNullOrWhiteSpace(reason) && reason.Length > 500)
+                throw new BusinessException("Reason must be 500 characters or fewer.", "REASON_TOO_LONG");
+            _complaintRepo.RejectResolution(complaintId, consumerId, reason);
+        }
+        public int SaveComplaint(FileComplaintViewModel vm, int consumerId, int roleId)
         {
             if (string.IsNullOrWhiteSpace(vm.Title)) throw new BusinessException("Title is required.");
             if (string.IsNullOrWhiteSpace(vm.Description)) throw new BusinessException("Description is required.");
@@ -208,6 +228,7 @@ namespace FixMyCity.service
 
         public OfficerDashboardViewModel GetOfficerDashboard(int officerId, int roleId)
         {
+            _complaintRepo.ExpireOverdueResolutions();
             var complaints = _complaintRepo.GetComplaints(null, officerId, roleId);
             var now = DateTime.Now;
 
@@ -233,10 +254,12 @@ namespace FixMyCity.service
             };
         }
 
-    public MyComplaintsViewModel GetOfficerComplaints(int officerId, OfficerComplaintsQuery query)
+        public MyComplaintsViewModel GetOfficerComplaints(int officerId, OfficerComplaintsQuery query)
         {
             if (query == null)
                 query = new OfficerComplaintsQuery();
+
+            _complaintRepo.ExpireOverdueResolutions();
 
             var statuses = _complaintRepo.GetStatuses();
             var categories = _complaintRepo.GetCategories();
@@ -271,7 +294,7 @@ namespace FixMyCity.service
             var pageSize = query.PageSize <= 0 ? 10 : query.PageSize;
             var pagedComplaints = complaints.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-                        return new MyComplaintsViewModel
+            return new MyComplaintsViewModel
             {
                 SearchTerm = query.SearchTerm,
                 StatusId = query.StatusId,
@@ -282,7 +305,7 @@ namespace FixMyCity.service
                 CurrentPage = page,
                 PageSize = pageSize,
                 TotalRecords = totalRecords,
-                                Complaints = pagedComplaints,
+                Complaints = pagedComplaints,
                 Statuses = statuses,
                 Categories = categories,
                 Priorities = priorities
@@ -301,7 +324,8 @@ namespace FixMyCity.service
 
         public MyComplaintsViewModel Search(int consumerId, ComplaintListFilterViewModel filter)
         {
-            ComplaintSearchResult vm= _complaintRepo.Search(consumerId, filter);
+            _complaintRepo.ExpireOverdueResolutions();
+            ComplaintSearchResult vm = _complaintRepo.Search(consumerId, filter);
             return new MyComplaintsViewModel
             {
                 Complaints = vm.Complaints,

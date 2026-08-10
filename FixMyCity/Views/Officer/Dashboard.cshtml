@@ -82,7 +82,7 @@
         <p class="text-muted small mb-0">Track your assigned workload, monitor SLA deadlines, and analyze resolution performance.</p>
     </div>
     <div>
-        <a href="@Url.Action("Complaints", "Officer")" class="btn btn-primary px-3 py-2" style="border-radius:10px;font-weight:600;">
+        <a href="@Url.Action("Complaints", "Officer")" class="btn-dash-primary btn-sm flex-fill px-3 py-2" style="border-radius:10px;font-weight:600;">
             <i class="bi bi-list-task me-1"></i> Manage Queue
         </a>
     </div>
@@ -92,7 +92,7 @@
 <div class="row g-3 mb-4">
     <div class="col-lg-3 col-sm-6">
         <div class="dash-stat">
-            <div class="ds-icon" style="background:linear-gradient(135deg,#1574e0,#38bdf8)"><i class="bi bi-file-earmark-text-fill"></i></div>
+            <div class="ds-icon" style="background:linear-gradient(135deg,#f59e0b,#ea580c)"><i class="bi bi-file-earmark-text-fill"></i></div>
             <div>
                 <div class="ds-val">@totalAssigned</div>
                 <div class="ds-lbl">Total Assigned</div>
@@ -365,7 +365,7 @@
                         dataLabels: {
                             name: { show: true, label: 'Resolution SLA', color: textColor, fontSize: '12px', offsetY: -10 },
                             value: {
-                                color: '#38bdf8',
+                                color: '#f59e0b',
                                 fontSize: '24px',
                                 fontWeight: '700',
                                 show: true,
@@ -376,9 +376,9 @@
                 },
                 fill: {
                     type: 'gradient',
-                    gradient: { shade: 'dark', type: 'horizontal', gradientToColors: ['#38bdf8'], stops: [0, 100] }
+                    gradient: { shade: 'dark', type: 'horizontal', gradientToColors: ['#ea580c'], stops: [0, 100] }
                 },
-                colors: ['#1574e0'],
+                colors: ['#f59e0b'],
                 stroke: { lineCap: 'round' }
             };
             new ApexCharts(document.querySelector("#officerSlaGaugeChart"), gaugeOptions).render();
