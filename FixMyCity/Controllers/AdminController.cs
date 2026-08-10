@@ -3,8 +3,10 @@ using FixMyCity.Infrastructure;
 using FixMyCity.Filters;
 using FixMyCity.service;
 using FixMyCity.Service;
+using FixMyCityModel.Model;
 using FixMyCityModel.ViewModel;
 using System;
+using System.Linq;
 using System.Web.Mvc;
 
 namespace FixMyCity.Controllers
@@ -14,16 +16,22 @@ namespace FixMyCity.Controllers
     {
         private readonly IAdminService _adminService;
         private readonly ISessionContext _session;
+        private readonly IAuthService _authService;
+        private readonly IMailService _mailService;
+        private readonly IConsumerService _consumerService;
 
         public AdminController()
-     : this(new AdminService(), new JwtSessionContext())
+     : this(new AdminService(), new JwtSessionContext(), new AuthService(), new MailService(), new ConsumerService())
         {
         }
 
-        public AdminController(IAdminService service, ISessionContext session)
+        public AdminController(IAdminService service, ISessionContext session, IAuthService authService, IMailService mailService, IConsumerService consumerService)
         {
             _adminService = service;
             _session = session;
+            _authService = authService;
+            _mailService = mailService;
+            _consumerService = consumerService;
         }
         // Wherever the logged-in admin's id actually comes from in your auth setup
         // (claims/session) — swap this out for the real accessor.
@@ -109,8 +117,7 @@ namespace FixMyCity.Controllers
             }
             catch (BusinessException ex)
             {
-                Response.StatusCode = 400;
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = ex.Message, code = ex.ErrorCode });
             }
         }
 
@@ -124,8 +131,7 @@ namespace FixMyCity.Controllers
             }
             catch (BusinessException ex)
             {
-                Response.StatusCode = 400;
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = ex.Message, code = ex.ErrorCode });
             }
         }
 
@@ -141,13 +147,37 @@ namespace FixMyCity.Controllers
         {
             try
             {
+                var previous = _adminService.GetUserById(consumerId);
                 _adminService.UpdateUser(consumerId, roleId, deptId, CurrentActorId);
+
+                var updated = _adminService.GetUserById(consumerId);
+                if (previous != null && updated != null &&
+                    previous.RoleId != RoleIds.SupportExecutive &&
+                    updated.RoleId == RoleIds.SupportExecutive &&
+                    !string.IsNullOrWhiteSpace(updated.Email))
+                {
+                    SendRoleChangedEmail(updated);
+                }
+
                 return Json(new { success = true });
             }
             catch (BusinessException ex)
             {
-                Response.StatusCode = 400;
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = ex.Message, code = ex.ErrorCode });
+            }
+        }
+
+        private void SendRoleChangedEmail(AdminUserEditViewModel user)
+        {
+            try
+            {
+                string roleName = user.Roles?.FirstOrDefault(r => r.RoleId == user.RoleId)?.RoleName ?? "Officer";
+                string deptName = user.Departments?.FirstOrDefault(d => d.DepartmentId == user.DeptId)?.DepartmentName;
+                _mailService.SendRoleChangedEmail(user.Email, user.Name, roleName, deptName);
+            }
+            catch (Exception ex)
+            {
+                FixMyCity.Infrastructure.FileLogger.Log(ex, "AdminController.SendRoleChangedEmail");
             }
         }
 
@@ -180,30 +210,81 @@ namespace FixMyCity.Controllers
             }
             catch (BusinessException ex)
             {
-                Response.StatusCode = 400;
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = ex.Message, code = ex.ErrorCode });
             }
         }
 
         [HttpGet]
-        public ActionResult EditComplaint(int id)
+        public ActionResult AssignComplaintModal(int id)
         {
             var vm = _adminService.GetComplaintById(id);
-            return PartialView("_EditComplaintModal", vm);
+            return PartialView("_AssignComplaintModal", vm);
         }
 
         [HttpPost]
-        public JsonResult SaveComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo)
+        public JsonResult SaveAssignment(int complaintId, int? assignedTo)
         {
             try
             {
-                _adminService.UpdateComplaint(complaintId, categoryId, priorityId, statusId, assignedTo, CurrentActorId,roleId);
+                var previous = _adminService.GetComplaintById(complaintId);
+
+                _adminService.AssignComplaint(complaintId, assignedTo, CurrentActorId);
+
+                // Notify the officer and citizen when (and only when) the assignment actually changed.
+                if (assignedTo.HasValue && assignedTo.Value != previous?.AssignedTo)
+                {
+                    SendAssignmentOtp(assignedTo.Value, previous?.PriorityId ?? 0, previous);
+                    SendCitizenAssignedEmail(previous, assignedTo.Value);
+                }
+
                 return Json(new { success = true });
             }
             catch (BusinessException ex)
             {
-                Response.StatusCode = 400;
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = ex.Message, code = ex.ErrorCode });
+            }
+        }
+
+        private void SendCitizenAssignedEmail(AdminComplaintEditViewModel complaint, int officerConsumerId)
+        {
+            try
+            {
+                if (complaint == null || string.IsNullOrWhiteSpace(complaint.RaisedByEmail)) return;
+
+                var officer = _adminService.GetUserById(officerConsumerId);
+                if (officer == null || string.IsNullOrWhiteSpace(officer.Name)) return;
+
+                string number = complaint.ComplaintNumber ?? $"#{complaint.ComplaintId}";
+                string title = complaint.Title ?? "Complaint";
+
+                _mailService.SendComplaintAssignedEmail(complaint.RaisedByEmail, complaint.RaisedByName, number, title, officer.Name);
+            }
+            catch (Exception ex)
+            {
+                FixMyCity.Infrastructure.FileLogger.Log(ex, "AdminController.SendCitizenAssignedEmail");
+            }
+        }
+
+        private void SendAssignmentOtp(int officerConsumerId, int priorityId, AdminComplaintEditViewModel complaint)
+        {
+            try
+            {
+                var officer = _adminService.GetUserById(officerConsumerId);
+                if (officer == null || string.IsNullOrWhiteSpace(officer.Email)) return;
+
+                string otp = _authService.CreateOtp(officerConsumerId, "COMPLAINT_ASSIGNED");
+
+                string number = complaint?.ComplaintNumber ?? $"#{complaint?.ComplaintId}";
+                string title = complaint?.Title ?? "Complaint";
+                string priority = complaint?.Priorities?.FirstOrDefault(p => p.PriorityId == priorityId)?.PriorityName
+                                  ?? complaint?.PriorityName ?? "Medium";
+
+                _mailService.SendAssignmentOtpEmail(officer.Email, officer.Name, number, title, priority, otp);
+            }
+            catch (Exception ex)
+            {
+                // Best-effort — a mail failure must not fail the assignment itself.
+                FixMyCity.Infrastructure.FileLogger.Log(ex, "AdminController.SendAssignmentOtp");
             }
         }
         /*  [HttpPost]
@@ -241,6 +322,81 @@ namespace FixMyCity.Controllers
             catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }
         }*/
 
+        // ============================================================
+        // PROFILE
+        // ============================================================
+
+        [HttpGet]
+        public ActionResult Profile()
+        {
+            Consumer consumer;
+            try
+            {
+                consumer = _consumerService.GetProfile(_session.ConsumerId);
+            }
+            catch (NotFoundException)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var vm = new ProfileViewModel
+            {
+                ConsumerId = consumer.ConsumerId,
+                Name = consumer.Name,
+                Email = consumer.Email,
+                Contact = consumer.Contact,
+                DOB = consumer.DOB,
+                AddressLine = consumer.AddressLine,
+                CityId = consumer.CityId,
+                WardId = consumer.WardId,
+                Designation = consumer.Designation
+            };
+
+            PopulateProfileDropdowns(vm);
+            ViewBag.ActivePage = "Profile";
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Profile(ProfileViewModel vm)
+        {
+            ViewBag.ActivePage = "Profile";
+
+            if (!ModelState.IsValid)
+            {
+                PopulateProfileDropdowns(vm);
+                return View(vm);
+            }
+
+            try
+            {
+                _consumerService.UpdateProfile(_session.ConsumerId, vm.Name, vm.Contact,
+                    vm.DOB, vm.AddressLine, vm.CityId, vm.WardId, vm.Designation);
+                TempData["Success"] = "Profile updated successfully.";
+                return RedirectToAction("Profile");
+            }
+            catch (BusinessException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                PopulateProfileDropdowns(vm);
+                return View(vm);
+            }
+            catch (DataAccessException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                PopulateProfileDropdowns(vm);
+                return View(vm);
+            }
+        }
+
+        private void PopulateProfileDropdowns(ProfileViewModel vm)
+        {
+            var cities = _consumerService.GetCities();
+            vm.Cities = cities;
+            int cityId = vm.CityId ?? (cities.Count > 0 ? cities[0].CityId : 1);
+            vm.Wards = _consumerService.GetWardsByCity(cityId);
+        }
 
     }
 }

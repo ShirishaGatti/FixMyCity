@@ -31,7 +31,7 @@
                         <tr>
                             <td><a href="javascript:void(0)" class="complaint-num-link" onclick="openDetailsDrawer(@c.ComplaintId)">@c.ComplaintNumber</a></td>
                             <td><span class="text-truncate-col-lg" title="@c.Title">@c.Title</span></td>
-                            <td><span class="text-truncate-col" title="@c.CategoryName">@c.CategoryName</span></td>
+                            <td><span class="status-badge status-badge-wrap" title="@c.CategoryName">@c.CategoryName</span></td>
                             <td><span class="priority-badge @c.PriorityName.ToLower()">@c.PriorityName</span></td>
                             <td>
                                 <span class="status-badge status-badge-wrap @c.StatusName.ToLower().Replace(" ", "")">@c.StatusName</span>

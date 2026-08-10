@@ -293,12 +293,17 @@ namespace FixMyCity.Repository
                     vm = new AdminComplaintEditViewModel
                     {
                         ComplaintId = ToInt(r["ComplaintId"]),
+                        ComplaintNumber = r["ComplaintNumber"] is DBNull ? null : r["ComplaintNumber"].ToString(),
                         Title = r["Title"].ToString(),
                         Description = r["Description"] is DBNull ? null : r["Description"].ToString(),
                         CategoryId = ToInt(r["CategoryId"]),
                         PriorityId = ToInt(r["PriorityId"]),
+                        PriorityName = r["PriorityName"] is DBNull ? null : r["PriorityName"].ToString(),
                         StatusId = ToInt(r["StatusId"]),
                         AssignedTo = r["AssignedTo"] is DBNull ? (int?)null : ToInt(r["AssignedTo"]),
+                        RaisedByConsumerId = ToInt(r["RaisedBy"]),
+                        RaisedByName = r["RaisedByName"] is DBNull ? null : r["RaisedByName"].ToString(),
+                        RaisedByEmail = r["RaisedByEmail"] is DBNull ? null : r["RaisedByEmail"].ToString(),
                         CityId = ToInt(r["CityId"]),
                         WardId = ToInt(r["WardId"])
                     };
@@ -308,21 +313,17 @@ namespace FixMyCity.Repository
             return vm;
         }
 
-        public bool UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId,int roleId)
+        public bool AssignComplaint(int complaintId, int? assignedTo, int actorId)
         {
             try
             {
-                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_Save");
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Admin_AssignComplaint");
                 db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
-                db.AddInParameter(com, "CategoryId", DbType.Int32, categoryId);
-                db.AddInParameter(com, "PriorityId", DbType.Int32, priorityId);
-                db.AddInParameter(com, "Status", DbType.Int32, statusId);
                 db.AddInParameter(com, "AssignedTo", DbType.Int32, assignedTo.HasValue ? (object)assignedTo.Value : DBNull.Value);
-                //db.AddInParameter(com, "RaisedBy", DbType.Int32, actorId);
-                db.AddInParameter(com, "RoleId", DbType.Int32, roleId); // Admin role
+                db.AddInParameter(com, "ActorId", DbType.Int32, actorId);
                 db.ExecuteNonQuery(com);
             }
-            catch (SqlException ex) { throw new DataAccessException("Failed to update complaint.", "Admin_UpdateComplaint", ex); }
+            catch (SqlException ex) { throw new DataAccessException("Failed to assign complaint.", "Admin_AssignComplaint", ex); }
             return true;
         }
 

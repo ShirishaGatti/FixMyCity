@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixMyCityModel", "FixMyCity
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixMyCityDal", "FixMyCityDal\FixMyCityDal.csproj", "{E4486AC7-5965-482E-8B50-21F5DBE2906F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FixMyCityService", "FixMyCityService\FixMyCityService.csproj", "{AFF81391-E7D3-4E9D-8244-0AE4B6748E34}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +27,6 @@ Global
 		{E4486AC7-5965-482E-8B50-21F5DBE2906F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4486AC7-5965-482E-8B50-21F5DBE2906F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4486AC7-5965-482E-8B50-21F5DBE2906F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AFF81391-E7D3-4E9D-8244-0AE4B6748E34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AFF81391-E7D3-4E9D-8244-0AE4B6748E34}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AFF81391-E7D3-4E9D-8244-0AE4B6748E34}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AFF81391-E7D3-4E9D-8244-0AE4B6748E34}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

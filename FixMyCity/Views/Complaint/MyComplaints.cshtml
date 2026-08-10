@@ -110,7 +110,7 @@
 <div class="dash-modal-overlay" id="userChatModalOverlay" style="display:none;" onclick="closeUserChatModal()">
     <div class="dash-modal" onclick="event.stopPropagation()" style="width:620px;">
         <div class="dash-modal-header">
-            <h5><i class="bi bi-chat-dots-fill me-2" style="color:#1574e0;"></i>Discussion — <span id="userChatModalNumber"></span></h5>
+            <h5><i class="bi bi-chat-dots-fill me-2" style="color:#1574e0;"></i>Discussion <span id="userChatModalNumber"></span></h5>
             <button type="button" class="dash-modal-close" onclick="closeUserChatModal()">&times;</button>
         </div>
         <div class="dash-modal-body" id="userChatModalBody" style="padding:16px 20px;">
@@ -187,7 +187,7 @@
                             <input type="file" name="Attachments" id="complaintAttachments" class="dash-input" multiple
                                    data-max-size-mb="@Model.MaxAttachmentSizeMB" data-allowed-ext="@Model.AllowedExtensionsCsv"
                                    data-max-count="5" />
-                            <small style="color:var(--tx3);">jpg, jpeg, png, pdf, doc, docx — up to 5 files, @Model.MaxAttachmentSizeMB MB each.</small>
+                            <small style="color:var(--tx3);">jpg, jpeg, png, pdf, doc, docx up to 5 files, @Model.MaxAttachmentSizeMB MB each.</small>
                             <div id="attachmentPreviewList" class="attachment-preview-list mt-2"></div>
                         </div>
                     </div>
@@ -490,9 +490,9 @@
                 Array.prototype.forEach.call(input.files, function (file) {
                     var ext = '.' + file.name.split('.').pop().toLowerCase();
                     var key = file.name.toLowerCase();
-                    if (allowedExt.indexOf(ext) === -1) { errors.push(file.name + ' — not allowed.'); return; }
-                    if (file.size > maxSizeBytes) { errors.push(file.name + ' — too large.'); return; }
-                    if (seenNames[key]) { errors.push(file.name + ' — duplicate.'); return; }
+                    if (allowedExt.indexOf(ext) === -1) { errors.push(file.name + '  not allowed.'); return; }
+                    if (file.size > maxSizeBytes) { errors.push(file.name + '  too large.'); return; }
+                    if (seenNames[key]) { errors.push(file.name + '  duplicate.'); return; }
                     if (dt.items.length >= maxCount) {
                         errors.push('You can upload a maximum of ' + maxCount + ' attachments.');
                         return;

@@ -1,5 +1,5 @@
 /* admin-complaints.js
-   Same AJAX search/sort/page/edit/delete pattern as admin-users.js, applied
+   Same AJAX search/sort/page/assign/delete pattern as admin-users.js, applied
    to the Manage Complaints screen. Kept as a separate file (rather than one
    shared generic script) so each page's URLs/selectors stay simple and
    explicit  worth merging later only if a third grid shows up.
@@ -120,16 +120,20 @@
         });
     });
 
-    $container.on("click", ".js-edit-complaint", function () {
+    window.closeAssignComplaintModal = function () {
+        var m = document.getElementById("assignComplaintModal");
+        if (m) m.style.display = "none";
+    };
+
+    $container.on("click", ".js-assign-complaint", function () {
         var id = $(this).data("id");
         $.ajax({
-            url: window.adminComplaintsUrls.editComplaint,
+            url: window.adminComplaintsUrls.assignComplaint,
             method: "GET",
             data: { id: id },
             success: function (html) {
-                $("#editComplaintModalContent").html(html);
-                var modal = new bootstrap.Modal(document.getElementById("editComplaintModal"));
-                modal.show();
+                $("#assignComplaintModalContent").html(html);
+                document.getElementById("assignComplaintModal").style.display = "flex";
             },
             error: function () {
                 showToast("Failed to load complaint details.", 'error', 'Error');
@@ -137,18 +141,26 @@
         });
     });
 
-    $(document).on("click", "#saveComplaintBtn", function () {
+    $(document).on("change", "#assignOfficerSelect", function () {
+        var $chip = $("#assignOfficerLive");
+        var $name = $("#assignOfficerLiveName");
+        if (!$chip.length || !$name.length) return;
+        var $opt = $(this).find("option:selected");
+        var officerName = $opt.val() ? $opt.text().split(" - ")[0] : "";
+        $chip.toggleClass("unassigned", !officerName)
+             .find("i").attr("class", "bi " + (officerName ? "bi-person-check-fill" : "bi-person-dash"));
+        $name.text(officerName ? officerName : "Unassigned");
+    });
+
+    $(document).on("click", "#assignComplaintBtn", function () {
         var $btn = $(this);
         var url = $btn.data("url");
-        var $errBox = $("#editComplaintFormError");
+        var $errBox = $("#assignComplaintFormError");
         $errBox.text("");
 
         var payload = {
-            complaintId: $("#editComplaintForm [name=complaintId]").val(),
-            categoryId: $("#editComplaintForm [name=categoryId]").val(),
-            priorityId: $("#editComplaintForm [name=priorityId]").val(),
-            statusId: $("#editComplaintForm [name=statusId]").val(),
-            assignedTo: $("#editComplaintForm [name=assignedTo]").val() || null
+            complaintId: $("#assignComplaintForm [name=complaintId]").val(),
+            assignedTo: $("#assignComplaintForm [name=assignedTo]").val() || null
         };
 
         $btn.prop("disabled", true);
@@ -160,16 +172,16 @@
             headers: getAntiForgeryHeader(),
             success: function (res) {
                 if (res && res.success) {
-                    bootstrap.Modal.getInstance(document.getElementById("editComplaintModal")).hide();
-                    showToast('Complaint updated successfully!', 'success', 'Saved');
+                    window.closeAssignComplaintModal();
+                    showToast('Complaint assigned successfully!', 'success', 'Saved');
                     loadGrid($form.serialize());
                 } else {
-                    $errBox.text((res && res.message) || "Failed to save changes.");
-                    showToast((res && res.message) || "Failed to save changes.", 'error', 'Error');
+                    $errBox.text((res && res.message) || "Failed to assign complaint.");
+                    showToast((res && res.message) || "Failed to assign complaint.", 'error', 'Error');
                 }
             },
             error: function (xhr) {
-                var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Failed to save changes.";
+                var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Failed to assign complaint.";
                 $errBox.text(msg);
                 showToast(msg, 'error', 'Error');
             },

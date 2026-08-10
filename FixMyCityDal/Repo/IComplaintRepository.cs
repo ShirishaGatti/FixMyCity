@@ -24,7 +24,7 @@ namespace FixMyCity.Repository
         bool DeleteComplaint(int complaintId, int consumerId);
         ComplaintSearchResult Search(int consumerId, ComplaintListFilterViewModel filter); List<ComplaintStatus> GetStatuses();
         List<Complaint> GetAssignedByOfficerId(int officerId);
-        //Complaint GetAssignedComplaintById(int complaintId, int officerId);
+        Complaint GetAssignedComplaintById(int complaintId, int officerId);
 
         // Resolution-confirmation workflow
         bool ResolveComplaint(int complaintId, int officerId);

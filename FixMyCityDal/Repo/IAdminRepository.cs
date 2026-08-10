@@ -17,7 +17,7 @@ namespace FixMyCity.Repository
 
         // Complaints
         AdminComplaintListViewModel ListComplaints(AdminComplaintListFilterViewModel filter);
-        bool UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId,int roleId);
+        bool AssignComplaint(int complaintId, int? assignedTo, int actorId);
         bool DeleteComplaint(int complaintId, int actorId);
 
         // Master data

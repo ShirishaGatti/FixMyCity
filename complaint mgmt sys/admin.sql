@@ -422,11 +422,37 @@ AS
 BEGIN
     SET NOCOUNT ON;
     SELECT
-        c.ComplaintId, c.Title, c.Description,
-        c.CategoryId, c.PriorityId, c.StatusId, c.AssignedTo,
+        c.ComplaintId, c.ComplaintNumber, c.Title, c.Description,
+        c.CategoryId, c.PriorityId, pr.PriorityName, c.StatusId, c.AssignedTo,
+        c.RaisedBy, rb.Name AS RaisedByName, rb.Email AS RaisedByEmail,
         c.CityId, c.WardId
     FROM FixMyCity.Complaint c
+    LEFT JOIN FixMyCity.ComplaintPriority pr ON pr.PriorityId = c.PriorityId
+    LEFT JOIN FixMyCity.Consumer rb ON rb.ConsumerId = c.RaisedBy
     WHERE c.ComplaintId = @ComplaintId;
+END
+GO
+
+-- Admins can ONLY assign a complaint to an officer. All other fields are
+-- managed by the citizen (open/complaint) or the officer (status/progress).
+CREATE OR ALTER PROCEDURE FixMyCity.Admin_AssignComplaint
+    @ComplaintId INT,
+    @AssignedTo INT = NULL,
+    @ActorId    INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM FixMyCity.Complaint WHERE ComplaintId = @ComplaintId AND IsActive = 1)
+        THROW 51003, 'Complaint not found.', 1;
+
+    UPDATE FixMyCity.Complaint
+    SET AssignedTo = @AssignedTo,
+        LastModifiedAt = GETUTCDATE()
+    WHERE ComplaintId = @ComplaintId;
+
+    INSERT INTO FixMyCity.ComplaintHistory (ComplaintId, FieldChanged, OldValue, NewValue, CreatedBy)
+    VALUES (@ComplaintId, 'AssignedTo', NULL, CAST(@AssignedTo AS VARCHAR(10)), @ActorId);
 END
 GO
 

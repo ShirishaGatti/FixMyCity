@@ -71,6 +71,8 @@ namespace FixMyCityModel.ViewModel
     {
         public int ComplaintId { get; set; }
 
+        public string ComplaintNumber { get; set; }
+
         public string Title { get; set; }
 
         public string Description { get; set; }
@@ -79,9 +81,16 @@ namespace FixMyCityModel.ViewModel
 
         public int PriorityId { get; set; }
 
+        public string PriorityName { get; set; }
+
         public int StatusId { get; set; }
 
         public int? AssignedTo { get; set; }
+
+        // Citizen who raised the complaint — used to notify them by email.
+        public int RaisedByConsumerId { get; set; }
+        public string RaisedByName { get; set; }
+        public string RaisedByEmail { get; set; }
 
         public int CityId { get; set; }
 

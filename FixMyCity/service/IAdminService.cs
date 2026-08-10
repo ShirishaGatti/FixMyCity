@@ -17,7 +17,7 @@ namespace FixMyCity.Service
         void DeleteUser(int consumerId, int actorId);
 
         AdminComplaintListViewModel ListComplaints(AdminComplaintListFilterViewModel filter);
-        void UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId,int roleId);
+        void AssignComplaint(int complaintId, int? assignedTo, int actorId);
         void DeleteComplaint(int complaintId, int actorId);
 
         MasterDataViewModel GetMasterData();

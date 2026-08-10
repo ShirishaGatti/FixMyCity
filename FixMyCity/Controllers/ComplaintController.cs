@@ -144,7 +144,7 @@ namespace FixMyCity.Controllers
             try
             {
                 _complaintService.ConfirmResolution(id, CurrentActorId);
-                return Json(new { success = true, message = "Thanks for confirming — the complaint has been closed." });
+                return Json(new { success = true, message = "Thanks for confirming the complaint has been closed." });
             }
             catch (BusinessException ex) { return Json(new { success = false, message = ex.Message }); }
             catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }

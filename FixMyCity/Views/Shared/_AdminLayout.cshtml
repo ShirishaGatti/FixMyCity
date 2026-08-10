@@ -1,4 +1,4 @@
-﻿@{
+@{
     Layout = null; // standalone — no public _Layout
 }
 <!DOCTYPE html>
@@ -115,6 +115,14 @@
                        class="admin-nav-link @(ViewBag.ActivePage == "Complaints" ? "active" : "")">
                         <i class="bi bi-file-earmark-text-fill"></i>
                         <span>Complaints</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="@Url.Action("Profile","Admin")"
+                       class="admin-nav-link @(ViewBag.ActivePage == "Profile" ? "active" : "")">
+                        <i class="bi bi-person-fill"></i>
+                        <span>Profile</span>
                     </a>
                 </li>
 
