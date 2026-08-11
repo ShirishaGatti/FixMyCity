@@ -222,6 +222,7 @@ namespace FixMyCity.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult SaveAssignment(int complaintId, int? assignedTo)
         {
             try

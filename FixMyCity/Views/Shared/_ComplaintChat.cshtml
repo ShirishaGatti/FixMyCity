@@ -53,15 +53,7 @@
 
         @if (Model.IsChatOpen)
         {
-            if (!textOnly)
-            {
-                <div class="chat-dropzone" id="chatDropzone-@domId">
-                    <div class="chat-dropzone-hint">
-                        <i class="bi bi-cloud-arrow-up"></i> Drag up to 10 files here, or use the paperclip below
-                    </div>
-                </div>
-            }
-
+          
             <form id="chatForm-@domId" class="chat-composer" autocomplete="off">
                 @Html.AntiForgeryToken()
                 @if (!textOnly)

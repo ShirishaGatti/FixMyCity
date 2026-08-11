@@ -19,13 +19,25 @@ namespace FixMyCity.Controllers
         private readonly ISessionContext _session;
         private readonly IMailService _mailService;
 
+        // Default constructor — used by MVC framework; delegates to the injectable one.
         public OfficerController()
+            : this(new ComplaintService(), new ConsumerService(), new JwtSessionContext(), new MailService())
         {
-            _complaintService = new ComplaintService();
-            _consumerService = new ConsumerService();
-            _session = new JwtSessionContext();
-            _mailService = new MailService();
         }
+
+        // Parameterized constructor — used by unit tests or a DI container.
+        public OfficerController(
+            IComplaintService complaintService,
+            IConsumerService consumerService,
+            ISessionContext session,
+            IMailService mailService)
+        {
+            _complaintService = complaintService;
+            _consumerService = consumerService;
+            _session = session;
+            _mailService = mailService;
+        }
+
         private int CurrentActorId => _session.ConsumerId;
         private int roleId => _session.RoleId;
         public ActionResult Dashboard()

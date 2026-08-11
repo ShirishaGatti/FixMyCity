@@ -274,7 +274,7 @@ namespace FixMyCity.Repository
 
                 vm.TotalCount = total;
             }
-            catch (SqlException ex) { throw new DataAccessException("Failed to load complaints list.", "Admin_ListComplaints", ex); }
+            catch (SqlException ex) { throw new DataAccessException("Failed to load complaints list.", "AdminComplaintList", ex); }
             return vm;
         }
 
