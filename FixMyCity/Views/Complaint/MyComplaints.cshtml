@@ -307,21 +307,21 @@
         }
 
         function rejectResolution(id) {
-            var reason = window.prompt('Optional: tell us why this isn\'t resolved yet. This is sent back to the officer.', '');
-            if (reason === null) return; // user cancelled
-            $.ajax({
-                url: '/Complaint/RejectResolution/' + id, type: 'POST',
-                data: { reason: reason, __RequestVerificationToken: antiForgeryToken },
-                success: function (res) {
-                    if (res.success) {
-                        showToast(res.message || 'Complaint reopened.', 'warning', 'Reopened');
-                        setTimeout(function () { window.location.reload(); }, 1200);
-                    } else {
-                        showToast(res.message || 'Could not reject the resolution.', 'error', 'Error');
-                    }
-                },
-                error: function () { showToast('Unable to reject the resolution. Please try again.', 'error', 'Error'); }
-            });
+            promptDialog('Optional: tell us why this isn\'t resolved yet. This is sent back to the officer.', function (reason) {
+                $.ajax({
+                    url: '/Complaint/RejectResolution/' + id, type: 'POST',
+                    data: { reason: reason || '', __RequestVerificationToken: antiForgeryToken },
+                    success: function (res) {
+                        if (res.success) {
+                            showToast(res.message || 'Complaint reopened.', 'warning', 'Reopened');
+                            setTimeout(function () { window.location.reload(); }, 1200);
+                        } else {
+                            showToast(res.message || 'Could not reject the resolution.', 'error', 'Error');
+                        }
+                    },
+                    error: function () { showToast('Unable to reject the resolution. Please try again.', 'error', 'Error'); }
+                });
+            }, 'Reject Resolution');
         }
         // ── Client-side date validation helper ────────────────────────
         function validateFilterDates() {
