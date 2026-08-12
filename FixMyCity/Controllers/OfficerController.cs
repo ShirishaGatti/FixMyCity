@@ -17,13 +17,27 @@ namespace FixMyCity.Controllers
         private readonly IComplaintService _complaintService;
         private readonly IConsumerService _consumerService;
         private readonly ISessionContext _session;
+        private readonly IMailService _mailService;
 
+        // Default constructor — used by MVC framework; delegates to the injectable one.
         public OfficerController()
+            : this(new ComplaintService(), new ConsumerService(), new JwtSessionContext(), new MailService())
         {
-            _complaintService = new ComplaintService();
-            _consumerService = new ConsumerService();
-            _session = new JwtSessionContext();
         }
+
+        // Parameterized constructor — used by unit tests or a DI container.
+        public OfficerController(
+            IComplaintService complaintService,
+            IConsumerService consumerService,
+            ISessionContext session,
+            IMailService mailService)
+        {
+            _complaintService = complaintService;
+            _consumerService = consumerService;
+            _session = session;
+            _mailService = mailService;
+        }
+
         private int CurrentActorId => _session.ConsumerId;
         private int roleId => _session.RoleId;
         public ActionResult Dashboard()
@@ -64,8 +78,15 @@ namespace FixMyCity.Controllers
 
             try
             {
+                var previous = _complaintService.GetAssignedComplaint(CurrentActorId, complaintId);
                 _complaintService.UpdateComplaint(complaintId, categoryId, priorityId, statusId, assignedTo, CurrentActorId, roleId);
-                //_adminService.UpdateComplaint(complaintId, categoryId, priorityId, statusId, assignedTo, CurrentActorId, roleId);
+
+                // Notify the citizen when the officer changes the complaint's progress.
+                if (previous != null && previous.StatusId != statusId)
+                {
+                    var current = _complaintService.GetAssignedComplaint(CurrentActorId, complaintId) ?? previous;
+                    SendCitizenProgressEmail(current, current.StatusName ?? "Updated");
+                }
 
                 return Json(new { success = true, message = "Complaint updated successfully." });
             }
@@ -86,7 +107,7 @@ namespace FixMyCity.Controllers
         // Dedicated transition for the resolution-confirmation workflow.
         // Deliberately separate from UpdateComplaint: an officer may only ever
         // push a complaint into "Awaiting Customer Confirmation" via this
-        // action � Closed/Reopened only ever happen through the citizen's
+        // action � Closed/Reopened only ever happen through the citizen's
         // Confirm/Reject actions or the 7-day auto-expiry.
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -94,7 +115,16 @@ namespace FixMyCity.Controllers
         {
             try
             {
+                var previous = _complaintService.GetAssignedComplaint(CurrentActorId, complaintId);
                 _complaintService.ResolveComplaint(complaintId, CurrentActorId);
+
+                // Resolving moves the complaint into "Awaiting Customer Confirmation" — notify the citizen.
+                var current = _complaintService.GetAssignedComplaint(CurrentActorId, complaintId);
+                if (previous != null && current != null && previous.StatusId != current.StatusId)
+                {
+                    SendCitizenProgressEmail(current, current.StatusName);
+                }
+
                 return Json(new { success = true, message = "Complaint marked Resolved. Awaiting the citizen's confirmation." });
             }
             catch (BusinessException ex)
@@ -175,6 +205,27 @@ namespace FixMyCity.Controllers
                 ModelState.AddModelError("", ex.Message);
                 PopulateProfileDropdowns(vm);
                 return View(vm);
+            }
+        }
+
+        private void SendCitizenProgressEmail(Complaint complaint, string newStatusName)
+        {
+            try
+            {
+                if (complaint == null || complaint.RaisedBy <= 0) return;
+
+                var citizen = _consumerService.GetProfile(complaint.RaisedBy);
+                if (citizen == null || string.IsNullOrWhiteSpace(citizen.Email)) return;
+
+                string number = complaint.ComplaintNumber ?? $"#{complaint.ComplaintId}";
+                string title = complaint.Title ?? "Complaint";
+
+                _mailService.SendComplaintProgressEmail(citizen.Email, citizen.Name, number, title, complaint.StatusName, newStatusName);
+            }
+            catch (Exception ex)
+            {
+                // Best-effort — a mail failure must not fail the officer's update.
+                FixMyCity.Infrastructure.FileLogger.Log(ex, "OfficerController.SendCitizenProgressEmail");
             }
         }
 

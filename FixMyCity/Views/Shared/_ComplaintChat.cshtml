@@ -14,256 +14,254 @@
     string idSuffix = ViewBag.ChatIdSuffix as string ?? "";
     string domId = Model.ComplaintId + idSuffix;
 }
-@*
-    Shared chat partial — used inside the Citizen details drawer
-    (ComplaintDetails.cshtml, full composer with attachments) and the
-    Officer quick-chat modal (_OfficerComplaintTable.cshtml, text-only via
-    ViewBag.ChatTextOnly = true). Self-contained: owns its own polling
-    loop and drag-drop zone, scoped by a computed domId so multiple
-    instances never collide if ever rendered twice on one page.
+<!DOCTYPE html>
+<html lang="en" id="htmlRoot">
+<head>
+    <link href="~/Content/css/citizen.css" rel="stylesheet" />
+</head>
+<body>
+    @*
+        Shared chat partial — used inside the Citizen details drawer
+        (ComplaintDetails.cshtml, full composer with attachments) and the
+        Officer quick-chat modal (_OfficerComplaintTable.cshtml, text-only via
+        ViewBag.ChatTextOnly = true). Self-contained: owns its own polling
+        loop and drag-drop zone, scoped by a computed domId so multiple
+        instances never collide if ever rendered twice on one page.
 
-    Optional ViewBag flags (both optional, default to citizen behavior):
-      ChatTextOnly  (bool)   - true hides paperclip/dropzone (officer modal)
-      ChatIdSuffix  (string) - appended to all element ids for uniqueness
-*@
+        Optional ViewBag flags (both optional, default to citizen behavior):
+          ChatTextOnly  (bool)   - true hides paperclip/dropzone (officer modal)
+          ChatIdSuffix  (string) - appended to all element ids for uniqueness
+    *@
 
-<div class="chat-panel" id="chatPanel-@domId" data-complaint-id="@Model.ComplaintId" data-last-id="0">
-    <h5 class="mt-4 mb-2">Discussion</h5>
+    <div class="chat-panel" id="chatPanel-@domId" data-complaint-id="@Model.ComplaintId" data-last-id="0">
+        <h5 class="mt-4 mb-2">Discussion</h5>
 
-    @if (!Model.IsChatOpen)
-    {
-        <div class="chat-closed-banner">
-            <i class="bi bi-lock-fill"></i>
-            This complaint is resolved or closed — the discussion is now read-only.
-        </div>
-    }
-
-    <div class="chat-thread" id="chatThread-@domId">
-        @foreach (var m in Model.Messages)
+        @if (!Model.IsChatOpen)
         {
-            @Html.Partial("_ChatMessageBubble", m)
-        }
-    </div>
-
-    @if (Model.IsChatOpen)
-    {
-        if (!textOnly)
-        {
-            <div class="chat-dropzone" id="chatDropzone-@domId">
-                <div class="chat-dropzone-hint">
-                    <i class="bi bi-cloud-arrow-up"></i> Drag up to 10 files here, or use the paperclip below
-                </div>
+            <div class="chat-closed-banner">
+                <i class="bi bi-lock-fill"></i>
+                This complaint is resolved or closed the discussion is now read-only.
             </div>
         }
 
-        <form id="chatForm-@domId" class="chat-composer" autocomplete="off">
-            @Html.AntiForgeryToken()
-            @if (!textOnly)
+        <div class="chat-thread" id="chatThread-@domId">
+            @foreach (var m in Model.Messages)
             {
-                <button type="button" class="chat-attach-btn" title="Attach up to 10 files" onclick="document.getElementById('chatFile-@domId').click()">
-                    <i class="bi bi-paperclip"></i>
-                </button>
-                <input type="file" id="chatFile-@domId" class="d-none" multiple
-                       data-allowed-ext="@Model.AllowedExtensionsCsv" data-max-size-mb="@Model.MaxAttachmentSizeMB"
-                       data-max-count="10" />
+                @Html.Partial("_ChatMessageBubble", m)
             }
-            <input type="text" id="chatInput-@domId" class="chat-input" placeholder="Type a message..." maxlength="1000" />
-            <button type="submit" class="chat-send-btn" title="Send">
-                <i class="bi bi-send-fill"></i>
-            </button>
-        </form>
-    }
-</div>
+        </div>
 
-<script>
-    (function () {
-        var complaintId = @Model.ComplaintId;
-        var domId = '@domId';
-        var panel = document.getElementById('chatPanel-' + domId);
-        var thread = document.getElementById('chatThread-' + domId);
-        var form = document.getElementById('chatForm-' + domId);
-        var input = document.getElementById('chatInput-' + domId);
-        var fileInput = document.getElementById('chatFile-' + domId);
-        var dropzone = document.getElementById('chatDropzone-' + domId);
-        var pollTimer = null;
-
-        function scrollToBottom() {
-            thread.scrollTop = thread.scrollHeight;
-        }
-        scrollToBottom();
-
-        function appendMessage(html) {
-            thread.insertAdjacentHTML('beforeend', html);
-            scrollToBottom();
-        }
-
-        function poll() {
-            var lastId = panel.dataset.lastId || 0;
-            $.ajax({
-                url: '/ComplaintChat/GetThread',
-                type: 'GET',
-                data: { complaintId: complaintId, sinceMessageId: lastId },
-                dataType: 'json',
-                success: function (res) {
-                    if (!res.success) return;
-                    if (res.messages && res.messages.length) {
-                        res.messages.forEach(function (m) {
-                            // Skip messages we already optimistically rendered ourselves
-                            // (server-rendered HTML is identical either way, but this
-                            // avoids a visible duplicate flashing in before dedupe).
-                            if (!thread.querySelector('[data-message-id="' + m.chatMessageId + '"]')) {
-                                appendMessage(m.html);
-                            }
-                            panel.dataset.lastId = m.chatMessageId;
-                        });
-                    }
-                    if (!res.isChatOpen && form) {
-                        form.style.display = 'none';
-                        if (dropzone) dropzone.style.display = 'none';
-                        clearInterval(pollTimer);
-                    }
-                },
-                error: function () {
-                    // Deliberately silent to the user (a single missed poll every 5s isn't worth
-                    // an alert()), but logged so a persistent failure is visible in devtools/telemetry
-                    // instead of the chat just going quiet with no signal anywhere.
-                console.warn('Chat poll failed for complaint ' + complaintId + '; will retry on next interval.');
-            }
-            });
-        }
-
-        // Seed lastId from whatever the server already rendered so the first
-        // poll only asks for messages newer than what's on screen.
-        var existingBubbles = thread.querySelectorAll('[data-message-id]');
-        if (existingBubbles.length) {
-            panel.dataset.lastId = existingBubbles[existingBubbles.length - 1].getAttribute('data-message-id');
-        }
-
-        var ACTIVE_INTERVAL_MS = 5000;
-        var BACKGROUND_INTERVAL_MS = 20000;
-
-        function startPolling(intervalMs) {
-            if (pollTimer) clearInterval(pollTimer);
-            pollTimer = setInterval(poll, intervalMs);
-        }
-
-        startPolling(document.hidden ? BACKGROUND_INTERVAL_MS : ACTIVE_INTERVAL_MS);
-
-        document.addEventListener('visibilitychange', function () {
-            startPolling(document.hidden ? BACKGROUND_INTERVAL_MS : ACTIVE_INTERVAL_MS);
-            if (!document.hidden) poll(); // catch up immediately on returning to the tab
-        });
-        // Expose a stop handle on the panel node itself so a host page that
-        // tears this partial's markup down (e.g. closing a modal) can stop
-        // the interval explicitly, instead of leaking a timer that keeps
-        // firing against a detached DOM until isChatOpen eventually flips.
-        panel.stopChatPolling = function () {
-            clearInterval(pollTimer);
-        };
-
-        if (form) {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                var text = input.value.trim();
-                if (!text) return;
-                if (text.length > 1000) {
-                    alert('Message cannot exceed 1000 characters.');
-                    return;
+        @if (Model.IsChatOpen)
+        {
+          
+            <form id="chatForm-@domId" class="chat-composer" autocomplete="off">
+                @Html.AntiForgeryToken()
+                @if (!textOnly)
+                {
+                    <button type="button" class="chat-attach-btn" title="Attach up to 10 files" onclick="document.getElementById('chatFile-@domId').click()">
+                        <i class="bi bi-paperclip"></i>
+                    </button>
+                    <input type="file" id="chatFile-@domId" class="d-none" multiple
+                           data-allowed-ext="@Model.AllowedExtensionsCsv" data-max-size-mb="@Model.MaxAttachmentSizeMB"
+                           data-max-count="10" />
                 }
-                var token = $(form).find('input[name="__RequestVerificationToken"]').val();
-                input.value = '';
+                <input type="text" id="chatInput-@domId" class="chat-input" placeholder="Type a message..." maxlength="1000" />
+                <button type="submit" class="chat-send-btn" title="Send">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </form>
+        }
+    </div>
 
+    <script>
+        (function () {
+            var complaintId = @Model.ComplaintId;
+            var domId = '@domId';
+            var panel = document.getElementById('chatPanel-' + domId);
+            var thread = document.getElementById('chatThread-' + domId);
+            var form = document.getElementById('chatForm-' + domId);
+            var input = document.getElementById('chatInput-' + domId);
+            var fileInput = document.getElementById('chatFile-' + domId);
+            var dropzone = document.getElementById('chatDropzone-' + domId);
+            var pollTimer = null;
+
+            function scrollToBottom() {
+                thread.scrollTop = thread.scrollHeight;
+            }
+            scrollToBottom();
+
+            function appendMessage(html) {
+                thread.insertAdjacentHTML('beforeend', html);
+                scrollToBottom();
+            }
+
+            function poll() {
+                var lastId = panel.dataset.lastId || 0;
                 $.ajax({
-                    url: '/ComplaintChat/SendText',
-                    type: 'POST',
-                    data: { ComplaintId: complaintId, MessageText: text, __RequestVerificationToken: token },
+                    url: '/ComplaintChat/GetThread',
+                    type: 'GET',
+                    data: { complaintId: complaintId, sinceMessageId: lastId },
+                    dataType: 'json',
                     success: function (res) {
-                        if (res.success) {
-                            appendMessage(res.html);
-                            panel.dataset.lastId = res.chatMessageId;
-                        } else {
-                            alert(res.message || 'Failed to send message.');
+                        if (!res.success) return;
+                        if (res.messages && res.messages.length) {
+                            res.messages.forEach(function (m) {
+                                // Skip messages we already optimistically rendered ourselves
+                                // (server-rendered HTML is identical either way, but this
+                                // avoids a visible duplicate flashing in before dedupe).
+                                if (!thread.querySelector('[data-message-id="' + m.chatMessageId + '"]')) {
+                                    appendMessage(m.html);
+                                }
+                                panel.dataset.lastId = m.chatMessageId;
+                            });
+                        }
+                        if (!res.isChatOpen && form) {
+                            form.style.display = 'none';
+                            if (dropzone) dropzone.style.display = 'none';
+                            clearInterval(pollTimer);
                         }
                     },
-                    error: function () { alert('Failed to send message.'); }
-                });
-            });
-
-            if (fileInput) {
-                fileInput.addEventListener('change', function () {
-                    if (fileInput.files.length) uploadFiles(fileInput.files);
-                    fileInput.value = '';
-                });
-            }
-        }
-
-        if (dropzone) {
-            ['dragenter', 'dragover'].forEach(function (evt) {
-                dropzone.addEventListener(evt, function (e) {
-                    e.preventDefault(); e.stopPropagation();
-                    dropzone.classList.add('chat-dropzone-active');
-                });
-            });
-            ['dragleave', 'drop'].forEach(function (evt) {
-                dropzone.addEventListener(evt, function (e) {
-                    e.preventDefault(); e.stopPropagation();
-                    dropzone.classList.remove('chat-dropzone-active');
-                });
-            });
-            dropzone.addEventListener('drop', function (e) {
-                var files = e.dataTransfer.files;
-                if (files && files.length) uploadFiles(files);
-            });
-        }
-
-        // files: a FileList (from <input multiple> or a drag-drop event).
-        // Validates the whole batch client-side (count/ext/size) before
-        // sending — mirrors the server-side batch validation in
-        // ComplaintChatService.SendAttachments, so the user finds out about
-        // a problem before anything uploads rather than after a partial send.
-        function uploadFiles(fileList) {
-            var allowedExt = (fileInput.dataset.allowedExt || '').split(',').map(function (x) { return x.trim().toLowerCase(); });
-            var maxBytes = parseFloat(fileInput.dataset.maxSizeMb) * 1024 * 1024;
-            var maxCount = parseInt(fileInput.dataset.maxCount, 10) || 10;
-
-            var files = Array.prototype.slice.call(fileList);
-            if (files.length > maxCount) {
-                alert('You can attach up to ' + maxCount + ' files at a time. You selected ' + files.length + '.');
-                return;
-            }
-
-            var errors = [];
-            files.forEach(function (file) {
-                var ext = '.' + file.name.split('.').pop().toLowerCase();
-                if (allowedExt.indexOf(ext) === -1) errors.push(file.name + ' is not an allowed file type.');
-                else if (file.size > maxBytes) errors.push(file.name + ' exceeds the size limit.');
-            });
-            if (errors.length) { alert(errors.join('\n')); return; }
-
-            var token = $(form).find('input[name="__RequestVerificationToken"]').val();
-            var formData = new FormData();
-            formData.append('complaintId', complaintId);
-            files.forEach(function (file) { formData.append('files', file); });
-            formData.append('__RequestVerificationToken', token);
-
-            $.ajax({
-                url: '/ComplaintChat/SendAttachment',
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function (res) {
-                    if (res.success) {
-                        res.messages.forEach(function (m) {
-                            appendMessage(m.html);
-                            panel.dataset.lastId = m.chatMessageId;
-                        });
-                    } else {
-                        alert(res.message || 'Failed to upload file(s).');
+                    error: function () {
+                        // Deliberately silent to the user (a single missed poll every 5s isn't worth
+                        // an alert()), but logged so a persistent failure is visible in devtools/telemetry
+                        // instead of the chat just going quiet with no signal anywhere.
+                        console.warn('Chat poll failed for complaint ' + complaintId + '; will retry on next interval.');
                     }
-                },
-                error: function () { alert('Failed to upload file(s).'); }
+                });
+            }
+
+            // Seed lastId from whatever the server already rendered so the first
+            // poll only asks for messages newer than what's on screen.
+            var existingBubbles = thread.querySelectorAll('[data-message-id]');
+            if (existingBubbles.length) {
+                panel.dataset.lastId = existingBubbles[existingBubbles.length - 1].getAttribute('data-message-id');
+            }
+
+            var ACTIVE_INTERVAL_MS = 5000;
+            var BACKGROUND_INTERVAL_MS = 20000;
+
+            function startPolling(intervalMs) {
+                if (pollTimer) clearInterval(pollTimer);
+                pollTimer = setInterval(poll, intervalMs);
+            }
+
+            startPolling(document.hidden ? BACKGROUND_INTERVAL_MS : ACTIVE_INTERVAL_MS);
+
+            document.addEventListener('visibilitychange', function () {
+                startPolling(document.hidden ? BACKGROUND_INTERVAL_MS : ACTIVE_INTERVAL_MS);
+                if (!document.hidden) poll(); // catch up immediately on returning to the tab
             });
-        }
-    })();
-</script>
+            // Expose a stop handle on the panel node itself so a host page that
+            // tears this partial's markup down (e.g. closing a modal) can stop
+            // the interval explicitly, instead of leaking a timer that keeps
+            // firing against a detached DOM until isChatOpen eventually flips.
+            panel.stopChatPolling = function () {
+                clearInterval(pollTimer);
+            };
+
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var text = input.value.trim();
+                    if (!text) return;
+                    if (text.length > 1000) {
+                        alert('Message cannot exceed 1000 characters.');
+                        return;
+                    }
+                    var token = $(form).find('input[name="__RequestVerificationToken"]').val();
+                    input.value = '';
+
+                    $.ajax({
+                        url: '/ComplaintChat/SendText',
+                        type: 'POST',
+                        data: { ComplaintId: complaintId, MessageText: text, __RequestVerificationToken: token },
+                        success: function (res) {
+                            if (res.success) {
+                                appendMessage(res.html);
+                                panel.dataset.lastId = res.chatMessageId;
+                            } else {
+                                alert(res.message || 'Failed to send message.');
+                            }
+                        },
+                        error: function () { alert('Failed to send message.'); }
+                    });
+                });
+
+                if (fileInput) {
+                    fileInput.addEventListener('change', function () {
+                        if (fileInput.files.length) uploadFiles(fileInput.files);
+                        fileInput.value = '';
+                    });
+                }
+            }
+
+            if (dropzone) {
+                ['dragenter', 'dragover'].forEach(function (evt) {
+                    dropzone.addEventListener(evt, function (e) {
+                        e.preventDefault(); e.stopPropagation();
+                        dropzone.classList.add('chat-dropzone-active');
+                    });
+                });
+                ['dragleave', 'drop'].forEach(function (evt) {
+                    dropzone.addEventListener(evt, function (e) {
+                        e.preventDefault(); e.stopPropagation();
+                        dropzone.classList.remove('chat-dropzone-active');
+                    });
+                });
+                dropzone.addEventListener('drop', function (e) {
+                    var files = e.dataTransfer.files;
+                    if (files && files.length) uploadFiles(files);
+                });
+            }
+
+            // files: a FileList (from <input multiple> or a drag-drop event).
+            // Validates the whole batch client-side (count/ext/size) before
+            // sending — mirrors the server-side batch validation in
+            // ComplaintChatService.SendAttachments, so the user finds out about
+            // a problem before anything uploads rather than after a partial send.
+            function uploadFiles(fileList) {
+                var allowedExt = (fileInput.dataset.allowedExt || '').split(',').map(function (x) { return x.trim().toLowerCase(); });
+                var maxBytes = parseFloat(fileInput.dataset.maxSizeMb) * 1024 * 1024;
+                var maxCount = parseInt(fileInput.dataset.maxCount, 10) || 10;
+
+                var files = Array.prototype.slice.call(fileList);
+                if (files.length > maxCount) {
+                    alert('You can attach up to ' + maxCount + ' files at a time. You selected ' + files.length + '.');
+                    return;
+                }
+
+                var errors = [];
+                files.forEach(function (file) {
+                    var ext = '.' + file.name.split('.').pop().toLowerCase();
+                    if (allowedExt.indexOf(ext) === -1) errors.push(file.name + ' is not an allowed file type.');
+                    else if (file.size > maxBytes) errors.push(file.name + ' exceeds the size limit.');
+                });
+                if (errors.length) { alert(errors.join('\n')); return; }
+
+                var token = $(form).find('input[name="__RequestVerificationToken"]').val();
+                var formData = new FormData();
+                formData.append('complaintId', complaintId);
+                files.forEach(function (file) { formData.append('files', file); });
+                formData.append('__RequestVerificationToken', token);
+
+                $.ajax({
+                    url: '/ComplaintChat/SendAttachment',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (res) {
+                        if (res.success) {
+                            res.messages.forEach(function (m) {
+                                appendMessage(m.html);
+                                panel.dataset.lastId = m.chatMessageId;
+                            });
+                        } else {
+                            alert(res.message || 'Failed to upload file(s).');
+                        }
+                    },
+                    error: function () { alert('Failed to upload file(s).'); }
+                });
+            }
+        })();
+    </script>

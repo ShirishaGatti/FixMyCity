@@ -1,0 +1,111 @@
+@model FixMyCityModel.ViewModel.AdminComplaintEditViewModel
+
+@{
+    var categoryName = Model.Categories.FirstOrDefault(c => c.CategoryId == Model.CategoryId)?.CategoryName ?? "—";
+    var statusName = Model.Statuses.FirstOrDefault(s => s.StatusId == Model.StatusId)?.StatusName ?? "Unknown";
+    var statusCss = statusName.ToLower().Replace(" ", "");
+    var currentOfficer = Model.Officers.FirstOrDefault(o => o.ConsumerId == Model.AssignedTo);
+    var priorityLabel = Model.PriorityName ?? "Medium";
+}
+
+<div class="dash-modal-header">
+    <div class="d-flex align-items-center gap-2">
+        <h5 class="mb-0">Assign Complaint</h5>
+        <span class="assign-modal-number">
+            <i class="bi bi-hash"></i>@Na(Model.ComplaintNumber)
+        </span>
+    </div>
+    <span class="assign-status-chip @statusCss"><span class="assign-status-dot"></span>@statusName</span>
+</div>
+
+<div class="dash-modal-body">
+
+    <div class="assign-summary">
+        <div class="assign-summary-title">
+            <i class="bi bi-file-earmark-text-fill"></i>
+            <span>@Na(Model.Title)</span>
+        </div>
+        <div class="assign-summary-grid">
+            <div class="assign-field">
+                <div class="assign-field-label"><i class="bi bi-tag"></i> Category</div>
+                <div class="assign-field-value">@categoryName</div>
+            </div>
+            <div class="assign-field">
+                <div class="assign-field-label"><i class="bi bi-flag"></i> Priority</div>
+                <div class="assign-field-value">
+                    <span class="priority-badge @priorityLabel.ToLower()">@priorityLabel</span>
+                </div>
+            </div>
+            <div class="assign-field">
+                <div class="assign-field-label"><i class="bi bi-person"></i> Raised By</div>
+                <div class="assign-field-value">@Na(Model.RaisedByName)</div>
+            </div>
+            <div class="assign-field">
+                <div class="assign-field-label"><i class="bi bi-envelope"></i> Citizen Email</div>
+                <div class="assign-field-value">@Na(Model.RaisedByEmail)</div>
+            </div>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <div class="assign-field assign-field-full">
+                <div class="assign-field-label"><i class="bi bi-chat-left-text"></i> Description</div>
+                <div class="assign-field-value">@Model.Description</div>
+            </div>
+        }
+    </div>
+
+    <div class="assign-officer-section">
+        <div class="assign-section-title">
+            <i class="bi bi-person-plus-fill"></i> Assign To Officer
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+            <label class="dash-label mb-0">Officer</label>
+            <span id="assignOfficerLive" class="assign-current-chip @(currentOfficer == null ? "unassigned" : "")">
+                <i class="bi @(currentOfficer == null ? "bi-person-dash" : "bi-person-check-fill")"></i>
+                <span id="assignOfficerLiveName">@(currentOfficer != null ? currentOfficer.Name : "Unassigned")</span>
+            </span>
+        </div>
+
+        <form id="assignComplaintForm">
+            <input type="hidden" name="complaintId" value="@Model.ComplaintId" />
+
+            <select id="assignOfficerSelect" name="assignedTo" class="dash-input">
+                <option value="">Unassigned</option>
+                @foreach (var o in Model.Officers)
+                {
+                    var suffix = string.Join(" . ", new[]
+                    {
+                       // o.Designation,
+                        o.DepartmentName,
+                        string.IsNullOrWhiteSpace(o.CityName) ? null : o.CityName
+                    }.Where(s => !string.IsNullOrWhiteSpace(s)));
+
+                    <option value="@o.ConsumerId" @(Model.AssignedTo == o.ConsumerId ? "selected" : "")>
+                        @o.Name@(string.IsNullOrWhiteSpace(suffix) ? "" :"-"+ suffix)
+                    </option>
+                }
+            </select>
+
+            <p class="assign-note mb-0">
+                <i class="bi bi-info-circle"></i>
+                The officer will receive an email with a one-time verification code to accept this complaint.
+            </p>
+
+            <div id="assignComplaintFormError" class="text-danger small mt-2"></div>
+        </form>
+    </div>
+
+</div>
+
+<div class="dash-modal-footer">
+    <button type="button" class="btn-dash-outline" onclick="closeAssignComplaintModal()">Cancel</button>
+    <button type="button" id="assignComplaintBtn" class="btn-dash-primary" data-url="@Url.Action("SaveAssignment","Admin")">
+        <i class="bi bi-person-plus-fill"></i> Assign
+    </button>
+</div>
+
+@helper Na(string value)
+{
+    @(string.IsNullOrWhiteSpace(value) ? "—" : value)
+}

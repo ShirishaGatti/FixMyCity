@@ -14,274 +14,211 @@
     double resRate = totalFiled > 0 ? Math.Round((double)resolvedCount / totalFiled * 100, 1) : 94.2;
 }
 
-@section head {
-    <style>
-        .citizen-kpi {
-            background: var(--bg3);
-            border: 1px solid var(--bd);
-            border-radius: 16px;
-            padding: 18px 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            transition: transform .2s, box-shadow .2s;
-        }
-        .citizen-kpi:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.2); }
-        .citizen-kpi .ck-icon {
-            width: 50px; height: 50px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 1.3rem; flex-shrink: 0;
-        }
-        .citizen-kpi .ck-val { font-size: 1.7rem; font-weight: 800; color: var(--tx); line-height: 1; }
-        .citizen-kpi .ck-lbl { font-size: .8rem; color: var(--tx3); margin-top: 2px; }
-
-        .dash-card {
-            background: var(--bg3);
-            border: 1px solid var(--bd);
-            border-radius: 16px; overflow: hidden;
-            height: 100%; display: flex; flex-direction: column;
-        }
-        .dash-card-header {
-            padding: 14px 18px; font-weight: 700; font-size: .9rem;
-            border-bottom: 1px solid var(--bd); color: var(--tx);
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .dash-card-body { padding: 16px 18px; flex: 1; position: relative; }
-        .chart-box { min-height: 250px; width: 100%; }
-
-        .dash-table { color: var(--tx); margin: 0; width: 100%; }
-        .dash-table thead th {
-            background: transparent; color: var(--tx3);
-            font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
-            padding: 10px 16px; border: 0; font-weight: 600;
-            border-bottom: 1px solid var(--bd); text-align: left;
-        }
-        .dash-table tbody td { padding: 12px 16px; border-bottom: 1px solid var(--bd); font-size: .875rem; vertical-align: middle; }
-        .dash-table tr:last-child td { border-bottom: none; }
-        .dash-table tbody tr:hover td { background: rgba(245, 158, 11, 0.05); }
-
-        .status-badge {
-            display: inline-block; padding: 3px 10px; border-radius: 20px;
-            font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
-        }
-        .status-badge.open { background: rgba(245,158,11,.12); color: #f59e0b; }
-        .status-badge.inprogress { background: rgba(59,130,246,.12); color: #3b82f6; }
-        .status-badge.resolved { background: rgba(16,185,129,.12); color: #10b981; }
-        .status-badge.closed { background: rgba(107,114,128,.15); color: #9ca3af; }
-    </style>
-}
-
-<!-- Welcome Header Banner -->
-<div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
-    <div>
-        <h2 class="fw-bold mb-1" style="color:var(--tx)">Welcome back, @firstName</h2>
-        <p class="text-muted small mb-0">Track your submitted civic issues, ward resolution statistics, and municipal impact.</p>
+    <!-- Welcome Header Banner -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1" style="color:var(--tx)">Welcome back, @firstName</h2>
+            <p class="text-muted small mb-0">Track your submitted civic issues, ward resolution statistics, and municipal impact.</p>
+        </div>
+        <div>
+            <a href="@Url.Action("MyComplaints", "Complaint")" class="btn-dash-primary">
+                <i class="bi bi-plus-circle-fill me-1"></i> File New Complaint
+            </a>
+        </div>
     </div>
-    <div>
-        <a href="@Url.Action("MyComplaints", "Complaint")" class="btn-dash-primary">
-            <i class="bi bi-plus-circle-fill me-1"></i> File New Complaint
-        </a>
-    </div>
-</div>
-
-<!-- Personal Stat Summary Cards -->
-<div class="row g-3 mb-4">
-    <div class="col-lg-3 col-sm-6">
-        <div class="citizen-kpi">
-            <div class="ck-icon" style="background:linear-gradient(135deg,#f59e0b,#ea580c)"><i class="bi bi-journal-text"></i></div>
-            <div>
-                <div class="ck-val">@totalFiled</div>
-                <div class="ck-lbl">My Total Complaints</div>
+    <!-- Personal Stat Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3 col-sm-6">
+            <div class="citizen-kpi">
+                <div class="ck-icon" style="background:linear-gradient(135deg,#f59e0b,#ea580c)"><i class="bi bi-journal-text"></i></div>
+                <div>
+                    <div class="ck-val">@totalFiled</div>
+                    <div class="ck-lbl">My Total Complaints</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6">
+            <div class="citizen-kpi">
+                <div class="ck-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"><i class="bi bi-clock-history"></i></div>
+                <div>
+                    <div class="ck-val">@openCount</div>
+                    <div class="ck-lbl">Open Tickets</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6">
+            <div class="citizen-kpi">
+                <div class="ck-icon" style="background:linear-gradient(135deg,#0d6efd,#0dcaf0)"><i class="bi bi-gear-wide-connected"></i></div>
+                <div>
+                    <div class="ck-val">@inProgressCount</div>
+                    <div class="ck-lbl">In Progress</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6">
+            <div class="citizen-kpi">
+                <div class="ck-icon" style="background:linear-gradient(135deg,#10b981,#34d399)"><i class="bi bi-shield-check"></i></div>
+                <div>
+                    <div class="ck-val">@resolvedCount</div>
+                    <div class="ck-lbl">Resolved Issues</div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-sm-6">
-        <div class="citizen-kpi">
-            <div class="ck-icon" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)"><i class="bi bi-clock-history"></i></div>
-            <div>
-                <div class="ck-val">@openCount</div>
-                <div class="ck-lbl">Open Tickets</div>
+    <!-- Charts Row 1: Pie/Donut Ticket Status & Mathematical Polar Area Category Chart -->
+    <div class="row g-3 mb-4">
+        <!-- Pie / Donut Chart: My Ticket Status Breakdown -->
+        <div class="col-lg-5">
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <span><i class="bi bi-pie-chart-fill me-2 text-warning"></i>My Complaint Status Overview</span>
+                    <span class="badge bg-dark text-muted fw-normal" style="font-size:0.75rem;">Pie Chart</span>
+                </div>
+                <div class="dash-card-body d-flex align-items-center justify-content-center">
+                    <div id="citizenStatusChart" class="chart-box"></div>
+                </div>
+            </div>
+        </div>
+        <!-- Mathematical Diagram: Category Breakdown (Polar Area Chart) -->
+        <div class="col-lg-7">
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <span><i class="bi bi-diagram-3-fill me-2 text-info"></i>Reported Issues by Sector</span>
+                    <span class="badge bg-dark text-muted fw-normal" style="font-size:0.75rem;">Polar Diagram</span>
+                </div>
+                <div class="dash-card-body">
+                    <div id="citizenCategoryChart" class="chart-box"></div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-sm-6">
-        <div class="citizen-kpi">
-            <div class="ck-icon" style="background:linear-gradient(135deg,#0d6efd,#0dcaf0)"><i class="bi bi-gear-wide-connected"></i></div>
-            <div>
-                <div class="ck-val">@inProgressCount</div>
-                <div class="ck-lbl">In Progress</div>
+    <!-- Charts Row 2: Ward Resolution Bar Graph & Radial Ward Health Gauge -->
+    <div class="row g-3 mb-4">
+        <!-- Bar Graph: Ward Resolution Velocity -->
+        <div class="col-lg-7">
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <span><i class="bi bi-bar-chart-line me-2 text-primary"></i>Ward Resolution Performance History</span>
+                    <span class="badge bg-dark text-muted fw-normal" style="font-size:0.75rem;">Bar Graph</span>
+                </div>
+                <div class="dash-card-body">
+                    <div id="citizenWardTrendChart" class="chart-box"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <span><i class="bi bi-speedometer2 me-2 text-success"></i>Ward Health Rating</span>
+                    <span class="badge bg-dark text-muted fw-normal" style="font-size:0.75rem;">Radial Gauge</span>
+                </div>
+                <div class="dash-card-body d-flex flex-column align-items-center justify-content-center">
+                    <div id="citizenHealthGaugeChart" class="chart-box"></div>
+                    <p class="text-muted small text-center mb-0 mt-2">Overall resolution index across your ward.</p>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-sm-6">
-        <div class="citizen-kpi">
-            <div class="ck-icon" style="background:linear-gradient(135deg,#10b981,#34d399)"><i class="bi bi-shield-check"></i></div>
-            <div>
-                <div class="ck-val">@resolvedCount</div>
-                <div class="ck-lbl">Resolved Issues</div>
-            </div>
-        </div>
-    </div>
-</div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const isDark = !document.documentElement.classList.contains("lm");
+            const textColor = isDark ? "#94a3b8" : "#475569";
+            const borderColor = isDark ? "rgba(148,163,184,0.1)" : "#e2e8f0";
 
-<!-- Charts Row 1: Pie/Donut Ticket Status & Mathematical Polar Area Category Chart -->
-<div class="row g-3 mb-4">
-    <!-- Pie / Donut Chart: My Ticket Status Breakdown -->
-    <div class="col-lg-5">
-        <div class="dash-card">
-            <div class="dash-card-header">
-                <span><i class="bi bi-pie-chart-fill me-2 text-warning"></i>My Complaint Status Overview</span>
-                <span class="badge bg-dark text-muted fw-normal" style="font-size:0.75rem;">Pie Chart</span>
-            </div>
-            <div class="dash-card-body d-flex align-items-center justify-content-center">
-                <div id="citizenStatusChart" class="chart-box"></div>
-            </div>
-        </div>
-    </div>
+            // 1. Donut Pie Chart: My Complaint Status Overview
+            const citizenStatusVals = [@openCount, @inProgressCount, @resolvedCount];
+            const hasData = citizenStatusVals.some(v => v > 0);
+            const seriesData = hasData ? citizenStatusVals : [2, 3, 7];
 
-    <!-- Mathematical Diagram: Category Breakdown (Polar Area Chart) -->
-    <div class="col-lg-7">
-        <div class="dash-card">
-            <div class="dash-card-header">
-                <span><i class="bi bi-diagram-3-fill me-2 text-info"></i>Reported Issues by Sector</span>
-                <span class="badge bg-dark text-muted fw-normal" style="font-size:0.75rem;">Polar Diagram</span>
-            </div>
-            <div class="dash-card-body">
-                <div id="citizenCategoryChart" class="chart-box"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Charts Row 2: Ward Resolution Bar Graph & Radial Ward Health Gauge -->
-<div class="row g-3 mb-4">
-    <!-- Bar Graph: Ward Resolution Velocity -->
-    <div class="col-lg-7">
-        <div class="dash-card">
-            <div class="dash-card-header">
-                <span><i class="bi bi-bar-chart-line me-2 text-primary"></i>Ward Resolution Performance History</span>
-                <span class="badge bg-dark text-muted fw-normal" style="font-size:0.75rem;">Bar Graph</span>
-            </div>
-            <div class="dash-card-body">
-                <div id="citizenWardTrendChart" class="chart-box"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-5">
-        <div class="dash-card">
-            <div class="dash-card-header">
-                <span><i class="bi bi-speedometer2 me-2 text-success"></i>Ward Health Rating</span>
-                <span class="badge bg-dark text-muted fw-normal" style="font-size:0.75rem;">Radial Gauge</span>
-            </div>
-            <div class="dash-card-body d-flex flex-column align-items-center justify-content-center">
-                <div id="citizenHealthGaugeChart" class="chart-box"></div>
-                <p class="text-muted small text-center mb-0 mt-2">Overall resolution index across your ward.</p>
-            </div>
-        </div>
-    </div>
-
-</div>
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const isDark = !document.documentElement.classList.contains("lm");
-        const textColor = isDark ? "#94a3b8" : "#475569";
-        const borderColor = isDark ? "rgba(148,163,184,0.1)" : "#e2e8f0";
-
-        // 1. Donut Pie Chart: My Complaint Status Overview
-        const citizenStatusVals = [@openCount, @inProgressCount, @resolvedCount];
-        const hasData = citizenStatusVals.some(v => v > 0);
-        const seriesData = hasData ? citizenStatusVals : [2, 3, 7];
-
-        const statusOptions = {
-            chart: { type: 'donut', height: 250, background: 'transparent' },
-            series: seriesData,
-            labels: ['Open', 'In Progress', 'Resolved'],
-            colors: ['#f59e0b', '#3b82f6', '#10b981'],
-            stroke: { show: true, width: 2, colors: [isDark ? '#0d1526' : '#ffffff'] },
-            legend: { position: 'bottom', labels: { colors: textColor } },
-            plotOptions: {
-                pie: {
-                    donut: {
-                        size: '70%',
-                        labels: {
-                            show: true,
-                            total: {
+            const statusOptions = {
+                chart: { type: 'donut', height: 250, background: 'transparent' },
+                series: seriesData,
+                labels: ['Open', 'In Progress', 'Resolved'],
+                colors: ['#f59e0b', '#3b82f6', '#10b981'],
+                stroke: { show: true, width: 2, colors: [isDark ? '#0d1526' : '#ffffff'] },
+                legend: { position: 'bottom', labels: { colors: textColor } },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '70%',
+                            labels: {
                                 show: true,
-                                label: 'My Tickets',
-                                color: textColor,
-                                formatter: function () { return hasData ? @totalFiled : 12; }
+                                total: {
+                                    show: true,
+                                    label: 'My Tickets',
+                                    color: textColor,
+                                    formatter: function () { return hasData ? @totalFiled : 12; }
+                                }
                             }
                         }
                     }
-                }
-            },
-            theme: { mode: isDark ? 'dark' : 'light' }
-        };
-        new ApexCharts(document.querySelector("#citizenStatusChart"), statusOptions).render();
+                },
+                theme: { mode: isDark ? 'dark' : 'light' }
+            };
+            new ApexCharts(document.querySelector("#citizenStatusChart"), statusOptions).render();
 
-        // 2. Polar Area Chart: Issues by Category
-        const categoryOptions = {
-            chart: { type: 'polarArea', height: 250, background: 'transparent' },
-            series: [14, 23, 18, 12, 9],
-            labels: ['Roads', 'Water', 'Sanitation', 'Lighting', 'Parks'],
-            colors: ['#f59e0b', '#3b82f6', '#10b981', '#facc15', '#22c55e'],
-            stroke: { colors: [isDark ? '#0d1526' : '#ffffff'] },
-            fill: { opacity: 0.8 },
-            legend: { position: 'bottom', labels: { colors: textColor } },
-            theme: { mode: isDark ? 'dark' : 'light' }
-        };
-        new ApexCharts(document.querySelector("#citizenCategoryChart"), categoryOptions).render();
+            // 2. Polar Area Chart: Issues by Category
+            const categoryOptions = {
+                chart: { type: 'polarArea', height: 250, background: 'transparent' },
+                series: [14, 23, 18, 12, 9],
+                labels: ['Roads', 'Water', 'Sanitation', 'Lighting', 'Parks'],
+                colors: ['#f59e0b', '#3b82f6', '#10b981', '#facc15', '#22c55e'],
+                stroke: { colors: [isDark ? '#0d1526' : '#ffffff'] },
+                fill: { opacity: 0.8 },
+                legend: { position: 'bottom', labels: { colors: textColor } },
+                theme: { mode: isDark ? 'dark' : 'light' }
+            };
+            new ApexCharts(document.querySelector("#citizenCategoryChart"), categoryOptions).render();
 
-        // 3. Bar Graph: Ward Resolution History
-        const wardTrendOptions = {
-            chart: { type: 'bar', height: 250, toolbar: { show: false }, background: 'transparent' },
-            series: [
-                { name: 'Community Complaints', data: [32, 45, 28, 54, 60, 48] },
-                { name: 'Ward Resolved', data: [28, 40, 26, 50, 58, 45] }
-            ],
-            xaxis: {
-                categories: ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-                labels: { style: { colors: textColor } }
-            },
-            yaxis: { labels: { style: { colors: textColor } } },
-            colors: ['#38bdf8', '#10b981'],
-            plotOptions: { bar: { borderRadius: 4, columnWidth: '55%' } },
-            grid: { borderColor: borderColor },
-            legend: { position: 'top', labels: { colors: textColor } },
-            theme: { mode: isDark ? 'dark' : 'light' }
-        };
-        new ApexCharts(document.querySelector("#citizenWardTrendChart"), wardTrendOptions).render();
+            // 3. Bar Graph: Ward Resolution History
+            const wardTrendOptions = {
+                chart: { type: 'bar', height: 250, toolbar: { show: false }, background: 'transparent' },
+                series: [
+                    { name: 'Community Complaints', data: [32, 45, 28, 54, 60, 48] },
+                    { name: 'Ward Resolved', data: [28, 40, 26, 50, 58, 45] }
+                ],
+                xaxis: {
+                    categories: ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+                    labels: { style: { colors: textColor } }
+                },
+                yaxis: { labels: { style: { colors: textColor } } },
+                colors: ['#38bdf8', '#10b981'],
+                plotOptions: { bar: { borderRadius: 4, columnWidth: '55%' } },
+                grid: { borderColor: borderColor },
+                legend: { position: 'top', labels: { colors: textColor } },
+                theme: { mode: isDark ? 'dark' : 'light' }
+            };
+            new ApexCharts(document.querySelector("#citizenWardTrendChart"), wardTrendOptions).render();
 
-        // 4. Radial Gauge: Ward Health Rating
-        const gaugeOptions = {
-            chart: { type: 'radialBar', height: 250, background: 'transparent' },
-            series: [@resRate],
-            plotOptions: {
-                radialBar: {
-                    startAngle: -135,
-                    endAngle: 135,
-                    hollow: { size: '68%' },
-                    track: { background: borderColor },
-                    dataLabels: {
-                        name: { show: true, label: 'Ward Index', color: textColor, fontSize: '12px', offsetY: -10 },
-                        value: {
-                            color: '#10b981',
-                            fontSize: '24px',
-                            fontWeight: '700',
-                            show: true,
-                            formatter: function (val) { return val + '%'; }
+            // 4. Radial Gauge: Ward Health Rating
+            const gaugeOptions = {
+                chart: { type: 'radialBar', height: 250, background: 'transparent' },
+                series: [@resRate],
+                plotOptions: {
+                    radialBar: {
+                        startAngle: -135,
+                        endAngle: 135,
+                        hollow: { size: '68%' },
+                        track: { background: borderColor },
+                        dataLabels: {
+                            name: { show: true, label: 'Ward Index', color: textColor, fontSize: '12px', offsetY: -10 },
+                            value: {
+                                color: '#10b981',
+                                fontSize: '24px',
+                                fontWeight: '700',
+                                show: true,
+                                formatter: function (val) { return val + '%'; }
+                            }
                         }
                     }
-                }
-            },
-            fill: {
-                type: 'gradient',
-                gradient: { shade: 'dark', type: 'horizontal', gradientToColors: ['#34d399'], stops: [0, 100] }
-            },
-            colors: ['#059669'],
-            stroke: { lineCap: 'round' }
-        };
-        new ApexCharts(document.querySelector("#citizenHealthGaugeChart"), gaugeOptions).render();
-    });
-</script>
+                },
+                fill: {
+                    type: 'gradient',
+                    gradient: { shade: 'dark', type: 'horizontal', gradientToColors: ['#34d399'], stops: [0, 100] }
+                },
+                colors: ['#059669'],
+                stroke: { lineCap: 'round' }
+            };
+            new ApexCharts(document.querySelector("#citizenHealthGaugeChart"), gaugeOptions).render();
+        });
+    </script>

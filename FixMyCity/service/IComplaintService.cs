@@ -22,7 +22,7 @@ namespace FixMyCity.service
         // Interface additions
         OfficerDashboardViewModel GetOfficerDashboard(int officerId, int roleId);
         MyComplaintsViewModel GetOfficerComplaints(int officerId, OfficerComplaintsQuery query);
-        //Complaint GetAssignedComplaint(int officerId, int complaintId);
+        Complaint GetAssignedComplaint(int officerId, int complaintId);
         int SaveComplaint(FileComplaintViewModel vm, int consumerId, int roleId);              // upsert — Complaint.ComplaintId null/0 = create
         void DeleteComplaint(int complaintId, int consumerId);
         MyComplaintsViewModel Search(int consumerId, ComplaintListFilterViewModel filter);

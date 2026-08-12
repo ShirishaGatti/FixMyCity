@@ -176,6 +176,26 @@
             }
             hideConfirmDialog();
         }
+        function promptDialog(message, onOk, title) {
+            var overlay = document.getElementById('globalPromptOverlay');
+            document.getElementById('globalPromptMsg').textContent = message;
+            document.getElementById('globalPromptTitle').textContent = title || 'Reason';
+            document.getElementById('globalPromptInput').value = '';
+            overlay._onOk = onOk;
+            overlay.style.display = 'flex';
+            document.getElementById('globalPromptInput').focus();
+        }
+        function hidePromptDialog() {
+            document.getElementById('globalPromptOverlay').style.display = 'none';
+        }
+        function promptOk() {
+            var overlay = document.getElementById('globalPromptOverlay');
+            var value = document.getElementById('globalPromptInput').value;
+            if (typeof overlay._onOk === 'function') {
+                overlay._onOk(value);
+            }
+            hidePromptDialog();
+        }
         function showPageLoading() {
             document.getElementById('globalLoadingOverlay').style.display = 'flex';
         }
@@ -249,6 +269,20 @@
             <div class="dash-modal-footer">
                 <button type="button" class="btn-dash-outline" onclick="hideConfirmDialog()">Cancel</button>
                 <button type="button" class="btn-dash-primary" onclick="confirmOk()">OK</button>
+            </div>
+        </div>
+    </div>
+    <!-- ── Global prompt (input) dialog ──────────────────────── -->
+    <div class="dash-modal-overlay" id="globalPromptOverlay" style="display:none;" onclick="hidePromptDialog()">
+        <div class="dash-modal" style="max-width:480px;" onclick="event.stopPropagation()">
+            <div class="dash-modal-header"><h5 id="globalPromptTitle">Reason</h5></div>
+            <div class="dash-modal-body">
+                <p id="globalPromptMsg" class="text-white-50 small mb-2"></p>
+                <textarea id="globalPromptInput" class="dash-input" rows="4" maxlength="500" placeholder="Optional: explain what went wrong..."></textarea>
+            </div>
+            <div class="dash-modal-footer">
+                <button type="button" class="btn-dash-outline" onclick="hidePromptDialog()">Cancel</button>
+                <button type="button" class="btn-dash-primary" onclick="promptOk()">Submit</button>
             </div>
         </div>
     </div>

@@ -1,144 +1,5 @@
 @model FixMyCityModel.ViewModel.ComplaintDetailsViewModel
 
-<style>
-    /* ── Complaint Detail Drawer Styles ─────────────────────────── */
-    .cd-hero {
-        background: linear-gradient(135deg, rgba(245,158,11,0.14) 0%, rgba(234,88,12,0.04) 100%);
-        border-bottom: 1px solid var(--bd);
-        padding: 20px 24px 18px;
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 12px;
-    }
-    .cd-hero-left { flex: 1; min-width: 0; }
-    .cd-hero-number {
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #f59e0b;
-        margin-bottom: 4px;
-    }
-    .cd-hero-title {
-        font-size: 1.15rem;
-        font-weight: 700;
-        line-height: 1.3;
-        color: var(--tx);
-        margin: 0 0 10px 0;
-        word-break: break-word;
-    }
-    .cd-badge-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        align-items: center;
-    }
-    .cd-body { padding: 20px 24px; }
-    .cd-section-title {
-        font-size: 0.7rem;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--tx3);
-        margin: 20px 0 10px;
-        padding-bottom: 6px;
-        border-bottom: 1px solid var(--bd);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .cd-description {
-        background: var(--bg3);
-        border: 1px solid var(--bd);
-        border-radius: 10px;
-        padding: 14px 16px;
-        font-size: 0.92rem;
-        line-height: 1.7;
-        color: var(--tx2);
-        white-space: pre-wrap;
-        word-break: break-word;
-    }
-    .cd-info-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-        gap: 10px;
-        margin-top: 4px;
-    }
-    .cd-info-item {
-        background: var(--bg3);
-        border: 1px solid var(--bd);
-        border-radius: 10px;
-        padding: 11px 13px;
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-    }
-    .cd-info-label {
-        font-size: 0.67rem;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--tx3);
-    }
-    .cd-info-value {
-        font-size: 0.88rem;
-        font-weight: 600;
-        color: var(--tx);
-    }
-    /* Attachment grid */
-    .cd-attach-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 10px;
-        margin-top: 4px;
-    }
-    .cd-attach-card {
-        background: var(--bg3);
-        border: 1px solid var(--bd);
-        border-radius: 10px;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        transition: border-color 0.2s, transform 0.15s;
-    }
-    .cd-attach-card:hover { border-color: #f59e0b; transform: translateY(-2px); }
-    .cd-attach-thumb {
-        width: 100%;
-        aspect-ratio: 4/3;
-        object-fit: cover;
-        display: block;
-    }
-    .cd-attach-icon-wrap {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        aspect-ratio: 4/3;
-        font-size: 2rem;
-        color: #f59e0b;
-    }
-    .cd-attach-info {
-        padding: 8px 10px;
-        border-top: 1px solid var(--bd);
-    }
-    .cd-attach-name {
-        font-size: 0.75rem;
-        font-weight: 600;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        color: var(--tx);
-    }
-    .cd-attach-size { font-size: 0.68rem; color: var(--tx3); margin-top: 2px; }
-    .cd-attach-actions { display: flex; gap: 4px; margin-top: 8px; }
-    .cd-attach-actions .btn-dash-outline { padding: 3px 8px; font-size: 0.73rem; }
-
-/* ── Scrollable in drawer ──────────────────────────── */
-.drawer-card .cd-hero { flex-shrink: 0; }
-.drawer-card .cd-body { flex: 1; overflow-y: auto; min-height: 0; }
-</style>
-
-
 <div class="cd-hero">
     <div class="cd-hero-left">
         <div class="cd-hero-number">
@@ -196,11 +57,9 @@
     </div>
 }
 <div class="cd-body">
-
     <!-- Description -->
     <div class="cd-section-title"><i class="bi bi-chat-square-text"></i> Description</div>
     <div class="cd-description">@Model.Complaint.Description</div>
-
     <!-- Details grid -->
     <div class="cd-section-title"><i class="bi bi-info-circle"></i> Details</div>
     <div class="cd-info-grid">
@@ -229,7 +88,6 @@
             <span class="cd-info-value">@Model.Complaint.CreatedAt.ToString("hh:mm tt")</span>
         </div>
     </div>
-
     <!-- Attachments -->
     <div class="cd-section-title"><i class="bi bi-paperclip"></i> Attachments</div>
     @if (Model.Attachments.Count == 0)
@@ -278,9 +136,7 @@
             }
         </div>
     }
-
 </div>
-
 <script>
     // Delegated — injected via AJAX after page load.
     $('.drawer-delete-attachment-btn').off('click').on('click', function () {
@@ -308,7 +164,7 @@
 
         confirmDialog("Confirm that your complaint has been resolved?", function () {
 
-            $.post("/Complaint/ConfirmComplaint", { id: id }, function (res) {
+            $.post("@Url.Action("ConfirmResolution", "Complaint")", { id: id, __RequestVerificationToken: antiForgeryToken }, function (res) {
 
                 if (res.success) {
                     showToast("Complaint closed successfully.", "success", "Success");
@@ -330,7 +186,7 @@
 
         confirmDialog("Reopen this complaint?", function () {
 
-            $.post("/Complaint/RejectComplaint", { id: id }, function (res) {
+            $.post("@Url.Action("RejectResolution", "Complaint")", { id: id, __RequestVerificationToken: antiForgeryToken }, function (res) {
 
                 if (res.success) {
                     showToast("Complaint reopened.", "success", "Success");

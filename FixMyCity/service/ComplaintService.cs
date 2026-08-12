@@ -311,15 +311,15 @@ namespace FixMyCity.service
                 Priorities = priorities
             };
         }
-        /*public Complaint GetAssignedComplaint(int officerId, int complaintId)
+        public Complaint GetAssignedComplaint(int officerId, int complaintId)
         {
             return _complaintRepo.GetAssignedComplaintById(complaintId, officerId);
-        }*/
+        }
         public void DeleteComplaint(int complaintId, int consumerId)
         {
             bool deleted = _complaintRepo.DeleteComplaint(complaintId, consumerId);
             if (!deleted)
-                throw new BusinessException("Complaint could not be deleted — it may not be Open anymore.", "COMPLAINT_NOT_DELETABLE");
+                throw new BusinessException("Complaint could not be deleted it may not be Open anymore.", "COMPLAINT_NOT_DELETABLE");
         }
 
         public MyComplaintsViewModel Search(int consumerId, ComplaintListFilterViewModel filter)

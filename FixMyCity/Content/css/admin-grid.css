@@ -141,3 +141,182 @@
 
     transition: opacity .15s ease;
 }
+
+/* ═══ Assign Complaint modal ═══════════════════════════════════ */
+#assignComplaintModal {
+    z-index: 1060;
+}
+
+.assign-complaint-modal {
+    max-width: 640px;
+}
+
+.assign-complaint-modal .dash-modal-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--bd);
+    background: linear-gradient(135deg, rgba(245, 158, 11, .08), rgba(234, 88, 12, .03));
+}
+
+.assign-modal-number {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-family: monospace;
+    font-size: .78rem;
+    font-weight: 700;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, .1);
+    border: 1px solid rgba(56, 189, 248, .22);
+    border-radius: 20px;
+    padding: 3px 10px;
+}
+
+html.lm .assign-modal-number {
+    color: #1d4ed8;
+    background: #e0f2fe;
+    border-color: #bae6fd;
+}
+
+/* Status chip in the header */
+.assign-status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    white-space: nowrap;
+}
+
+.assign-status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.assign-status-chip.open            { background: rgba(16,185,129,.12);  color: #34d399; border: 1px solid rgba(16,185,129,.25); }
+.assign-status-chip.inprogress       { background: rgba(56,189,248,.12);  color: #38bdf8; border: 1px solid rgba(56,189,248,.25); }
+.assign-status-chip.awaitingconfirmation,
+.assign-status-chip.awaitingcustomerconfirmation { background: rgba(245,158,11,.12); color: #fbbf24; border: 1px solid rgba(245,158,11,.25); }
+.assign-status-chip.resolved         { background: rgba(167,139,250,.12); color: #a78bfa; border: 1px solid rgba(167,139,250,.25); }
+.assign-status-chip.closed           { background: rgba(148,163,184,.12); color: #94a3b8; border: 1px solid rgba(148,163,184,.25); }
+.assign-status-chip.reopened         { background: rgba(248,113,113,.12); color: #f87171; border: 1px solid rgba(248,113,113,.25); }
+.assign-status-chip                   { background: rgba(148,163,184,.12); color: #94a3b8; border: 1px solid rgba(148,163,184,.25); }
+
+/* Complaint summary card */
+.assign-summary {
+    background: var(--bg3);
+    border: 1px solid var(--bd);
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.assign-summary-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-weight: 600;
+    font-size: .95rem;
+    color: var(--tx);
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px dashed var(--bd);
+}
+
+.assign-summary-title i {
+    color: #f59e0b;
+    margin-top: 2px;
+}
+
+.assign-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+}
+
+.assign-field-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--tx2);
+    margin-bottom: 3px;
+}
+
+.assign-field-value {
+    font-size: .88rem;
+    color: var(--tx);
+    word-break: break-word;
+}
+
+.assign-field-full {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--bd);
+}
+
+/* Officer assignment section */
+.assign-officer-section {
+    margin-top: 20px;
+}
+
+.assign-section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--tx);
+    margin-bottom: 12px;
+}
+
+.assign-section-title i {
+    color: #f59e0b;
+}
+
+.assign-current-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: .75rem;
+    font-weight: 600;
+    background: rgba(16,185,129,.12);
+    color: #34d399;
+    border: 1px solid rgba(16,185,129,.25);
+}
+
+.assign-current-chip.unassigned {
+    background: rgba(148,163,184,.12);
+    color: #94a3b8;
+    border-color: rgba(148,163,184,.25);
+}
+
+.assign-note {
+    font-size: .78rem;
+    color: var(--tx2);
+    margin-top: 10px;
+}
+
+.assign-note i {
+    color: #38bdf8;
+}
+
+@media (max-width: 520px) {
+    .assign-summary-grid {
+        grid-template-columns: 1fr;
+    }
+    .assign-complaint-modal .dash-modal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}

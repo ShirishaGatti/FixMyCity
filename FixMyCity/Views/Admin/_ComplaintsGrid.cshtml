@@ -63,7 +63,7 @@
                         <td class="complaint-num">@item.ComplaintId</td>
                         <td>@Na(item.ComplaintNumber)</td>
                         <td><span class="text-truncate-col-lg" title="@Na(item.Title)">@Na(item.Title)</span></td>
-                        <td><span class="text-truncate-col" title="@Na(item.CategoryName)">@Na(item.CategoryName)</span></td>
+                        <td><span class="status-badge status-badge-wrap" title="@Na(item.CategoryName)">@Na(item.CategoryName)</span></td>
                         <td><span class="priority-badge @item.PriorityName.ToLower()">@Na(item.PriorityName)</span></td>
                         <td><span class="status-badge status-badge-wrap awaitingcustomerconfirmation @item.StatusName.ToLower().Replace(" ","")">@Na(item.StatusName)</span></td>
                         <td><span class="text-truncate-col" title="@Na(item.AssignedName)">@Na(item.AssignedName)</span></td>
@@ -71,8 +71,8 @@
                         <td><span class="text-truncate-col" title="@Na(item.WardName)">@Na(item.WardName)</span></td>
                         <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
                         <td>
-                            <button type="button" class="btn btn-warning btn-sm action-btn js-edit-complaint" data-id="@item.ComplaintId" title="Edit">
-                                <i class="fa fa-edit"></i>
+                            <button type="button" class="btn btn-primary btn-sm action-btn js-assign-complaint" data-id="@item.ComplaintId" title="Assign to officer">
+                                <i class="fa fa-user-plus"></i>
                             </button>
                             <button type="button" class="btn btn-danger btn-sm js-delete-complaint" data-id="@item.ComplaintId" data-title="@item.Title" title="Delete">
                                 <i class="fa fa-trash"></i>
@@ -84,7 +84,7 @@
             else
             {
                 <tr>
-                    <td colspan="10" class="text-center py-4">
+                    <td colspan="11" class="text-center py-4">
                         <i class="fa fa-folder-open fa-lg text-muted"></i>
                         <div class="mt-2 text-muted">No complaints found matching your filters.</div>
                     </td>

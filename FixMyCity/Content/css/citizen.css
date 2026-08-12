@@ -964,3 +964,326 @@ html.lm .chat-thread { scrollbar-color:#d1d5db transparent; }.cd-confirm-card {
     gap: 10px;
     flex-wrap: wrap;
 }
+
+    /* ── Complaint Detail Drawer Styles ─────────────────────────── */
+    .cd-hero {
+        background: linear-gradient(135deg, rgba(245,158,11,0.14) 0%, rgba(234,88,12,0.04) 100%);
+        border-bottom: 1px solid var(--bd);
+        padding: 20px 24px 18px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+    .cd-hero-left { flex: 1; min-width: 0; }
+    .cd-hero-number {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #f59e0b;
+        margin-bottom: 4px;
+    }
+    .cd-hero-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        line-height: 1.3;
+        color: var(--tx);
+        margin: 0 0 10px 0;
+        word-break: break-word;
+    }
+    .cd-badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+    }
+    .cd-body { padding: 20px 24px; }
+    .cd-section-title {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--tx3);
+        margin: 20px 0 10px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--bd);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .cd-description {
+        background: var(--bg3);
+        border: 1px solid var(--bd);
+        border-radius: 10px;
+        padding: 14px 16px;
+        font-size: 0.92rem;
+        line-height: 1.7;
+        color: var(--tx2);
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+    .cd-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 10px;
+        margin-top: 4px;
+    }
+    .cd-info-item {
+        background: var(--bg3);
+        border: 1px solid var(--bd);
+        border-radius: 10px;
+        padding: 11px 13px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+    .cd-info-label {
+        font-size: 0.67rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--tx3);
+    }
+    .cd-info-value {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--tx);
+    }
+    /* Attachment grid */
+    .cd-attach-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 10px;
+        margin-top: 4px;
+    }
+    .cd-attach-card {
+        background: var(--bg3);
+        border: 1px solid var(--bd);
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: border-color 0.2s, transform 0.15s;
+    }
+    .cd-attach-card:hover { border-color: #f59e0b; transform: translateY(-2px); }
+    .cd-attach-thumb {
+        width: 100%;
+        aspect-ratio: 4/3;
+        object-fit: cover;
+        display: block;
+    }
+    .cd-attach-icon-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 4/3;
+        font-size: 2rem;
+        color: #f59e0b;
+    }
+    .cd-attach-info {
+        padding: 8px 10px;
+        border-top: 1px solid var(--bd);
+    }
+    .cd-attach-name {
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--tx);
+    }
+    .cd-attach-size { font-size: 0.68rem; color: var(--tx3); margin-top: 2px; }
+    .cd-attach-actions { display: flex; gap: 4px; margin-top: 8px; }
+    .cd-attach-actions .btn-dash-outline { padding: 3px 8px; font-size: 0.73rem; }
+
+/* ── Scrollable in drawer ──────────────────────────── */
+.drawer-card .cd-hero { flex-shrink: 0; }
+.drawer-card .cd-body { flex: 1; overflow-y: auto; min-height: 0; }
+     .citizen-kpi {
+            background: var(--bg3);
+            border: 1px solid var(--bd);
+            border-radius: 16px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform .2s, box-shadow .2s;
+        }
+        .citizen-kpi:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.2); }
+        .citizen-kpi .ck-icon {
+            width: 50px; height: 50px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.3rem; flex-shrink: 0;
+        }
+        .citizen-kpi .ck-val { font-size: 1.7rem; font-weight: 800; color: var(--tx); line-height: 1; }
+        .citizen-kpi .ck-lbl { font-size: .8rem; color: var(--tx3); margin-top: 2px; }
+
+        .dash-card {
+            background: var(--bg3);
+            border: 1px solid var(--bd);
+            border-radius: 16px; overflow: hidden;
+            height: 100%; display: flex; flex-direction: column;
+        }
+        .dash-card-header {
+            padding: 14px 18px; font-weight: 700; font-size: .9rem;
+            border-bottom: 1px solid var(--bd); color: var(--tx);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .dash-card-body { padding: 16px 18px; flex: 1; position: relative; }
+        .chart-box { min-height: 250px; width: 100%; }
+
+        .dash-table { color: var(--tx); margin: 0; width: 100%; }
+        .dash-table thead th {
+            background: transparent; color: var(--tx3);
+            font-size: .72rem; text-transform: uppercase; letter-spacing: .08em;
+            padding: 10px 16px; border: 0; font-weight: 600;
+            border-bottom: 1px solid var(--bd); text-align: left;
+        }
+        .dash-table tbody td { padding: 12px 16px; border-bottom: 1px solid var(--bd); font-size: .875rem; vertical-align: middle; }
+        .dash-table tr:last-child td { border-bottom: none; }
+        .dash-table tbody tr:hover td { background: rgba(245, 158, 11, 0.05); }
+
+        .status-badge {
+            display: inline-block; padding: 3px 10px; border-radius: 20px;
+            font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em;
+        }
+        .status-badge.open { background: rgba(245,158,11,.12); color: #f59e0b; }
+        .status-badge.inprogress { background: rgba(59,130,246,.12); color: #3b82f6; }
+        .status-badge.resolved { background: rgba(16,185,129,.12); color: #10b981; }
+        .status-badge.closed { background: rgba(107,114,128,.15); color: #9ca3af; }
+
+    .cd-hero {
+        background: linear-gradient(135deg, rgba(245,158,11,0.14) 0%, rgba(234,88,12,0.04) 100%);
+        border-bottom: 1px solid var(--bd);
+        padding: 20px 24px 18px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+    .cd-hero-left { flex: 1; min-width: 0; }
+    .cd-hero-number {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #f59e0b;
+        margin-bottom: 4px;
+    }
+    .cd-hero-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        line-height: 1.3;
+        color: var(--tx);
+        margin: 0 0 10px 0;
+        word-break: break-word;
+    }
+    .cd-badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+    }
+    .cd-body { padding: 20px 24px; }
+    .cd-section-title {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--tx3);
+        margin: 20px 0 10px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--bd);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .cd-description {
+        background: var(--bg3);
+        border: 1px solid var(--bd);
+        border-radius: 10px;
+        padding: 14px 16px;
+        font-size: 0.92rem;
+        line-height: 1.7;
+        color: var(--tx2);
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+    .cd-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+        gap: 10px;
+        margin-top: 4px;
+    }
+    .cd-info-item {
+        background: var(--bg3);
+        border: 1px solid var(--bd);
+        border-radius: 10px;
+        padding: 11px 13px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+    .cd-info-label {
+        font-size: 0.67rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--tx3);
+    }
+    .cd-info-value {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--tx);
+    }
+    /* Attachment grid */
+    .cd-attach-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 10px;
+        margin-top: 4px;
+    }
+    .cd-attach-card {
+        background: var(--bg3);
+        border: 1px solid var(--bd);
+        border-radius: 10px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: border-color 0.2s, transform 0.15s;
+    }
+    .cd-attach-card:hover { border-color: #f59e0b; transform: translateY(-2px); }
+    .cd-attach-thumb {
+        width: 100%;
+        aspect-ratio: 4/3;
+        object-fit: cover;
+        display: block;
+    }
+    .cd-attach-icon-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 4/3;
+        font-size: 2rem;
+        color: #f59e0b;
+    }
+    .cd-attach-info {
+        padding: 8px 10px;
+        border-top: 1px solid var(--bd);
+    }
+    .cd-attach-name {
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: var(--tx);
+    }
+    .cd-attach-size { font-size: 0.68rem; color: var(--tx3); margin-top: 2px; }
+    .cd-attach-actions { display: flex; gap: 4px; margin-top: 8px; }
+    .cd-attach-actions .btn-dash-outline { padding: 3px 8px; font-size: 0.73rem; }
+
+/* ── Scrollable in drawer ──────────────────────────── */
+.drawer-card .cd-hero { flex-shrink: 0; }
+.drawer-card .cd-body { flex: 1; overflow-y: auto; min-height: 0; }

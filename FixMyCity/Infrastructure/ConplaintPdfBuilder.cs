@@ -79,7 +79,7 @@ namespace FixMyCity.Service
 
             // Footer
             b.AddLine(page, left, b.PageBottom + 14, right, b.PageBottom + 14, colorHex: BorderGray);
-            b.AddText(page, left, b.PageBottom, $"Generated on {DateTime.Now:dd-MMM-yyyy hh:mm tt} — FixMyCity Municipal Complaint System", 7.5, colorHex: "#999999");
+            b.AddText(page, left, b.PageBottom, $"Generated on {DateTime.Now:dd-MMM-yyyy hh:mm tt} FixMyCity Municipal Complaint System", 7.5, colorHex: "#999999");
 
             return b.Build();
         }

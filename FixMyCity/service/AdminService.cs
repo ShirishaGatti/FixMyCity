@@ -129,12 +129,10 @@ namespace FixMyCity.service
             return vm;
         }
 
-        public void UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId, int roleId)
+        public void AssignComplaint(int complaintId, int? assignedTo, int actorId)
         {
             if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
-            if (categoryId <= 0 || priorityId <= 0 || statusId <= 0)
-                throw new BusinessException("Category, priority and status are required.", "INVALID_INPUT");
-            _repo.UpdateComplaint(complaintId, categoryId, priorityId, statusId, assignedTo, actorId, roleId);
+            _repo.AssignComplaint(complaintId, assignedTo, actorId);
         }
 
         public void DeleteComplaint(int complaintId, int actorId)
