@@ -515,6 +515,9 @@ select * from fixmycity.consumer
 CREATE OR ALTER PROCEDURE FixMyCity.AdminComplaintList
 (  
     @CategoryId INT = NULL,  
+    @PriorityId INT = NULL,
+    @StatusId INT = NULL,
+    @AssignedTo INT = NULL,
     @CityId INT = NULL,  
     @WardId INT = NULL,  
     @SortBy NVARCHAR(50) = 'ComplaintId',  
@@ -525,16 +528,16 @@ CREATE OR ALTER PROCEDURE FixMyCity.AdminComplaintList
 AS  
 BEGIN  
     SET NOCOUNT ON;  
-  
+   
     IF (@PageNumber < 1) SET @PageNumber = 1;  
     IF (@PageSize < 1 OR @PageSize > 100) SET @PageSize = 10;  
-  
+   
     IF @SortBy NOT IN ('ComplaintId', 'CreatedAt', 'CategoryName', 'StatusName', 'PriorityName')  
         SET @SortBy = 'ComplaintId';  
-  
+   
     IF UPPER(@SortDir) NOT IN ('ASC', 'DESC')  
         SET @SortDir = 'DESC';  
-  
+   
     DECLARE @Sql NVARCHAR(MAX) = N'  
     ;WITH Filtered AS  
     (  
@@ -566,6 +569,9 @@ BEGIN
 		LEFT JOIN FixMyCity.Consumer con ON con.ConsumerId = c.AssignedTo
         WHERE c.IsActive = 1  
           AND (@CategoryId IS NULL OR c.CategoryId = @CategoryId)  
+          AND (@PriorityId IS NULL OR c.PriorityId = @PriorityId)  
+          AND (@StatusId IS NULL OR c.StatusId = @StatusId)  
+          AND (@AssignedTo IS NULL OR c.AssignedTo = @AssignedTo)  
           AND (@CityId IS NULL OR c.CityId = @CityId)  
           AND (@WardId IS NULL OR c.WardId = @WardId)  
     )  
@@ -575,9 +581,9 @@ BEGIN
     CASE WHEN @SortBy <> 'ComplaintId' THEN ', ComplaintId ' + @SortDir ELSE '' END + '  
     OFFSET (@PageNumber - 1) * @PageSize ROWS  
     FETCH NEXT @PageSize ROWS ONLY;';  
-  
+   
     EXEC sp_executesql  
         @Sql,  
-        N'@CategoryId INT, @CityId INT, @WardId INT, @PageNumber INT, @PageSize INT',  
-        @CategoryId, @CityId, @WardId, @PageNumber, @PageSize;  
-END  
+        N'@CategoryId INT, @PriorityId INT, @StatusId INT, @AssignedTo INT, @CityId INT, @WardId INT, @PageNumber INT, @PageSize INT',  
+        @CategoryId, @PriorityId, @StatusId, @AssignedTo, @CityId, @WardId, @PageNumber, @PageSize;  
+END

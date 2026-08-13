@@ -25,7 +25,6 @@ namespace FixMyCityModel.ViewModel
         public string WardName { get; set; }
         public DateTime CreatedAt { get; set; }
         public int isActive { get; set; }
-
     }
 
     public class AdminComplaintListFilterViewModel
@@ -34,6 +33,11 @@ namespace FixMyCityModel.ViewModel
         public int? CityId { get; set; }
         public int? WardId { get; set; }
         // "ComplaintId", "CreatedAt", "CategoryName", "StatusName", "PriorityName"
+        public int? PriorityId { get; set; }
+        public int? StatusId { get; set; }
+        public int? AssignedTo { get; set; }
+        public IEnumerable<Consumer> Officers { get; set; }
+            = new List<Consumer>();
         public string SortBy { get; set; } = "ComplaintId";
         public string SortDir { get; set; } = "DESC";
 
@@ -62,6 +66,5 @@ namespace FixMyCityModel.ViewModel
                 return (int)Math.Ceiling(TotalCount / (double)Filter.PageSize);
             }
         }
-    
-}
+    }
 }

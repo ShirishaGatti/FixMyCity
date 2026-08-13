@@ -126,6 +126,30 @@
         if (m) m.style.display = "none";
     };
 
+    //$(document).ready(function () {
+    //    $.get('@Url.Action("GetOfficers", "Admin")', function (html) {
+    //        var $select = $('select[name="Filter.AssignedTo"]');
+    //        $(html).find('option').each(function () {
+    //            $select.append($(this));
+    //        });
+    //    });
+    //});
+    $(document).ready(function () {
+        $.get('@Url.Action("GetOfficers", "Admin")', function (html) {
+            var $select = $('select[name="Filter.AssignedTo"]');
+            // The GetOfficers action returns a table of officers.
+            // Extract the officer name from the first <td> of each <tr>.
+            $(html).find('tr').each(function () {
+                var $td = $(this).find('td:first');
+                if ($td.length) {
+                    var name = $td.text().trim();
+                    if (name) {
+                        $select.append($('<option>').val('').text(name));
+                    }
+                }
+            });
+        });
+    });
     function openAssignModal(id) {
         if (!id) {
             showToast("Missing complaint id.", 'error', 'Error');
