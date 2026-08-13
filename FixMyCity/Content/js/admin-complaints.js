@@ -17,6 +17,7 @@
             url: gridUrl,
             method: "GET",
             data: params,
+            cache: false,
             success: function (html) {
                 $container.html(html);
                 updateSummary();
@@ -125,76 +126,114 @@
         if (m) m.style.display = "none";
     };
 
-    $container.on("click", ".js-assign-complaint", function () {
-        var id = $(this).data("id");
+    function openAssignModal(id) {
+        if (!id) {
+            showToast("Missing complaint id.", 'error', 'Error');
+            return;
+        }
+
         $.ajax({
             url: window.adminComplaintsUrls.assignComplaint,
             method: "GET",
             data: { id: id },
             success: function (html) {
-                $("#assignComplaintModalContent").html(html);
-                document.getElementById("assignComplaintModal").style.display = "flex";
-            },
-            error: function () {
-                showToast("Failed to load complaint details.", 'error', 'Error');
-            }
-        });
-    });
-
-    $(document).on("change", "#assignOfficerSelect", function () {
-        var $chip = $("#assignOfficerLive");
-        var $name = $("#assignOfficerLiveName");
-        if (!$chip.length || !$name.length) return;
-        var $opt = $(this).find("option:selected");
-        var officerName = $opt.val() ? $opt.text().split(" - ")[0] : "";
-        $chip.toggleClass("unassigned", !officerName)
-             .find("i").attr("class", "bi " + (officerName ? "bi-person-check-fill" : "bi-person-dash"));
-        $name.text(officerName ? officerName : "Unassigned");
-    });
-
-    $(document).on("click", "#assignComplaintBtn", function () {
-        var $btn = $(this);
-        var url = $btn.data("url");
-        var $errBox = $("#assignComplaintFormError");
-        $errBox.text("");
-
-        var payload = {
-            complaintId: $("#assignComplaintForm [name=complaintId]").val(),
-            assignedTo: $("#assignComplaintForm [name=assignedTo]").val() || null
-        };
-
-        $btn.prop("disabled", true);
-
-        $.ajax({
-            url: url,
-            method: "POST",
-            data: payload,
-            headers: getAntiForgeryHeader(),
-            success: function (res) {
-                if (res && res.success) {
-                    window.closeAssignComplaintModal();
-                    showToast('Complaint assigned successfully!', 'success', 'Saved');
-                    loadGrid($form.serialize());
-                } else {
-                    $errBox.text((res && res.message) || "Failed to assign complaint.");
-                    showToast((res && res.message) || "Failed to assign complaint.", 'error', 'Error');
+                var $modalContent = $("#assignComplaintModalContent");
+                var modalEl = document.getElementById("assignComplaintModal");
+                if (!$modalContent.length || !modalEl) {
+                    showToast("Assign modal markup is missing from the page.", 'error', 'Error');
+                    return;
                 }
+                $modalContent.html(html);
+                modalEl.style.display = "flex";
+
+                // Attach handlers DIRECTLY to the injected elements.
+                // We cannot use $(document).on() delegation here because the modal
+                // content div has onclick="event.stopPropagation()" which kills
+                // all bubbling before it reaches document.
+
+                $modalContent.find("#assignOfficerSelect").on("change", function () {
+                    var $chip = $("#assignOfficerLive");
+                    var $name = $("#assignOfficerLiveName");
+                    if (!$chip.length || !$name.length) return;
+                    var $opt = $(this).find("option:selected");
+                    var officerName = $opt.val() ? $opt.text().split(" - ")[0] : "";
+                    $chip.toggleClass("unassigned", !officerName)
+                         .find("i").attr("class", "bi " + (officerName ? "bi-person-check-fill" : "bi-person-dash"));
+                    $name.text(officerName ? officerName : "Unassigned");
+                });
+
+                $modalContent.find("#assignComplaintBtn").on("click", function () {
+                    var $btn = $(this);
+                    var $errBox = $("#assignComplaintFormError");
+                    $errBox.text("");
+
+                    try {
+                        var token = $('input[name="__RequestVerificationToken"]').first().val();
+
+                        var payload = {
+                            complaintId: $("#assignComplaintForm [name=complaintId]").val(),
+                            assignedTo: $("#assignComplaintForm [name=assignedTo]").val() || null,
+                            __RequestVerificationToken: token
+                        };
+
+                        $btn.prop("disabled", true);
+
+                        $.ajax({
+                            url: $btn.data("url"),
+                            method: "POST",
+                            data: payload,
+                            success: function (res) {
+                                console.log("[assign] success", res);
+                                if (res && res.success) {
+                                    window.closeAssignComplaintModal();
+                                    showToast('Complaint assigned successfully!', 'success', 'Saved');
+                                    loadGrid($form.serialize());
+                                } else {
+                                    var msg = (res && res.message) || "Failed to assign complaint.";
+                                    $errBox.text(msg);
+                                    showToast(msg, 'error', 'Error');
+                                }
+                            },
+                            error: function (xhr) {
+                                console.log("[assign] error", xhr);
+                                var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Failed to assign complaint. Status: " + xhr.status;
+                                $errBox.text(msg);
+                                showToast(msg, 'error', 'Error');
+                            },
+                            complete: function () {
+                                $btn.prop("disabled", false);
+                            }
+                        });
+                    } catch (ex) {
+                        $btn.prop("disabled", false);
+                        console.log("[assign] exception", ex);
+                        showToast("Assign failed: " + ex.message, 'error', 'Error');
+                    }
+                });
             },
             error: function (xhr) {
-                var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Failed to assign complaint.";
-                $errBox.text(msg);
+                var msg = (xhr.responseJSON && xhr.responseJSON.message) || "Failed to load complaint details.";
                 showToast(msg, 'error', 'Error');
-            },
-            complete: function () {
-                $btn.prop("disabled", false);
             }
         });
+    }
+
+    // Bind on document (not just the grid container) so the handler survives any
+    // container re-render, and use a namespace so re-running the script never
+    // double-binds. try/catch makes any failure visible instead of silent.
+    $(document).off("click.assignComplaint").on("click.assignComplaint", ".js-assign-complaint", function () {
+        try {
+            openAssignModal($(this).data("id"));
+        } catch (ex) {
+            showToast("Assign failed: " + ex.message, 'error', 'Error');
+        }
     });
 
     function getAntiForgeryHeader() {
-        var token = $('input[name="__RequestVerificationToken"]').val();
-        return token ? { "RequestVerificationToken": token } : {};
+        var token = $('input[name="__RequestVerificationToken"]').first().val();
+        return token ? { "__RequestVerificationToken": token } : {};
     }
 
     updateSummary();
 })();
+

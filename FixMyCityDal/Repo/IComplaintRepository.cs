@@ -16,9 +16,10 @@ namespace FixMyCity.Repository
         Attachment GetAttachmentById(int attachmentId, int consumerId);
         void DeleteAttachment(int attachmentId, int consumerId);
         // Interface additions
-        int SaveComplaint(Complaint complaint, int roleId, int consumerId);
+        // int SaveComplaint(Complaint complaint, int roleId, int consumerId);
         // upsert — Complaint.ComplaintId null/0 = create
-        bool UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId, int roleId);
+        //  bool UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId, int roleId);
+        int SaveComplaint(Complaint c, int actorId, int roleId, int? statusId = null, int? assignedTo = null);
 
 
         bool DeleteComplaint(int complaintId, int consumerId);

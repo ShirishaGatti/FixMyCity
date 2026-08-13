@@ -180,10 +180,19 @@ namespace FixMyCity.service
         }
         public void UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId, int roleId)
         {
-            if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
+                        if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
             if (categoryId <= 0 || priorityId <= 0 || statusId <= 0)
                 throw new BusinessException("Category, priority and status are required.", "INVALID_INPUT");
-            _complaintRepo.UpdateComplaint(complaintId, categoryId, priorityId, statusId, assignedTo, actorId, roleId);
+
+            var complaint = _complaintRepo.GetAssignedComplaintById(complaintId, actorId);
+            if (complaint == null) throw new NotFoundException("Complaint not found.");
+
+            complaint.CategoryId = categoryId;
+            complaint.PriorityId = priorityId;
+            complaint.StatusId = statusId;
+            complaint.AssignedTo = assignedTo;
+            _complaintRepo.SaveComplaint(complaint, actorId, roleId, statusId,  assignedTo);
+       //     SaveComplaint(Complaint c, int actorId, int roleId, int ? statusId = null, int ? assignedTo = null)
         }
 
         public void ResolveComplaint(int complaintId, int officerId)
@@ -217,13 +226,12 @@ namespace FixMyCity.service
                 Description = vm.Description,
                 CategoryId = vm.CategoryId,
                 PriorityId = vm.PriorityId,
-                RaisedBy = consumerId,
                 AddressLine = vm.AddressLine,
                 Landmark = vm.Landmark,
                 WardId = vm.WardId,
                 CityId = vm.CityId
             };
-            return _complaintRepo.SaveComplaint(complaint, roleId, consumerId);
+            return _complaintRepo.SaveComplaint(complaint, consumerId, roleId);
         }
 
         public OfficerDashboardViewModel GetOfficerDashboard(int officerId, int roleId)

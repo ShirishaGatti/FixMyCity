@@ -195,8 +195,38 @@ namespace FixMyCity.Repository
             }
         }
         // ComplaintRepository.cs — cache field, same shape as ItemRepository
+        public int SaveComplaint(Complaint c, int actorId, int roleId, int? statusId = null, int? assignedTo = null)
+{
+    try
+    {
+        DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_Save");
 
-        public int SaveComplaint(Complaint c, int roleId, int consumerId)
+        db.AddInParameter(com, "ComplaintId", DbType.Int32, c.ComplaintId == 0 ? (object)DBNull.Value : c.ComplaintId);
+        db.AddInParameter(com, "Title", DbType.String, (object)c.Title ?? DBNull.Value);
+        db.AddInParameter(com, "Description", DbType.String, (object)c.Description ?? DBNull.Value);
+        db.AddInParameter(com, "CategoryId", DbType.Int32, c.CategoryId == 0 ? (object)DBNull.Value : c.CategoryId);
+        db.AddInParameter(com, "PriorityId", DbType.Int32, c.PriorityId == 0 ? (object)DBNull.Value : c.PriorityId);
+        db.AddInParameter(com, "AddressLine", DbType.String, (object)c.AddressLine ?? DBNull.Value);
+        db.AddInParameter(com, "Landmark", DbType.String, (object)c.Landmark ?? DBNull.Value);
+        db.AddInParameter(com, "WardId", DbType.Int32, c.WardId == 0 ? (object)DBNull.Value : c.WardId);
+        db.AddInParameter(com, "CityId", DbType.Int32, c.CityId == 0 ? (object)DBNull.Value : c.CityId);
+        db.AddInParameter(com, "Status", DbType.Int32, statusId.HasValue ? (object)statusId.Value : DBNull.Value);
+        db.AddInParameter(com, "AssignedTo", DbType.Int32, assignedTo.HasValue ? (object)assignedTo.Value : DBNull.Value);
+        db.AddInParameter(com, "RaisedBy", DbType.Int32, actorId);
+        db.AddInParameter(com, "RoleId", DbType.Int32, roleId);
+        db.AddOutParameter(com, "SavedComplaintId", DbType.Int32, 4);
+
+        db.ExecuteNonQuery(com);
+        int savedId = Convert.ToInt32(db.GetParameterValue(com, "SavedComplaintId"));
+        ClearComplaintCache(actorId);
+        return savedId;
+    }
+    catch (SqlException ex)
+    {
+        throw new DataAccessException("Failed to save complaint.", "Complaint_Save", ex);
+    }
+}
+     /*   public int SaveComplaint(Complaint c, int roleId, int consumerId)
         {
             try
             {
@@ -241,7 +271,7 @@ namespace FixMyCity.Repository
             }
             catch (SqlException ex) { throw new DataAccessException("Failed to update complaint.", "Admin_UpdateComplaint", ex); }
             return true;
-        }
+        }*/
 
         public bool ResolveComplaint(int complaintId, int officerId)
         {
@@ -355,21 +385,8 @@ namespace FixMyCity.Repository
             var list = new List<Complaint>();
             try
             {
-                const string sql = @"SELECT c.ComplaintId, c.ComplaintNumber, c.Title, c.Description,
-                                           c.CategoryId, cat.CategoryName, c.PriorityId, pr.PriorityName,
-                                           c.StatusId, st.StatusName, c.RaisedBy, c.AssignedTo, asg.Name AS AssignedName,
-                                           c.AddressLine, c.Landmark, c.WardId, w.WardName, c.CityId, ci.CityName,
-                                           c.ResolvedDate, c.ClosedDate, c.ReopenCount, c.CreatedAt
-                                    FROM FixMyCity.Complaint c
-                                    JOIN FixMyCity.ComplaintCategory cat ON cat.CategoryId = c.CategoryId
-                                    JOIN FixMyCity.ComplaintPriority pr ON pr.PriorityId = c.PriorityId
-                                    JOIN FixMyCity.ComplaintStatus st ON st.StatusId = c.StatusId
-                                    JOIN FixMyCity.Ward w ON w.WardId = c.WardId
-                                    JOIN FixMyCity.City ci ON ci.CityId = c.CityId
-                                    LEFT JOIN FixMyCity.Consumer asg ON asg.ConsumerId = c.AssignedTo
-                                    WHERE c.AssignedTo = @OfficerId AND c.IsActive = 1";
 
-                DbCommand com = db.GetSqlStringCommand(sql);
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_GetAssignedByOfficer");
                 db.AddInParameter(com, "OfficerId", DbType.Int32, officerId);
                 DataSet ds = db.ExecuteDataSet(com);
                 if (ds != null && ds.Tables.Count > 0)
@@ -386,21 +403,7 @@ namespace FixMyCity.Repository
         {
             try
             {
-                const string sql = @"SELECT c.ComplaintId, c.ComplaintNumber, c.Title, c.Description,
-                                           c.CategoryId, cat.CategoryName, c.PriorityId, pr.PriorityName,
-                                           c.StatusId, st.StatusName, c.RaisedBy, c.AssignedTo, asg.Name AS AssignedName,
-                                           c.AddressLine, c.Landmark, c.WardId, w.WardName, c.CityId, ci.CityName,
-                                           c.ResolvedDate, c.ClosedDate, c.ReopenCount, c.CreatedAt
-                                    FROM FixMyCity.Complaint c
-                                    JOIN FixMyCity.ComplaintCategory cat ON cat.CategoryId = c.CategoryId
-                                    JOIN FixMyCity.ComplaintPriority pr ON pr.PriorityId = c.PriorityId
-                                    JOIN FixMyCity.ComplaintStatus st ON st.StatusId = c.StatusId
-                                    JOIN FixMyCity.Ward w ON w.WardId = c.WardId
-                                    JOIN FixMyCity.City ci ON ci.CityId = c.CityId
-                                    LEFT JOIN FixMyCity.Consumer asg ON asg.ConsumerId = c.AssignedTo
-                                    WHERE c.ComplaintId = @ComplaintId AND c.AssignedTo = @OfficerId AND c.IsActive = 1";
-
-                DbCommand com = db.GetSqlStringCommand(sql);
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_GetAssignedById");
                 db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
                 db.AddInParameter(com, "OfficerId", DbType.Int32, officerId);
                 DataSet ds = db.ExecuteDataSet(com);
@@ -544,7 +547,9 @@ namespace FixMyCity.Repository
                 StatusName = Convert.ToString(row["StatusName"]),
                 RaisedBy = Convert.ToInt32(row["RaisedBy"]),
                 AssignedTo = row["AssignedTo"] is DBNull ? (int?)null : Convert.ToInt32(row["AssignedTo"]),
-                //AssignedName = row["AssignedName"] is DBNull ? null : Convert.ToString(row["AssignedName"]),
+                // AssignedName = row.Table.Columns.Contains("AssignedName") && row["AssignedName"] != DBNull.Value ? Convert.ToString(row["AssignedName"]) : null,
+                AssignedName = row.Table.Columns.Contains("AssignedName") && row["AssignedName"] != DBNull.Value
+    ? Convert.ToString(row["AssignedName"]) : null,
                 AddressLine = Convert.ToString(row["AddressLine"]),
                 Landmark = row["Landmark"] is DBNull ? null : Convert.ToString(row["Landmark"]),
                 WardId = Convert.ToInt32(row["WardId"]),

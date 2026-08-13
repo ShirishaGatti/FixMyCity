@@ -71,12 +71,15 @@
                         <td><span class="text-truncate-col" title="@Na(item.WardName)">@Na(item.WardName)</span></td>
                         <td>@item.CreatedAt.ToString("dd/MM/yyyy")</td>
                         <td>
-                            <button type="button" class="btn btn-primary btn-sm action-btn js-assign-complaint" data-id="@item.ComplaintId" title="Assign to officer">
-                                <i class="fa fa-user-plus"></i>
-                            </button>
-                            <button type="button" class="btn btn-danger btn-sm js-delete-complaint" data-id="@item.ComplaintId" data-title="@item.Title" title="Delete">
-                                <i class="fa fa-trash"></i>
-                            </button>
+                            @{ var isOpen = item.StatusName.Trim().ToLower() == "open"; }
+                            <div class="d-flex gap-1">
+                                <button type="button" class="btn btn-primary btn-sm action-btn js-assign-complaint" data-id="@item.ComplaintId" title="Assign to officer">
+                                    <i class="fa fa-user-plus"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm js-delete-complaint" data-id="@item.ComplaintId" data-title="@item.Title" title="@(isOpen ? "Delete" : "Cannot delete — complaint is not Open")" @(isOpen ? "" : "disabled")>
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 }
