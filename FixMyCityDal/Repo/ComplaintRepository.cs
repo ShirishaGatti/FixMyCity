@@ -45,13 +45,24 @@ namespace FixMyCity.Repository
             return list;
         }
 
-        public Complaint GetById(int complaintId, int consumerId)
+        public Complaint GetById(int complaintId, int? consumerId = null, int? officerId = null)
         {
             try
             {
-                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_GetById");
-                db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
-                db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
+                DbCommand com;
+                if (officerId.HasValue)
+                {
+                    com = db.GetStoredProcCommand("FixMyCity.Complaint_GetAssignedById");
+                    db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
+                    db.AddInParameter(com, "OfficerId", DbType.Int32, officerId.Value);
+                }
+                else
+                {
+                    com = db.GetStoredProcCommand("FixMyCity.Complaint_GetById");
+                    db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
+                    db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId ?? 0);
+                }
+
                 DataSet ds = db.ExecuteDataSet(com);
                 if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
                     return MapComplaint(ds.Tables[0].Rows[0]);
@@ -62,30 +73,7 @@ namespace FixMyCity.Repository
                 throw new DataAccessException("Failed to retrieve complaint.", "Complaint_GetById", ex);
             }
         }
-
-        public int Create(Complaint c)
-        {
-            try
-            {
-                DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_Create");
-                db.AddInParameter(com, "Title", DbType.String, c.Title);
-                db.AddInParameter(com, "Description", DbType.String, c.Description);
-                db.AddInParameter(com, "CategoryId", DbType.Int32, c.CategoryId);
-                db.AddInParameter(com, "PriorityId", DbType.Int32, c.PriorityId);
-                db.AddInParameter(com, "RaisedBy", DbType.Int32, c.RaisedBy);
-                db.AddInParameter(com, "AddressLine", DbType.String, c.AddressLine);
-                db.AddInParameter(com, "Landmark", DbType.String, (object)c.Landmark ?? DBNull.Value);
-                db.AddInParameter(com, "WardId", DbType.Int32, c.WardId);
-                db.AddInParameter(com, "CityId", DbType.Int32, c.CityId);
-                db.AddOutParameter(com, "NewComplaintId", DbType.Int32, 4);
-                db.ExecuteNonQuery(com);
-                return Convert.ToInt32(db.GetParameterValue(com, "NewComplaintId"));
-            }
-            catch (SqlException ex)
-            {
-                throw new DataAccessException("Failed to file complaint.", "Complaint_Create", ex);
-            }
-        }
+     
 
         public List<ComplaintCategory> GetCategories()
         {
@@ -399,7 +387,7 @@ namespace FixMyCity.Repository
             }
             return list;
         }
-        public Complaint GetAssignedComplaintById(int complaintId, int officerId)
+     /*   public Complaint GetAssignedComplaintById(int complaintId, int officerId)
         {
             try
             {
@@ -415,7 +403,7 @@ namespace FixMyCity.Repository
             {
                 throw new DataAccessException("Failed to retrieve assigned complaint.", "Complaint_GetAssignedComplaintById", ex);
             }
-        }
+        }*/
 
         public bool DeleteComplaint(int complaintId, int consumerId)
         {

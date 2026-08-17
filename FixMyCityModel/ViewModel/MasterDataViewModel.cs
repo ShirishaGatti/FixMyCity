@@ -1,5 +1,6 @@
 using FixMyCityModel.Model;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace FixMyCityModel.ViewModel
 {
@@ -42,5 +43,24 @@ namespace FixMyCityModel.ViewModel
         public bool IsActive { get; set; }
         public string WardNo { get; set; }
         public string DepartmentName { get; set; }
+    }
+    public class MasterImportViewModel
+    {
+        [Required(ErrorMessage = "Name is required.")]
+        [StringLength(100, MinimumLength = 3, ErrorMessage = "Name must be between 3 and 100 characters.")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessage = "Entity type is required.")]
+        [StringLength(50)]
+        public string EntityType { get; set; }
+
+        [StringLength(50)]
+        public int? DepartmentId { get; set; }
+
+        [StringLength(20)]
+        public string WardNo { get; set; }
+
+        [StringLength(50)]
+        public int? ParentId { get; set; }
     }
 }

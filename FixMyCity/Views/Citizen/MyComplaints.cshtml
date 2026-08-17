@@ -18,7 +18,7 @@
 <div id="alertContainer" class="mb-3"></div>
 
 <!-- Filter bar -->
-@using (Html.BeginForm("MyComplaints", "Complaint", FormMethod.Get, new { id = "filterForm" }))
+@using (Html.BeginForm("MyComplaints", "Citizen", FormMethod.Get, new { id = "filterForm" }))
 {
     <div class="dash-card mb-4" style="padding:14px 18px;">
         <div class="row g-2 align-items-end">
@@ -126,7 +126,7 @@
             <h5 id="complaintModalTitle">File a New Complaint</h5>
             <button type="button" class="dash-modal-close" onclick="closeComplaintModal()">&times;</button>
         </div>
-        @using (Html.BeginForm("SaveComplaint", "Complaint", FormMethod.Post, new { id = "complaintForm", enctype = "multipart/form-data" }))
+        @using (Html.BeginForm("SaveComplaint", "Citizen", FormMethod.Post, new { id = "complaintForm", enctype = "multipart/form-data" }))
         {
             @Html.AntiForgeryToken()
             <input type="hidden" name="ComplaintId" id="complaintIdField" value="" />
@@ -245,7 +245,7 @@
         }
 
         function openEditComplaint(id) {
-            $.get('/Complaint/GetComplaintForEdit/' + id, function (res) {
+            $.get('/Citizen/GetComplaintForEdit/' + id, function (res) {
                 if (!res.success) { showToast(res.message || 'Could not load complaint.', 'error', 'Error'); return; }
                 isEditMode = true;
                 $('#complaintIdField').val(res.complaintId);
@@ -271,7 +271,7 @@
         function deleteComplaint(id) {
             confirmDialog('Are you sure you want to delete this complaint?', function () {
                 $.ajax({
-                    url: '/Complaint/DeleteComplaint/' + id, type: 'POST',
+                    url: '/Citizen/DeleteComplaint/' + id, type: 'POST',
                     data: {
                         __RequestVerificationToken: antiForgeryToken
                     },
@@ -291,7 +291,7 @@
         function confirmResolution(id) {
             confirmDialog('Confirm that this complaint has been resolved to your satisfaction? It will be closed.', function () {
                 $.ajax({
-                    url: '/Complaint/ConfirmResolution/' + id, type: 'POST',
+                    url: '/Citizen/ConfirmResolution/' + id, type: 'POST',
                     data: { __RequestVerificationToken: antiForgeryToken },
                     success: function (res) {
                         if (res.success) {
@@ -309,7 +309,7 @@
         function rejectResolution(id) {
             promptDialog('Optional: tell us why this isn\'t resolved yet. This is sent back to the officer.', function (reason) {
                 $.ajax({
-                    url: '/Complaint/RejectResolution/' + id, type: 'POST',
+                    url: '/Citizen/RejectResolution/' + id, type: 'POST',
                     data: { reason: reason || '', __RequestVerificationToken: antiForgeryToken },
                     success: function (res) {
                         if (res.success) {
@@ -359,7 +359,7 @@
                 if (!validateFilterDates()) return;
 
                 $.ajax({
-                    url: '/Complaint/MyComplaints',
+                    url: '/Citizen/MyComplaints',
                     type: 'GET',
                     data: $(this).serialize(),
                     success: function (html) {
@@ -389,7 +389,7 @@
             document.getElementById('detailsDrawerContent').innerHTML =
                 '<div class="text-center py-5"><span class="spinner-border"></span></div>';
             $.ajax({
-                url: '/Complaint/ComplaintDetailsPartial',
+                url: '/Citizen/ComplaintDetailsPartial',
                 type: 'GET',
                 data: { id },
 

@@ -1,0 +1,8 @@
+[
+  {"name": "New State", "entityType": "state"},
+  {"name": "New District", "entityType": "district", "parentId": 5},
+  {"name": "New City", "entityType": "city"},
+  {"name": "New Ward", "entityType": "ward"},
+  {"name": "New Category", "entityType": "category"},
+  {"name": "New Department", "entityType": "department"}
+]

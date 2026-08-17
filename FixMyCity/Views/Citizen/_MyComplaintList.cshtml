@@ -64,7 +64,7 @@
                                     <div class="d-flex gap-1 align-items-center">
                                         <button type="button" class="row-action-btn" title="Edit" @(isOpen ? "" : "disabled") onclick="openEditComplaint(@c.ComplaintId)"><i class="bi bi-pencil-square"></i></button>
                                         <button type="button" class="row-action-btn text-danger" title="Delete" @(isOpen ? "" : "disabled") onclick="deleteComplaint(@c.ComplaintId)"><i class="bi bi-trash"></i></button>
-                                        <a class="row-action-btn" title="Export PDF" href="@Url.Action("ExportComplaintPdf", "Complaint", new { id = c.ComplaintId })"><i class="bi bi-file-earmark-pdf"></i></a>
+                                        <a class="row-action-btn" title="Export PDF" href="@Url.Action("ExportComplaintPdf", "Citizen", new { id = c.ComplaintId })"><i class="bi bi-file-earmark-pdf"></i></a>
                                     </div>
                                 }
                             </td>
@@ -178,7 +178,7 @@
             icon = " <i class='bi bi-arrow-down-up ms-1 text-muted'></i>";
         }
         var url = new UrlHelper(HttpContext.Current.Request.RequestContext);
-        string href = url.Action("MyComplaints", "Complaint", new
+        string href = url.Action("MyComplaints", "Citizen", new
         {
             Filter_Title = filter.Title,
             Filter_CategoryId = filter.CategoryId,
@@ -198,7 +198,7 @@
     {
         if (!enabled) return $"<span class='dash-pager-link disabled'>{label}</span>";
         var url = new UrlHelper(HttpContext.Current.Request.RequestContext);
-        string href = url.Action("MyComplaints", "Complaint", new
+        string href = url.Action("MyComplaints", "Citizen", new
         {
             Filter_Title = filter.Title,
             Filter_CategoryId = filter.CategoryId,

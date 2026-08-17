@@ -104,7 +104,7 @@
                 <div class="cd-attach-card" data-attachment-id="@a.AttachmentId">
                     @if (a.IsImage)
                     {
-                        <img src="@Url.Action("DownloadAttachment", "Complaint", new { id = a.AttachmentId })"
+                        <img src="@Url.Action("DownloadAttachment", "Citizen", new { id = a.AttachmentId })"
                              class="cd-attach-thumb" alt="@a.FileName" />
                     }
                     else
@@ -117,7 +117,7 @@
                         <div class="cd-attach-name" title="@a.FileName">@a.FileName</div>
                         <div class="cd-attach-size">@a.FileSizeDisplay</div>
                         <div class="cd-attach-actions">
-                            <a href="@Url.Action("DownloadAttachment", "Complaint", new { id = a.AttachmentId })"
+                            <a href="@Url.Action("DownloadAttachment", "Citizen", new { id = a.AttachmentId })"
                                class="btn-dash-outline btn-sm" title="Download">
                                 <i class="bi bi-download"></i>
                             </a>
@@ -143,7 +143,7 @@
         var btn = $(this);
         confirmDialog('Are you sure you want to remove this attachment?', function () {
             $.ajax({
-                url: '/Complaint/DeleteAttachment/' + btn.data('id'),
+                url: '/Citizen/DeleteAttachment/' + btn.data('id'),
                 type: 'POST',
                 data: { __RequestVerificationToken: antiForgeryToken },
                 success: function (res) {
@@ -164,7 +164,7 @@
 
         confirmDialog("Confirm that your complaint has been resolved?", function () {
 
-            $.post("@Url.Action("ConfirmResolution", "Complaint")", { id: id, __RequestVerificationToken: antiForgeryToken }, function (res) {
+            $.post("@Url.Action("ConfirmResolution", "Citizen")", { id: id, __RequestVerificationToken: antiForgeryToken }, function (res) {
 
                 if (res.success) {
                     showToast("Complaint closed successfully.", "success", "Success");
@@ -186,7 +186,7 @@
 
         confirmDialog("Reopen this complaint?", function () {
 
-            $.post("@Url.Action("RejectResolution", "Complaint")", { id: id, __RequestVerificationToken: antiForgeryToken }, function (res) {
+            $.post("@Url.Action("RejectResolution", "Citizen")", { id: id, __RequestVerificationToken: antiForgeryToken }, function (res) {
 
                 if (res.success) {
                     showToast("Complaint reopened.", "success", "Success");
