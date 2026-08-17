@@ -199,6 +199,7 @@
         .status-badge.inprogress { background: rgba(59,130,246,.12); color: #3b82f6; }
         .status-badge.resolved { background: rgba(16,185,129,.12); color: #10b981; }
         .status-badge.closed { background: rgba(107,114,128,.15); color: #9ca3af; }
+        .status-badge.awaitingcustomerconfirmation { background: rgba(16,185,129,.12); color: #10b981; }
 
         .priority-badge {
             display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: .7rem; font-weight: 600;

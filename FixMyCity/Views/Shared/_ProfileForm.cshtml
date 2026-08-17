@@ -25,8 +25,8 @@
         <div class="row g-3">
             <div class="col-md-6 dash-form-group">
                 <label class="dash-label">Full Name *</label>
-                @Html.TextBoxFor(m => m.Name, new { @class = "dash-input" })
-                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger small" })
+                @Html.TextBoxFor(m => m.Name, new { @class = "dash-input", type = "text" })
+            @*    @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger small",type = "text" })*@
             </div>
             <div class="col-md-6 dash-form-group">
                 <label class="dash-label">Email (read-only)</label>

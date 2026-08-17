@@ -65,7 +65,7 @@
     <Compile Include="Repo\IAdminRepository.cs" />
     <Compile Include="Repo\IAuthRepository.cs" />
     <Compile Include="Repo\IComplaintChatRepository.cs" />
-    <Compile Include="Repo\IComplaintRepository.cs" />
+    <Compile Include="IComplaintRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\FixMyCityModel\FixMyCityModel.csproj">

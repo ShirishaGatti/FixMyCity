@@ -200,56 +200,32 @@
 </div>
 
 </div><!-- /md-page -->
+
 @section adminScripts {
-
     <script src="~/Content/js/MasterData.js"></script>
-
     <script>
         $(function () {
-
             MasterData.init({
                 urls: {
                     list: '@Url.Action("GetMasterList", "Admin")',
-                    save: '@Url.Action("SaveMaster", "Admin")'
+                    save: '@Url.Action("SaveMaster",    "Admin")'
                 }
             });
-
         });
     </script>
 
     <!-- JSON Import Script -->
     <script>
         $(document).ready(function () {
-
-            $('#importBtn').on('click', function (e) {
-
-                e.preventDefault();
-
-                var fileInput = $('#jsonFile')[0];
-
-                if (!fileInput || fileInput.files.length === 0) {
-                    $('#importResult').html(
-                        '<div class="alert alert-warning">' +
-                        'Please select a JSON file.' +
-                        '</div>'
-                    );
+            $('#importBtn').on('click', function () {
+                var file = $('#jsonFile')[0].files[0];
+                if (!file) {
+                    $('#importResult').html('<div class="alert alert-warning">Please select a JSON file.</div>');
                     return;
                 }
 
-                var file = fileInput.files[0];
-
                 var formData = new FormData();
-
-                // JSON file
                 formData.append('file', file);
-
-                // Anti-forgery token
-                var token = $('input[name="__RequestVerificationToken"]').val();
-
-                formData.append(
-                    '__RequestVerificationToken',
-                    token
-                );
 
                 $.ajax({
                     url: '@Url.Action("ImportMasterData", "Admin")',
@@ -257,90 +233,24 @@
                     data: formData,
                     processData: false,
                     contentType: false,
-
                     success: function (res) {
-
                         var html = '';
-
                         if (res.success) {
-
-                            html =
-                                '<div class="alert alert-success">' +
-                                '<h5>Import Complete</h5>' +
-                                '<p>Imported: ' +
-                                res.imported +
-                                ' / ' +
-                                res.total +
-                                ' records</p>' +
-                                '<ul class="mb-0 small">';
-
-                            if (res.success) {
-
-                                var html =
-                                    '<div class="alert alert-success">' +
-                                    '<h5>Import Complete</h5>' +
-                                    '<p>Imported: ' + res.imported +
-                                    ' / ' + res.total + ' records</p>' +
-                                    '</div>';
-
-                                html += '<div class="import-results">';
-
-                                if (res.results) {
-
-                                    res.results.forEach(function (result) {
-
-                                        var isFailed =
-                                            result.indexOf('FAILED') === 0 ||
-                                            result.indexOf('❌') === 0;
-
-                                        if (isFailed) {
-
-                                            html +=
-                                                '<div style="color:#dc3545; margin-bottom:5px;">' +
-                                                result +
-                                                '</div>';
-
-                                        } else {
-
-                                            html +=
-                                                '<div style="color:#198754; margin-bottom:5px;">' +
-                                                result +
-                                                '</div>';
-                                        }
-
-                                    });
-                                }
-
-                                html += '</div>';
-
-                                $('#importResult').html(html);
-                            }
-
+                            html = '<div class="alert alert-success"><h5>Import Complete</h5>';
+                            html += '<p>Imported: ' + res.imported + ' / ' + res.total + ' records</p>';
+                            html += '<ul class="mb-0 small">';
+                            html += res.results.map(function (r) { return '<li>' + r + '</li>'; }).join('');
+                            html += '</ul></div>';
                         } else {
-
-                            html =
-                                '<div class="alert alert-danger">' +
-                                (res.message || 'Import failed.') +
-                                '</div>';
+                            html = '<div class="alert alert-danger">' + res.message + '</div>';
                         }
-
                         $('#importResult').html(html);
                     },
-
-                    error: function (xhr) {
-
-                        console.log(xhr.responseText);
-
-                        $('#importResult').html(
-                            '<div class="alert alert-danger">' +
-                            'Request failed. Check the browser console/server logs.' +
-                            '</div>'
-                        );
+                    error: function () {
+                        $('#importResult').html('<div class="alert alert-danger">Request failed.</div>');
                     }
                 });
-
             });
-
         });
     </script>
-}
+</section>

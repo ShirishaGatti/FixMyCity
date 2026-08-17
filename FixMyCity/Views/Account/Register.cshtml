@@ -60,7 +60,7 @@
                                 @Html.LabelFor(m => m.Name, "Full Name *", new { @class = "form-label text-white-50 small fw-semibold" })
                                 <div class="input-group">
                                     <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-person-fill"></i></span>
-                                    @Html.TextBoxFor(m => m.Name, new { @class = "form-control bg-dark border-secondary text-white custom-input", placeholder = "John Doe" })
+                                    @Html.TextBoxFor(m => m.Name, new { @class = "form-control bg-dark border-secondary text-white custom-input", placeholder = "John Doe", type = "text" })
                                 </div>
                                 @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger small mt-1" })
                             </div>
@@ -69,7 +69,7 @@
                                 @Html.LabelFor(m => m.Contact, "Contact Number *", new { @class = "form-label text-white-50 small fw-semibold" })
                                 <div class="input-group">
                                     <span class="input-group-text bg-dark border-secondary text-white-50"><i class="bi bi-telephone-fill"></i></span>
-                                    @Html.TextBoxFor(m => m.Contact, new { @class = "form-control bg-dark border-secondary text-white custom-input", placeholder = "+91 9876543210" })
+                                    @Html.TextBoxFor(m => m.Contact, new { @class = "form-control bg-dark border-secondary text-white custom-input", placeholder = "+91 9876543210", type = "tel" })
                                 </div>
                                 @Html.ValidationMessageFor(m => m.Contact, "", new { @class = "text-danger small mt-1" })
                             </div>

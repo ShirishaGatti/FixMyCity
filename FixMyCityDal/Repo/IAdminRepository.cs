@@ -14,7 +14,7 @@ namespace FixMyCity.Repository
         bool UpdateUser(int consumerId, int newRoleId, int? deptId, int actorId);
         //bool UpdateOfficer(int consumerId, string designation, int? wardId, int? deptId, int actorId);
         bool DeleteUser(int consumerId, int actorId);
-
+        List<Consumer> GetOfficers();
         // Complaints
         AdminComplaintListViewModel ListComplaints(AdminComplaintListFilterViewModel filter);
         bool AssignComplaint(int complaintId, int? assignedTo, int actorId);

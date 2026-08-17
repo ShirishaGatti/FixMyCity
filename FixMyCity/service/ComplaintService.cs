@@ -1,4 +1,4 @@
-﻿using FixMyCity.Exceptions;
+using FixMyCity.Exceptions;
 using FixMyCity.Infrastructure;
 using FixMyCity.Repository;
 using FixMyCity.Service;
@@ -43,30 +43,7 @@ namespace FixMyCity.service
             };
         }
 
-        public int FileComplaint(FileComplaintViewModel vm, int consumerId)
-        {
-            if (string.IsNullOrWhiteSpace(vm.Title))
-                throw new BusinessException("Title is required.");
-
-            if (string.IsNullOrWhiteSpace(vm.Description))
-                throw new BusinessException("Description is required.");
-
-            Complaint complaint = new Complaint
-            {
-                Title = vm.Title,
-                Description = vm.Description,
-                CategoryId = vm.CategoryId,
-                PriorityId = vm.PriorityId,
-                RaisedBy = consumerId,
-                AddressLine = vm.AddressLine,
-                Landmark = vm.Landmark,
-                WardId = vm.WardId,
-                CityId = vm.CityId
-            };
-
-            return _complaintRepo.Create(complaint);
-        }
-        private static readonly string[] AllowedExtensions =
+             private static readonly string[] AllowedExtensions =
     (ConfigurationManager.AppSettings["AllowedAttachmentExtensions"] ?? ".jpg,.jpeg,.png,.pdf,.doc,.docx")
         .Split(',').Select(e => e.Trim().ToLowerInvariant()).ToArray();
 
@@ -148,11 +125,23 @@ namespace FixMyCity.service
                     CreatedAt = a.CreatedAt
                 }).ToList();
 
+        /*   public Complaint GetComplaintDetails(int complaintId, int consumerId)
+           {
+               var complaint = _complaintRepo.GetById(complaintId, consumerId);
+               if (complaint == null) throw new NotFoundException("Complaint not found.");
+               return complaint;
+           }*/
         public Complaint GetComplaintDetails(int complaintId, int consumerId)
         {
-            var complaint = _complaintRepo.GetById(complaintId, consumerId);
+            var complaint = _complaintRepo.GetById(complaintId, consumerId: consumerId);
             if (complaint == null) throw new NotFoundException("Complaint not found.");
             return complaint;
+        }
+
+        public Complaint GetAssignedComplaint(int officerId, int complaintId)
+        {
+        
+            return _complaintRepo.GetById(complaintId,null,officerId);
         }
 
         public Attachment GetAttachmentForDownload(int attachmentId, int consumerId)
@@ -180,10 +169,21 @@ namespace FixMyCity.service
         }
         public void UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo, int actorId, int roleId)
         {
-            if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
+                        if (complaintId <= 0) throw new BusinessException("Invalid complaint.", "INVALID_COMPLAINT");
             if (categoryId <= 0 || priorityId <= 0 || statusId <= 0)
                 throw new BusinessException("Category, priority and status are required.", "INVALID_INPUT");
-            _complaintRepo.UpdateComplaint(complaintId, categoryId, priorityId, statusId, assignedTo, actorId, roleId);
+
+            var complaint = roleId == RoleIds.SupportExecutive
+                ? _complaintRepo.GetById(complaintId, officerId: actorId)
+                : _complaintRepo.GetById(complaintId, consumerId: actorId);
+            if (complaint == null) throw new NotFoundException("Complaint not found.");
+
+            complaint.CategoryId = categoryId;
+            complaint.PriorityId = priorityId;
+            complaint.StatusId = statusId;
+            complaint.AssignedTo = assignedTo;
+            _complaintRepo.SaveComplaint(complaint, actorId, roleId, statusId,  assignedTo);
+       //     SaveComplaint(Complaint c, int actorId, int roleId, int ? statusId = null, int ? assignedTo = null)
         }
 
         public void ResolveComplaint(int complaintId, int officerId)
@@ -217,13 +217,12 @@ namespace FixMyCity.service
                 Description = vm.Description,
                 CategoryId = vm.CategoryId,
                 PriorityId = vm.PriorityId,
-                RaisedBy = consumerId,
                 AddressLine = vm.AddressLine,
                 Landmark = vm.Landmark,
                 WardId = vm.WardId,
                 CityId = vm.CityId
             };
-            return _complaintRepo.SaveComplaint(complaint, roleId, consumerId);
+            return _complaintRepo.SaveComplaint(complaint, consumerId, roleId);
         }
 
         public OfficerDashboardViewModel GetOfficerDashboard(int officerId, int roleId)
@@ -311,10 +310,10 @@ namespace FixMyCity.service
                 Priorities = priorities
             };
         }
-        public Complaint GetAssignedComplaint(int officerId, int complaintId)
+      /*  public Complaint GetAssignedComplaint(int officerId, int complaintId)
         {
             return _complaintRepo.GetAssignedComplaintById(complaintId, officerId);
-        }
+        }*/
         public void DeleteComplaint(int complaintId, int consumerId)
         {
             bool deleted = _complaintRepo.DeleteComplaint(complaintId, consumerId);

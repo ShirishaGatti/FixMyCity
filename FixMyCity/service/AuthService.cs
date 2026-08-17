@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using FixMyCityModel.Model;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace FixMyCity.Service
 {
@@ -43,27 +44,39 @@ namespace FixMyCity.Service
 
         // ===========================
         // Register (public, self-service — Citizen only)
-        // ===========================
         public int Register(RegisterViewModel vm)
         {
             ValidateName(vm.Name);
             ValidateEmail(vm.Email);
             ValidateNewPassword(vm.Password);
 
-            if (string.IsNullOrWhiteSpace(vm.Contact))
-                throw new BusinessException("Contact number is required.", "CONTACT_REQUIRED");
+            if (!Regex.IsMatch(vm.Contact ?? "", @"^(?:\+91|91)?[6789]\d{9}$"))
+                throw new BusinessException("Contact number must be a valid 10-digit number.", "INVALID_CONTACT");
+
+            string dobError;
+            if (!vm.ValidateDob(out dobError))
+                throw new BusinessException(dobError, "INVALID_DOB");
+
+            if (!string.IsNullOrWhiteSpace(vm.Designation) && Regex.IsMatch(vm.Designation.Trim(), @"^\d+$"))
+                throw new BusinessException("Designation cannot be only numbers.", "INVALID_DESIGNATION");
+
+            if (vm.CityId.HasValue && vm.WardId.HasValue)
+            {
+                var wardsInCity = _repo.GetWardsByCity(vm.CityId.Value);
+                if (!wardsInCity.Any(w => w.WardId == vm.WardId.Value))
+                    throw new BusinessException("Selected ward does not belong to the selected city.", "WARD_CITY_MISMATCH");
+            }
 
             // Self-registration is restricted to Citizen; SupportExecutive/Admin
             vm.RoleId = RoleIds.Citizen;
             vm.DepartmentId = null;
-         //   vm.Designation = null;
+            //   vm.Designation = null;
 
             if (EmailExists(vm.Email))
                 throw new BusinessException("An account with this email already exists.", "EMAIL_EXISTS");
 
             byte[] salt = GenerateSalt();
             byte[] hash = HashPassword(vm.Password, salt);
-
             return _repo.Register(vm, hash, salt);
         }
 
@@ -331,11 +344,7 @@ namespace FixMyCity.Service
                 _repo.RevokeAllRefreshTokens(stored.ConsumerId);
         }
 
-        // ===========================
-        // Shared validation helpers
-        // ===========================
-        // Pulled out of Register()/RegisterStaff() so the two entry points
-        // can't quietly drift apart on what "valid" means.
+     
         private void ValidateName(string name)
         {
             if (string.IsNullOrWhiteSpace(name) || name.Trim().Length < 3)

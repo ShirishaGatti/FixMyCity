@@ -25,30 +25,51 @@
                     @Html.AntiForgeryToken()
 
                     <div class="row g-2">
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             @Html.DropDownList("Filter.CategoryId",
                                      new SelectList(Model.Categories, "CategoryId", "CategoryName", Model.Filter.CategoryId),
                                      "All Categories",
-                                     new { @class = "form-control" })
+                                     new { @class = "form-control form-select" })
                         </div>
                         <div class="col-md-2">
                             @Html.DropDownList("Filter.CityId",
                                      new SelectList(Model.Cities, "CityId", "CityName", Model.Filter.CityId),
                                      "All Cities",
-                                     new { @class = "form-control" })
-                            @*<input type="number" name="Filter.CityId" value="@Model.Filter.CityId" class="form-control" placeholder="City Id" />*@
+                                     new { @class = "form-control form-select" })
                         </div>
                         <div class="col-md-2">
                             @Html.DropDownList("Filter.WardId",
                                      new SelectList(Model.Wards, "WardId", "WardName", Model.Filter.WardId),
-                                     "All Wards",
-                                     new { @class = "form-control" })
-                          @*  <input type="number" name="Filter.WardId" value="@Model.Filter.WardId" class="form-control" placeholder="Ward Id" />*@
+                                      "All Wards",
+                                      new { @class = "form-control form-select" })
                         </div>
-                        <div class="col-md-1 d-flex">
-                            <button type="submit" class="btn btn-primary w-100" title="Search">
-                                <i class="fa fa-search"></i>
-                            </button>
+                        <div class="col-md-2">
+                            @Html.DropDownList("Filter.PriorityId",
+                                     new SelectList(Model.Priorities, "PriorityId", "PriorityName", Model.Filter.PriorityId),
+                                      "All Priorities",
+                                      new { @class = "form-control form-select" })
+                        </div>
+                        <div class="col-md-2">
+                            @Html.DropDownList("Filter.StatusId",
+                                     new SelectList(Model.Statuses, "StatusId", "StatusName", Model.Filter.StatusId),
+                                      "All Statuses",
+                                      new { @class = "form-control form-select" })
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group">
+                                <select name="Filter.AssignedTo" class="form-control form-select">
+                                    <option value="">All Officers</option>
+                                    @foreach (var officer in Model.Filter.Officers)
+                                    {
+                                        <option value="@officer.ConsumerId" @(Model.Filter.AssignedTo == officer.ConsumerId ? "selected" : "")>
+                                            @officer.Name@(string.IsNullOrWhiteSpace(officer.Designation) ? "" : "-" + officer.Designation)
+                                        </option>
+                                    }
+                                </select>
+                                <button type="submit" class="btn btn-primary" title="Search">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -75,6 +96,8 @@
 
                 </form>
 
+              
+
                 <div id="complaintsGridContainer">
                     @Html.Partial("_ComplaintsGrid", Model)
                 </div>
@@ -100,5 +123,5 @@
             saveAssignment: '@Url.Action("SaveAssignment","Admin")'
         };
     </script>
-    <script src="~/Content/js/admin-complaints.js"></script>
+    <script src="~/Content/js/admin-complaints.js?v=3"></script>
 }

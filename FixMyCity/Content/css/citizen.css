@@ -389,6 +389,7 @@
 .status-badge.inprogress { background: rgba(245,158,11,0.15); color: #fbbf24; border-color: rgba(245,158,11,0.25); }
 .status-badge.resolved   { background: rgba(16,185,129,0.15); color: #34d399; border-color: rgba(16,185,129,0.25); }
 .status-badge.closed     { background: rgba(239,68,68,0.12); color: #f87171; border-color: rgba(239,68,68,0.2); }
+.status-badge.awaitingcustomerconfirmation { background: rgba(16,185,129,0.15); color: #10b981; border-color: rgba(16,185,129,0.25); }
 
 /* ── Priority badge ──────────────────────────────── */
 .priority-badge {
@@ -728,7 +729,7 @@ input[type="file"].dash-input::file-selector-button:hover {
 .complaint-num-link { color: var(--accent); font-weight: 600; text-decoration: none; cursor: pointer; }
 .complaint-num-link:hover { text-decoration: underline; }
 
-.row-actions { display: flex; gap: 6px; }
+.row-actions { display: flex; gap: 6px; align-items: center; }
 .row-action-btn {
     background: none; border: 1px solid var(--bd); border-radius: 6px; padding: 5px 8px;
     color: var(--tx2); cursor: pointer; text-decoration: none; display: inline-flex;
@@ -1283,6 +1284,13 @@ html.lm .chat-thread { scrollbar-color:#d1d5db transparent; }.cd-confirm-card {
     .cd-attach-size { font-size: 0.68rem; color: var(--tx3); margin-top: 2px; }
     .cd-attach-actions { display: flex; gap: 4px; margin-top: 8px; }
     .cd-attach-actions .btn-dash-outline { padding: 3px 8px; font-size: 0.73rem; }
+
+    .row-action-note {
+    font-size: 0.72rem;
+    margin-top: 2px;
+    min-height: 1.1em;   /* reserves the line even when empty */
+    white-space: nowrap;
+}
 
 /* ── Scrollable in drawer ──────────────────────────── */
 .drawer-card .cd-hero { flex-shrink: 0; }

@@ -233,8 +233,9 @@ namespace FixMyCity.Repository
             {
                 DbCommand com = db.GetStoredProcCommand("FixMyCity.AdminComplaintList");
                 db.AddInParameter(com, "CategoryId", DbType.Int32, filter.CategoryId.HasValue ? (object)filter.CategoryId.Value : DBNull.Value);
-                db.AddInParameter(com, "CityId", DbType.Int32, filter.CityId.HasValue ? (object)filter.CityId.Value : DBNull.Value);
-                db.AddInParameter(com, "WardId", DbType.Int32, filter.WardId.HasValue ? (object)filter.WardId.Value : DBNull.Value);
+                db.AddInParameter(com, "PriorityId", DbType.Int32, filter.PriorityId.HasValue ? (object)filter.PriorityId.Value : DBNull.Value);
+                db.AddInParameter(com, "StatusId", DbType.Int32, filter.StatusId.HasValue ? (object)filter.StatusId.Value : DBNull.Value);
+                db.AddInParameter(com, "AssignedTo", DbType.Int32, filter.AssignedTo.HasValue ? (object)filter.AssignedTo.Value : DBNull.Value);
                 db.AddInParameter(com, "SortBy", DbType.String, filter.SortBy ?? "ComplaintId");
                 db.AddInParameter(com, "SortDir", DbType.String, filter.SortDir ?? "DESC");
                 db.AddInParameter(com, "PageNumber", DbType.Int32, filter.PageNumber);
@@ -380,7 +381,70 @@ namespace FixMyCity.Repository
             catch (SqlException ex) { throw new DataAccessException("Failed to load districts.", "District_GetAll", ex); }
             return list;
         }
+        public List<Consumer> GetOfficers()
+        {
+            var officers = new List<Consumer>();
 
+            Database db = DatabaseFactory.CreateDatabase();
+
+            using (DbCommand cmd = db.GetStoredProcCommand("FixMyCity.Admin_GetOfficers"))
+            {
+                using (IDataReader reader = db.ExecuteReader(cmd))
+                {
+                    while (reader.Read())
+                    {
+                        officers.Add(new Consumer
+                        {
+                            ConsumerId = Convert.ToInt32(reader["ConsumerId"]),
+
+                            Name = reader["Name"] == DBNull.Value
+                                ? null
+                                : reader["Name"].ToString(),
+
+                            Email = reader["Email"] == DBNull.Value
+                                ? null
+                                : reader["Email"].ToString(),
+
+                            Contact = reader["Contact"] == DBNull.Value
+                                ? null
+                                : reader["Contact"].ToString(),
+
+                            DOB = reader["DOB"] == DBNull.Value
+                                ? (DateTime?)null
+                                : Convert.ToDateTime(reader["DOB"]),
+
+                            AddressLine = reader["AddressLine"] == DBNull.Value
+                                ? null
+                                : reader["AddressLine"].ToString(),
+
+                            CityId = reader["CityId"] == DBNull.Value
+                                ? (int?)null
+                                : Convert.ToInt32(reader["CityId"]),
+
+                            WardId = reader["WardId"] == DBNull.Value
+                                ? (int?)null
+                                : Convert.ToInt32(reader["WardId"]),
+
+                            RoleId = Convert.ToInt32(reader["RoleId"]),
+
+                            DeptId = reader["DeptId"] == DBNull.Value
+                                ? (int?)null
+                                : Convert.ToInt32(reader["DeptId"]),
+
+                            Designation = reader["Designation"] == DBNull.Value
+                                ? null
+                                : reader["Designation"].ToString(),
+
+                            IsActive = Convert.ToBoolean(reader["IsActive"]),
+
+                            CreatedDate = Convert.ToDateTime(reader["CreatedDate"])
+                        });
+                    }
+                }
+            }
+
+            return officers;
+        }
         public List<City> GetCitiesFull()
         {
             var list = new List<City>();
@@ -631,7 +695,7 @@ namespace FixMyCity.Repository
             }
             return newId;
         }
-        public void UpdateOfficer(
+  /*      public void UpdateOfficer(
     int consumerId,
     string designation,
     int? wardId,
@@ -648,7 +712,7 @@ namespace FixMyCity.Repository
 
                 db.ExecuteNonQuery(cmd);
             }
-        }
+        }*/
         private static bool HasColumn(IDataReader reader, string columnName)
         {
             for (int i = 0; i < reader.FieldCount; i++)

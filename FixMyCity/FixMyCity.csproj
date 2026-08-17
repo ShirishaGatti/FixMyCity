@@ -349,7 +349,7 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\ComplaintChatController.cs" />
-    <Compile Include="Controllers\ComplaintController.cs" />
+    <Compile Include="Controllers\CitizenController.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
@@ -464,6 +464,10 @@
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
     <Content Include="Scripts\_references.js" />
+    <Content Include="Views\Email\AssignmentOtp.html" />
+    <Content Include="Views\Email\ComplaintAssigned.html" />
+    <Content Include="Views\Email\ComplaintProgress.html" />
+    <Content Include="Views\Email\RoleChanged.html" />
     <Content Include="Views\Shared\_AdminLayout.css" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -501,11 +505,11 @@
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Account\VerifyOtp.cshtml" />
     <Content Include="Views\Account\LoginOtp.html" />
-    <Content Include="Views\Complaint\Home.cshtml" />
+    <Content Include="Views\Citizen\Home.cshtml" />
     <Content Include="Views\Shared\_CitizenLayout.cshtml" />
-    <Content Include="Views\Complaint\Profile.cshtml" />
-    <Content Include="Views\Complaint\MyComplaints.cshtml" />
-    <Content Include="Views\Complaint\ComplaintDetails.cshtml" />
+    <Content Include="Views\Citizen\Profile.cshtml" />
+    <Content Include="Views\Citizen\MyComplaints.cshtml" />
+    <Content Include="Views\Citizen\ComplaintDetails.cshtml" />
     <Content Include="Views\Admin\Dashboard.cshtml" />
     <Content Include="Views\Admin\MasterData.cshtml" />
     <Content Include="Views\Admin\Users.cshtml" />
@@ -525,7 +529,7 @@
     <Content Include="Views\Shared\_ProfileForm.cshtml" />
     <Content Include="Views\Shared\_ComplaintChat.cshtml" />
     <Content Include="Views\Shared\_ChatMessageBubble.cshtml" />
-    <Content Include="Views\Complaint\_MyComplaintList.cshtml" />
+    <Content Include="Views\Citizen\_MyComplaintList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

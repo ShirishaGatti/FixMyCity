@@ -29,7 +29,7 @@ $(document).ready(function () {
                 spinner.addClass('d-none');
 
                 if (res.success) {
-                    window.location.href = res.redirectUrl || '/Complaint/MyComplaints';
+                    window.location.href = res.redirectUrl || '/Citizen/MyComplaints';
                 } else {
                     showAlert('#alertContainer', res.message || 'Invalid or expired OTP.', 'danger');
                 }

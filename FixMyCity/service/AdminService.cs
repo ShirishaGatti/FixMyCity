@@ -105,6 +105,7 @@ namespace FixMyCity.service
             filter.SortDir = string.Equals(filter.SortDir, "ASC", StringComparison.OrdinalIgnoreCase) ? "ASC" : "DESC";
 
             _complaintRepo.ExpireOverdueResolutions();
+            filter.Officers = _repo.GetOfficers();
 
             var vm = _repo.ListComplaints(filter);
             vm.Filter = filter;

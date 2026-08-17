@@ -15,14 +15,14 @@ using System.Web.UI.WebControls;
 namespace FixMyCity.Controllers
 {
     [RoleAuthorize(RoleIds.Citizen)]
-    public class ComplaintController : Controller
+    public class CitizenController : Controller
     {
         private readonly IConsumerService _consumerService;
         private readonly IComplaintService _complaintService;
         private readonly ISessionContext _session;
         private readonly IComplaintChatService _chatService;
 
-        public ComplaintController()
+        public CitizenController()
         {
             _consumerService = new ConsumerService();
             _complaintService = new ComplaintService();
@@ -262,6 +262,11 @@ namespace FixMyCity.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Profile(ProfileViewModel vm)
         {
+            string dobError;
+            if (!vm.ValidateDob(out dobError))
+            {
+                ModelState.AddModelError("DOB", dobError);
+            }
             if (!ModelState.IsValid)
             {
                 PopulateProfileDropdowns(vm);

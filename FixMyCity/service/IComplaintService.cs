@@ -10,7 +10,6 @@ namespace FixMyCity.service
     public interface IComplaintService
     {
         MyComplaintsViewModel GetComplaints(int consumerId, int assignedTo, int roleId);
-        int FileComplaint(FileComplaintViewModel vm, int consumerId);
         List<AttachmentViewModel> UploadAttachments(int complaintId, int consumerId, IEnumerable<HttpPostedFileBase> files);
         List<AttachmentViewModel> GetAttachments(int complaintId, int consumerId);
         Complaint GetComplaintDetails(int complaintId, int consumerId);

@@ -99,18 +99,18 @@
                     {
                         <tr>
                             <td class="complaint-num">@item.ComplaintNumber</td>
-                            <td><span class="text-truncate-col-lg" title="@item.Title">@item.Title</span></td>
+                            <td><span  class="text-truncate-col-lg" title="@item.Title">@item.Title</span></td>
                             <td><span class="status-badge status-badge-wrap" title="@item.CategoryName">@item.CategoryName</span></td>
                             <td><span class="priority-badge @item.PriorityName.ToLower()">@item.PriorityName</span></td>
                             <td><span class="status-badge status-badge-wrap awaitingcustomerconfirmation @item.StatusName.ToLower().Replace(" ", "")">@item.StatusName</span></td>
                             <td><span class="text-truncate-col" title="@(string.IsNullOrWhiteSpace(item.AssignedName) ? "N/A" : item.AssignedName)">@(string.IsNullOrWhiteSpace(item.AssignedName) ? "N/A" : item.AssignedName)</span></td>
                             <td>@item.CreatedAt.ToString("dd MMM yyyy")</td>
-                            <td class="row-actions">
+                            <td>
                                 @{
                                     bool canEdit = item.StatusName != "Awaiting Customer Confirmation" && item.StatusName != "Closed";
                                     bool canResolve = item.StatusName == "Open" || item.StatusName == "In Progress" || item.StatusName == "Reopened";
                                 }
-                                <div class="d-flex gap-1">
+                                <div class="row-actions">
                                     <button type="button" class="row-action-btn complaint-edit-btn"
                                             title="Edit complaint"
                                             data-complaint-id="@item.ComplaintId"
@@ -125,7 +125,7 @@
                                     @if (canResolve)
                                     {
                                         <button type="button" class="row-action-btn text-success complaint-resolve-btn"
-                                                title="Mark Resolved � sends it to the citizen for confirmation"
+                                                title="Mark Resolved – sends it to the citizen for confirmation"
                                                 data-complaint-id="@item.ComplaintId"
                                                 data-complaint-number="@item.ComplaintNumber">
                                             <i class="bi bi-check2-circle"></i>

@@ -8,6 +8,10 @@ using FixMyCityModel.ViewModel;
 using System;
 using System.Linq;
 using System.Web.Mvc;
+using System.Web;
+using System.IO;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace FixMyCity.Controllers
 {
@@ -66,25 +70,221 @@ namespace FixMyCity.Controllers
                 return Json(new { success = true, message = "Saved successfully.", id = newId, entityType = vm.EntityType });
             }
             catch (BusinessException ex) { return Json(new { success = false, message = ex.Message, code = ex.ErrorCode }); }
-            catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }
+catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult ImportMasterData(HttpPostedFileBase file)
+        {
+            if (file == null || file.ContentLength == 0)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "No file uploaded."
+                });
+            }
+
+            try
+            {
+                string json;
+
+                using (var reader = new StreamReader(file.InputStream))
+                {
+                    json = reader.ReadToEnd();
+                }
+
+                var items = JsonConvert.DeserializeObject<List<MasterImportViewModel>>(json);
+
+                if (items == null || items.Count == 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Invalid JSON format."
+                    });
+                }
+
+                var results = new List<string>();
+
+                foreach (var item in items)
+                {
+                    try
+                    {
+                        var model = new MasterEntitySaveViewModel
+                        {
+                            EntityType = item.EntityType,
+                            Name = item.Name,
+                            IsActive = true
+                        };
+
+                        // Pass DepartmentId for categories
+                        if (!string.IsNullOrWhiteSpace(item.EntityType) &&
+                            item.EntityType.Equals(
+                                "category",
+                                StringComparison.OrdinalIgnoreCase) &&
+                            item.DepartmentId.HasValue)
+                        {
+                            model.DepartmentId = item.DepartmentId.Value;
+                        }
+
+                        // Pass WardNo for wards
+                        if (!string.IsNullOrWhiteSpace(item.EntityType) &&
+                            item.EntityType.Equals(
+                                "ward",
+                                StringComparison.OrdinalIgnoreCase) &&
+                            !string.IsNullOrWhiteSpace(item.WardNo))
+                        {
+                            model.WardNo = item.WardNo;
+                        }
+
+                        // Pass ParentId for:
+                        // District -> State
+                        // City     -> District
+                        // Ward     -> City
+                        if (!string.IsNullOrWhiteSpace(item.EntityType) &&
+                            (
+                                item.EntityType.Equals(
+                                    "district",
+                                    StringComparison.OrdinalIgnoreCase) ||
+
+                                item.EntityType.Equals(
+                                    "city",
+                                    StringComparison.OrdinalIgnoreCase) ||
+
+                                item.EntityType.Equals(
+                                    "ward",
+                                    StringComparison.OrdinalIgnoreCase)
+                            ) &&
+                            item.ParentId.HasValue)
+                        {
+                            model.ParentId = item.ParentId.Value;
+                        }
+
+                        int newId = _adminService.SaveMaster(
+                            model,
+                            CurrentActorId
+                        );
+
+                        results.Add(
+                            string.Format(
+                                "SUCCESS {0} (ID: {1})",
+                                item.Name,
+                                newId
+                            )
+                        );
+                    }
+                    catch (BusinessException ex)
+                    {
+                        results.Add(
+                            string.Format(
+                                "FAILED {0} - Validation: {1}",
+                                item.Name,
+                                ex.Message
+                            )
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        results.Add(
+                            string.Format(
+                                "FAILED {0} - Error: {1}",
+                                item.Name,
+                                ex.Message
+                            )
+                        );
+                    }
+                }
+
+                return Json(new
+                {
+                    success = true,
+                    total = items.Count,
+                    imported = results.Count(
+                        r => r.StartsWith("SUCCESS")),
+
+                    failed = results.Count(
+                        r => r.StartsWith("FAILED")),
+
+                    results = results
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
         [HttpGet]
-        public JsonResult GetMasterList(string entityType, int? parentId, bool includeInactive = false)
+        public JsonResult GetMasterList(
+            string entityType,
+            int? parentId,
+            bool includeInactive = false)
         {
             try
             {
-                var list = _adminService.GetMasterList(entityType, parentId, includeInactive);
-                return Json(new { success = true, data = list }, JsonRequestBehavior.AllowGet);
+                var data = _adminService.GetMasterList(
+                    entityType,
+                    parentId,
+                    includeInactive
+                );
+
+                return Json(
+                    new
+                    {
+                        success = true,
+                        data = data
+                    },
+                    JsonRequestBehavior.AllowGet
+                );
             }
             catch (BusinessException ex)
             {
-                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+                return Json(
+                    new
+                    {
+                        success = false,
+                        message = ex.Message
+                    },
+                    JsonRequestBehavior.AllowGet
+                );
             }
-            catch (DataAccessException ex)
+            catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+                return Json(
+                    new
+                    {
+                        success = false,
+                        message = ex.Message
+                    },
+                    JsonRequestBehavior.AllowGet
+                );
             }
         }
+
+
+        //[HttpGet]
+        //public JsonResult GetMasterList(string entityType, int? parentId, bool includeInactive = false)
+        //{
+        //    try
+        //    {
+        //        var list = _adminService.GetMasterList(entityType, parentId, includeInactive);
+        //        return Json(new { success = true, data = list }, JsonRequestBehavior.AllowGet);
+        //    }
+        //    catch (BusinessException ex)
+        //    {
+        //        return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+        //    }
+        //    catch (DataAccessException ex)
+        //    {
+        //        return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+        //    }
+        //}
         [HttpGet]
         public JsonResult GetDistricts(int? stateId)
         {
@@ -296,7 +496,7 @@ namespace FixMyCity.Controllers
             var vm = _adminService.GetOfficers(filter);
             return PartialView("_OfficerTable", vm);
         }
-
+        /*
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult UpdateOfficer(int consumerId, string designation, int? wardId, int? deptId)
@@ -363,7 +563,11 @@ namespace FixMyCity.Controllers
         public ActionResult Profile(ProfileViewModel vm)
         {
             ViewBag.ActivePage = "Profile";
-
+            string dobError;
+            if (!vm.ValidateDob(out dobError))
+            {
+                ModelState.AddModelError("DOB", dobError);
+            }
             if (!ModelState.IsValid)
             {
                 PopulateProfileDropdowns(vm);
