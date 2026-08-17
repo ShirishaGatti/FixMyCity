@@ -262,6 +262,11 @@ namespace FixMyCity.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Profile(ProfileViewModel vm)
         {
+            string dobError;
+            if (!vm.ValidateDob(out dobError))
+            {
+                ModelState.AddModelError("DOB", dobError);
+            }
             if (!ModelState.IsValid)
             {
                 PopulateProfileDropdowns(vm);

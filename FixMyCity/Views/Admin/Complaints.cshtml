@@ -96,22 +96,7 @@
 
                 </form>
 
-                <script>
-                    $(document).ready(function () {
-                        $.get('@Url.Action("GetOfficers", "Admin")', function (html) {
-                            var $select = $('select[name="Filter.AssignedTo"]');
-                            $(html).find('tr').each(function () {
-                                var $td = $(this).find('td:first');
-                                if ($td.length) {
-                                    var name = $td.text().trim();
-                                    if (name) {
-                                        $select.append($('<option>').val('').text(name));
-                                    }
-                                }
-                            });
-                        });
-                    });
-                </script>
+              
 
                 <div id="complaintsGridContainer">
                     @Html.Partial("_ComplaintsGrid", Model)

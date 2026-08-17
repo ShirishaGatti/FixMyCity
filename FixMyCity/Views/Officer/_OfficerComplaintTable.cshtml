@@ -105,12 +105,12 @@
                             <td><span class="status-badge status-badge-wrap awaitingcustomerconfirmation @item.StatusName.ToLower().Replace(" ", "")">@item.StatusName</span></td>
                             <td><span class="text-truncate-col" title="@(string.IsNullOrWhiteSpace(item.AssignedName) ? "N/A" : item.AssignedName)">@(string.IsNullOrWhiteSpace(item.AssignedName) ? "N/A" : item.AssignedName)</span></td>
                             <td>@item.CreatedAt.ToString("dd MMM yyyy")</td>
-                            <td class="row-actions">
+                            <td>
                                 @{
                                     bool canEdit = item.StatusName != "Awaiting Customer Confirmation" && item.StatusName != "Closed";
                                     bool canResolve = item.StatusName == "Open" || item.StatusName == "In Progress" || item.StatusName == "Reopened";
                                 }
-                                <div class="d-flex gap-1 align-items-center">
+                                <div class="row-actions">
                                     <button type="button" class="row-action-btn complaint-edit-btn"
                                             title="Edit complaint"
                                             data-complaint-id="@item.ComplaintId"

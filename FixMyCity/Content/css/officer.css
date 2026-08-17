@@ -167,6 +167,7 @@ body {
 .status-badge.inprogress    { background: rgba(245,158,11,0.15); color:#fbbf24; border:1px solid rgba(245,158,11,0.25); }
 .status-badge.resolved      { background: rgba(16,185,129,0.15); color:#34d399; border:1px solid rgba(16,185,129,0.25); }
 .status-badge.closed        { background: rgba(239,68,68,0.12);  color:#f87171; border:1px solid rgba(239,68,68,0.2); }
+.status-badge.awaitingcustomerconfirmation { background: rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.25); }
 
 .priority-badge.low         { background: rgba(16,185,129,0.12); color:#34d399; border:1px solid rgba(16,185,129,0.2); }
 .priority-badge.medium      { background: rgba(245,158,11,0.12); color:#fbbf24; border:1px solid rgba(245,158,11,0.2); }
@@ -189,7 +190,7 @@ body {
 }
 
 /* ── Row action buttons ──────────────────────────────────── */
-.row-actions { white-space: nowrap; }
+.row-actions { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
 .row-action-btn {
     display: inline-flex;
     align-items: center;
@@ -315,6 +316,7 @@ html.lm .status-badge.open       { background: #dbeafe; color: #1d4ed8; border-c
 html.lm .status-badge.inprogress { background: #fef3c7; color: #b45309; border-color: #fde68a; }
 html.lm .status-badge.resolved   { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
 html.lm .status-badge.closed     { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+html.lm .status-badge.awaitingcustomerconfirmation { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
 html.lm .priority-badge.low      { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
 html.lm .priority-badge.medium   { background: #fef3c7; color: #92400e; border-color: #fde68a; }
 html.lm .priority-badge.high     { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
@@ -398,6 +400,13 @@ html.lm .dash-card .text-muted { color: #6b7280 !important; }
         .priority-badge.high { background: rgba(239,68,68,.12); color: #ef4444; }
         .priority-badge.medium { background: rgba(245,158,11,.12); color: #f59e0b; }
         .priority-badge.low { background: rgba(16,185,129,.12); color: #10b981; }
+
+        .row-action-note {
+    font-size: 0.72rem;
+    margin-top: 2px;
+    min-height: 1.1em;   /* reserves the line even when empty */
+    white-space: nowrap;
+}
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 768px) {
     .dash-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }

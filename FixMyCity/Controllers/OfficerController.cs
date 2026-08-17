@@ -180,7 +180,11 @@ namespace FixMyCity.Controllers
         public ActionResult Profile(ProfileViewModel vm)
         {
             ViewBag.ActivePage = "Profile";
-
+            string dobError;
+            if (!vm.ValidateDob(out dobError))
+            {
+                ModelState.AddModelError("DOB", dobError);
+            }
             if (!ModelState.IsValid)
             {
                 PopulateProfileDropdowns(vm);

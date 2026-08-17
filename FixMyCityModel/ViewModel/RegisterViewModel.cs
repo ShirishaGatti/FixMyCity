@@ -16,7 +16,7 @@ namespace FixMyCityModel.ViewModel
         }
 
         [Required(ErrorMessage = "Name is required.")]
-        [StringLength(100, MinimumLength = 3)]
+        [RegularExpression(@"^[a-zA-Z\s]{3,100}$", ErrorMessage = "Name must contain only letters and be at least 3 characters long.")]
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Email is required.")]
@@ -30,7 +30,7 @@ namespace FixMyCityModel.ViewModel
         public string Password { get; set; }
 
         [Required(ErrorMessage = "Contact number is required.")]
-        [StringLength(15)]
+        [RegularExpression(@"^(?:\+91|91)?[6789]\d{9}$", ErrorMessage = "Enter a valid 10-digit contact number.")]
         public string Contact { get; set; }
 
         public DateTime? DOB { get; set; }
@@ -40,11 +40,13 @@ namespace FixMyCityModel.ViewModel
 
         public int? CityId { get; set; }
         public int? WardId { get; set; }
-
         public int RoleId { get; set; }
-
         public int? DepartmentId { get; set; }
+
+        [StringLength(100)]
+        [RegularExpression(@"^(?!\d+$).*$", ErrorMessage = "Designation cannot be only numbers.")]
         public string Designation { get; set; }
+
         // SelectList — not IEnumerable<City/Ward> — because:
         //   a) @Html.DropDownListFor needs a SelectList, not a raw entity list.
         //   b) A user selects exactly ONE city and ONE ward, so storing a
@@ -53,5 +55,18 @@ namespace FixMyCityModel.ViewModel
         //      on validation failure pre-selects the user's previous choice.
         public IEnumerable<City> Cities { get; set; }
         public IEnumerable<Ward> Wards { get; set; }
+
+        // Same reasoning as ProfileViewModel.ValidateDob — a runtime "not in
+        // the future" rule doesn't fit a fixed DataAnnotations pattern.
+        public bool ValidateDob(out string errorMessage)
+        {
+            errorMessage = null;
+            if (DOB.HasValue && DOB.Value.Date > DateTime.Today)
+            {
+                errorMessage = "Date of birth cannot be a future date.";
+                return false;
+            }
+            return true;
+        }
     }
 }

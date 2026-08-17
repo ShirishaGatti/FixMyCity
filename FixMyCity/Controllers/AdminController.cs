@@ -496,7 +496,7 @@ catch (DataAccessException ex) { return Json(new { success = false, message = ex
             var vm = _adminService.GetOfficers(filter);
             return PartialView("_OfficerTable", vm);
         }
-
+        /*
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult UpdateOfficer(int consumerId, string designation, int? wardId, int? deptId)
@@ -563,7 +563,11 @@ catch (DataAccessException ex) { return Json(new { success = false, message = ex
         public ActionResult Profile(ProfileViewModel vm)
         {
             ViewBag.ActivePage = "Profile";
-
+            string dobError;
+            if (!vm.ValidateDob(out dobError))
+            {
+                ModelState.AddModelError("DOB", dobError);
+            }
             if (!ModelState.IsValid)
             {
                 PopulateProfileDropdowns(vm);

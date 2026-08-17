@@ -35,13 +35,13 @@
                             <td><span class="priority-badge @c.PriorityName.ToLower()">@c.PriorityName</span></td>
                             <td>
                                 <span class="status-badge status-badge-wrap @c.StatusName.ToLower().Replace(" ", "")">@c.StatusName</span>
-                                @if (isAwaitingConfirmation && c.DaysLeftToRespond>0)
+                                @*@if (isAwaitingConfirmation && c.DaysLeftToRespond>0)
                                 {
                                     <div class="text-muted" style="font-size:0.72rem; margin-top:2px; white-space:nowrap;">
                                         <i class="bi bi-hourglass-split"></i>
                                         @(c.DaysLeftToRespond == 0 ? "Closes today if no response" : $"{c.DaysLeftToRespond} day{(c.DaysLeftToRespond == 1 ? "" : "s")} to respond")
                                     </div>
-                                }
+                                }*@
                             </td>
                             <td>@c.CreatedAt.ToString("dd MMM yyyy")</td>
                             <td>
@@ -51,22 +51,26 @@
                                     <i class="bi bi-chat-dots-fill"></i>
                                 </button>
                             </td>
-                            <td class="row-actions">
-                                @if (isAwaitingConfirmation)
-                                {
-                                    <div class="d-flex gap-1">
+                            <td>
+                                <div class="row-actions">
+                                    @if (isAwaitingConfirmation)
+                                    {
                                         <button type="button" class="row-action-btn text-success" title="Confirm resolution" onclick="confirmResolution(@c.ComplaintId)"><i class="bi bi-check2-circle"></i></button>
                                         <button type="button" class="row-action-btn text-danger" title="Reject resolution" onclick="rejectResolution(@c.ComplaintId)"><i class="bi bi-x-circle"></i></button>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="d-flex gap-1 align-items-center">
+                                    }
+                                    else
+                                    {
                                         <button type="button" class="row-action-btn" title="Edit" @(isOpen ? "" : "disabled") onclick="openEditComplaint(@c.ComplaintId)"><i class="bi bi-pencil-square"></i></button>
                                         <button type="button" class="row-action-btn text-danger" title="Delete" @(isOpen ? "" : "disabled") onclick="deleteComplaint(@c.ComplaintId)"><i class="bi bi-trash"></i></button>
                                         <a class="row-action-btn" title="Export PDF" href="@Url.Action("ExportComplaintPdf", "Citizen", new { id = c.ComplaintId })"><i class="bi bi-file-earmark-pdf"></i></a>
-                                    </div>
-                                }
+                                    }
+                                </div>
+                                <div class="text-muted row-action-note">
+                                    @if (isAwaitingConfirmation && c.DaysLeftToRespond > 0)
+                                    {
+                                        <text><i class="bi bi-hourglass-split"></i> @(c.DaysLeftToRespond == 1 ? "1 day to respond" : $"{c.DaysLeftToRespond} days to respond")</text>
+                                    }
+                                </div>
                             </td>
                         </tr>
                     }
