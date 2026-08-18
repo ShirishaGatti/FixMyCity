@@ -85,7 +85,7 @@ namespace FixMyCity.Controllers
                 if (previous != null && previous.StatusId != statusId)
                 {
                     var current = _complaintService.GetAssignedComplaint(CurrentActorId, complaintId) ?? previous;
-                    SendCitizenProgressEmail(current, current.StatusName ?? "Updated");
+                    SendCitizenProgressEmail(current, previous.StatusName, current.StatusName ?? "Updated");
                 }
 
                 return Json(new { success = true, message = "Complaint updated successfully." });
@@ -122,7 +122,7 @@ namespace FixMyCity.Controllers
                 var current = _complaintService.GetAssignedComplaint(CurrentActorId, complaintId);
                 if (previous != null && current != null && previous.StatusId != current.StatusId)
                 {
-                    SendCitizenProgressEmail(current, current.StatusName);
+                    SendCitizenProgressEmail(current, previous.StatusName, current.StatusName);
                 }
 
                 return Json(new { success = true, message = "Complaint marked Resolved. Awaiting the citizen's confirmation." });
@@ -212,7 +212,7 @@ namespace FixMyCity.Controllers
             }
         }
 
-        private void SendCitizenProgressEmail(Complaint complaint, string newStatusName)
+        private void SendCitizenProgressEmail(Complaint complaint, string oldStatusName, string newStatusName)
         {
             try
             {
@@ -224,7 +224,7 @@ namespace FixMyCity.Controllers
                 string number = complaint.ComplaintNumber ?? $"#{complaint.ComplaintId}";
                 string title = complaint.Title ?? "Complaint";
 
-                _mailService.SendComplaintProgressEmail(citizen.Email, citizen.Name, number, title, complaint.StatusName, newStatusName);
+                _mailService.SendComplaintProgressEmail(citizen.Email, citizen.Name, number, title, oldStatusName, newStatusName);
             }
             catch (Exception ex)
             {

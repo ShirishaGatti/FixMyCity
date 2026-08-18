@@ -473,14 +473,14 @@ catch (DataAccessException ex) { return Json(new { success = false, message = ex
                 var officer = _adminService.GetUserById(officerConsumerId);
                 if (officer == null || string.IsNullOrWhiteSpace(officer.Email)) return;
 
-                string otp = _authService.CreateOtp(officerConsumerId, "COMPLAINT_ASSIGNED");
+                //string otp = _authService.CreateOtp(officerConsumerId, "COMPLAINT_ASSIGNED");
 
                 string number = complaint?.ComplaintNumber ?? $"#{complaint?.ComplaintId}";
                 string title = complaint?.Title ?? "Complaint";
                 string priority = complaint?.Priorities?.FirstOrDefault(p => p.PriorityId == priorityId)?.PriorityName
                                   ?? complaint?.PriorityName ?? "Medium";
 
-                _mailService.SendAssignmentOtpEmail(officer.Email, officer.Name, number, title, priority, otp);
+                _mailService.SendAssignmentOtpEmail(officer.Email, officer.Name, number, title, priority);
             }
             catch (Exception ex)
             {
