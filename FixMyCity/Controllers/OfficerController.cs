@@ -18,10 +18,11 @@ namespace FixMyCity.Controllers
         private readonly IConsumerService _consumerService;
         private readonly ISessionContext _session;
         private readonly IMailService _mailService;
+        private readonly IComplaintChatService _chatService;
 
         // Default constructor — used by MVC framework; delegates to the injectable one.
         public OfficerController()
-            : this(new ComplaintService(), new ConsumerService(), new JwtSessionContext(), new MailService())
+            : this(new ComplaintService(), new ConsumerService(), new JwtSessionContext(), new MailService(), new ComplaintChatService())
         {
         }
 
@@ -30,12 +31,14 @@ namespace FixMyCity.Controllers
             IComplaintService complaintService,
             IConsumerService consumerService,
             ISessionContext session,
-            IMailService mailService)
+            IMailService mailService,
+            IComplaintChatService chatService)
         {
             _complaintService = complaintService;
             _consumerService = consumerService;
             _session = session;
             _mailService = mailService;
+            _chatService = chatService;
         }
 
         private int CurrentActorId => _session.ConsumerId;
@@ -59,6 +62,78 @@ namespace FixMyCity.Controllers
         {
             var vm = _complaintService.GetOfficerComplaints(_session.ConsumerId, query);
             return PartialView("_OfficerComplaintTable", vm);
+        }
+        [HttpGet]
+        public ActionResult ComplaintDetailsPartial(int id)
+        {
+            try
+            {
+                Complaint complaint = null;
+                
+                // Try to get complaint assigned to the current officer using RoleId
+                if (roleId == (int)RoleIds.SupportExecutive)
+                {
+                    // For officers, try to get the complaint using the ConsumerId from session
+                    // to look up assigned complaint
+                    var consumerId = CurrentActorId;
+                    if (consumerId > 0)
+                    {
+                        try
+                        {
+                            complaint = _complaintService.GetAssignedComplaint(consumerId, id);
+                        }
+                        catch (NotFoundException)
+                        {
+                            // ConsumerId didn't work, try getting all officer complaints
+                            var officerComplaints = _complaintService.GetOfficerComplaints(CurrentActorId, new OfficerComplaintsQuery());
+                            if (officerComplaints.Complaints.Any(c => c.ComplaintId == id))
+                            {
+                                complaint = officerComplaints.Complaints.First(c => c.ComplaintId == id);
+                            }
+                        }
+                    }
+                    // If still not found, try without officer filter
+                    if (complaint == null)
+                    {
+                        var allComplaints = _complaintService.GetOfficerComplaints(CurrentActorId, new OfficerComplaintsQuery());
+                        if (allComplaints.Complaints.Any(c => c.ComplaintId == id))
+                        {
+                            complaint = allComplaints.Complaints.First(c => c.ComplaintId == id);
+                        }
+                    }
+                }
+                else
+                {
+                    // For other roles, use original approach
+                    complaint = _complaintService.GetAssignedComplaint(CurrentActorId, id);
+                }
+                
+                if (complaint == null)
+                {
+                    return Content("<div class='p-4'>Complaint not found or not assigned to you.</div>");
+                }
+                
+                var raiserName = "";
+                if (complaint.RaisedBy > 0)
+                {
+                    var raiser = _consumerService.GetProfile(complaint.RaisedBy);
+                    raiserName = raiser != null ? raiser.Name : "Unknown";
+                }
+                ViewData["RaiseByName"] = raiserName;
+                var vm = new ComplaintDetailsViewModel
+                {
+                    Complaint = complaint,
+                    RaiseByName = raiserName,
+                    Attachments = _complaintService.GetAttachments(id, complaint.RaisedBy),
+                   // Chat = _chatService.GetThread(id, CurrentActorId, roleId, 0)
+                };
+
+                return PartialView("OfficerComplaintDetails", vm);
+            }
+            catch (NotFoundException)
+            {
+                return Content("<div class='p-4'>Complaint not found.</div>");
+            }
         }
         [HttpGet]
         public ActionResult Queue()
@@ -107,7 +182,7 @@ namespace FixMyCity.Controllers
         // Dedicated transition for the resolution-confirmation workflow.
         // Deliberately separate from UpdateComplaint: an officer may only ever
         // push a complaint into "Awaiting Customer Confirmation" via this
-        // action � Closed/Reopened only ever happen through the citizen's
+        // action — Closed/Reopened only ever happen through the citizen's
         // Confirm/Reject actions or the 7-day auto-expiry.
         [HttpPost]
         [ValidateAntiForgeryToken]

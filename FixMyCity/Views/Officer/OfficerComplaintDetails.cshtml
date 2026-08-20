@@ -1,0 +1,118 @@
+@model FixMyCityModel.ViewModel.ComplaintDetailsViewModel
+
+<div class="cd-hero">
+    <div class="cd-hero-left">
+        <div class="cd-hero-number">
+            <i class="bi bi-hash"></i> @Model.Complaint.ComplaintNumber
+        </div>
+        <h4 class="cd-hero-title">@Model.Complaint.Title</h4>
+        <div class="cd-badge-row">
+            <span class="status-badge @Model.Complaint.StatusName.ToLower().Replace(" ", "")">
+                <i class="bi bi-circle-fill" style="font-size:0.5rem;vertical-align:middle;margin-right:3px;"></i>
+                @Model.Complaint.StatusName
+            </span>
+            <span class="priority-badge @Model.Complaint.PriorityName.ToLower()">
+                @Model.Complaint.PriorityName
+            </span>
+        </div>
+    </div>
+    <button type="button" class="dash-modal-close" onclick="closeDetailsDrawer()" style="flex-shrink:0;">&times;</button>
+</div>
+
+<div class="cd-hero-right">
+    <div class="cd-hero-raiserdetails">
+        <span class="cd-hero-raiselabel">Raised By:</span>
+        <span class="cd-hero-raisename">@ViewData["RaiseByName"]</span>
+    </div>
+</div>
+
+@if (Model.Complaint.IsAwaitingConfirmation)
+{
+    <div class="cd-confirm-card">
+        <div class="cd-confirm-icon">
+            <i class="bi bi-patch-check-fill"></i>
+        </div>
+
+        <div class="cd-confirm-content">
+            <h6>Officer marked this complaint as <strong>Resolved</strong></h6>
+
+            <p>
+                The citizen has
+                <strong>@(Model.Complaint.DaysLeftToRespond ?? 0) day(s)</strong>
+                remaining to confirm or reject.
+            </p>
+        </div>
+    </div>
+}
+<div class="cd-body">
+    <!-- Description -->
+    <div class="cd-section-title"><i class="bi bi-chat-square-text"></i> Description</div>
+    <div class="cd-description">@Model.Complaint.Description</div>
+    <!-- Details grid -->
+    <div class="cd-section-title"><i class="bi bi-info-circle"></i> Details</div>
+    <div class="cd-info-grid">
+        <div class="cd-info-item">
+            <span class="cd-info-label"><i class="bi bi-tag me-1"></i>Category</span>
+            <span class="cd-info-value">@Model.Complaint.CategoryName</span>
+        </div>
+        <div class="cd-info-item">
+            <span class="cd-info-label"><i class="bi bi-geo-alt me-1"></i>City</span>
+            <span class="cd-info-value">@Model.Complaint.CityName</span>
+        </div>
+        <div class="cd-info-item">
+            <span class="cd-info-label"><i class="bi bi-map me-1"></i>Ward</span>
+            <span class="cd-info-value">@Model.Complaint.WardName</span>
+        </div>
+        <div class="cd-info-item">
+            <span class="cd-info-label"><i class="bi bi-person-badge me-1"></i>Assigned To</span>
+            <span class="cd-info-value">@(Model.Complaint.AssignedName ?? "Not yet assigned")</span>
+        </div>
+        <div class="cd-info-item">
+            <span class="cd-info-label"><i class="bi bi-calendar-event me-1"></i>Filed On</span>
+            <span class="cd-info-value">@Model.Complaint.CreatedAt.ToString("dd MMM yyyy")</span>
+        </div>
+        <div class="cd-info-item">
+            <span class="cd-info-label"><i class="bi bi-clock me-1"></i>Time</span>
+            <span class="cd-info-value">@Model.Complaint.CreatedAt.ToString("hh:mm tt")</span>
+        </div>
+    </div>
+    <!-- Attachments -->
+    <div class="cd-section-title"><i class="bi bi-paperclip"></i> Attachments</div>
+    @if (Model.Attachments.Count == 0)
+    {
+        <div style="color:var(--tx3); font-size:0.88rem; padding: 10px 0;">
+            <i class="bi bi-folder2-open me-2"></i>No attachments uploaded for this complaint.
+        </div>
+    }
+    else
+    {
+        <div class="cd-attach-grid">
+            @foreach (var a in Model.Attachments)
+            {
+                <div class="cd-attach-card" data-attachment-id="@a.AttachmentId">
+                    @if (a.IsImage)
+                    {
+                        <img src="@Url.Action("DownloadAttachment", "Citizen", new { id = a.AttachmentId })"
+                             class="cd-attach-thumb" alt="@a.FileName" />
+                    }
+                    else
+                    {
+                        <div class="cd-attach-icon-wrap">
+                            <i class="bi @a.IconClass"></i>
+                        </div>
+                    }
+                    <div class="cd-attach-info">
+                        <div class="cd-attach-name" title="@a.FileName">@a.FileName</div>
+                        <div class="cd-attach-size">@a.FileSizeDisplay</div>
+                        <div class="cd-attach-actions">
+                            <a href="@Url.Action("DownloadAttachment", "Citizen", new { id = a.AttachmentId })"
+                               class="btn-dash-outline btn-sm" title="Download">
+                                <i class="bi bi-download"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

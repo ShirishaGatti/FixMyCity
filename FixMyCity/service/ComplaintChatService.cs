@@ -102,6 +102,13 @@ namespace FixMyCity.Service
             if (file.ContentLength > MaxAttachmentSizeBytes)
                 throw new BusinessException($"'{originalName}' exceeds the {MaxAttachmentSizeMB}MB limit.", "FILE_TOO_LARGE");
 
+            // Enforce 10-file cap on chat attachments for this complaint (separate from the
+            // complaint-form 10-file cap — each bucket has its own independent limit).
+            var complaintRepo = new ComplaintRepository();
+            int chatCount = complaintRepo.GetComplaintChatAttachmentCount(complaintId);
+            if (chatCount + 1 > 10)
+                throw new BusinessException($"A maximum of 10 documents can be uploaded via chat per complaint. You already have {chatCount}.", "TOO_MANY_FILES");
+
             // Create the DB row first (this is also where the SP re-validates
             // chat-open status), then write to disk, then link it into the
             // message thread. If any later step fails we compensate by
@@ -335,6 +342,12 @@ namespace FixMyCity.Service
                 throw new BusinessException(
                     $"You can attach up to {MaxAttachmentsPerMessage} files at a time. You selected {validFiles.Count}.",
                     "TOO_MANY_FILES");
+
+            // Enforce the 10-file cap on chat attachments for this complaint.
+            var complaintRepo = new ComplaintRepository();
+            int chatCount = complaintRepo.GetComplaintChatAttachmentCount(complaintId);
+            if (chatCount + validFiles.Count > 10)
+                throw new BusinessException($"A maximum of 10 documents can be uploaded via chat per complaint. You already have {chatCount}.", "TOO_MANY_FILES");
 
             // Validate every file before creating any DB rows or writing
             // anything to disk, so a bad file in the batch doesn't leave a

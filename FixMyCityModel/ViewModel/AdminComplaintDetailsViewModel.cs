@@ -1,13 +1,14 @@
-﻿using FixMyCityModel.Model;
+using FixMyCityModel.Model;
 using System.Collections.Generic;
 
 namespace FixMyCityModel.ViewModel
 {
-    public class ComplaintDetailsViewModel
+    public class AdminComplaintDetailsViewModel
     {
         public Complaint Complaint { get; set; }
         public List<AttachmentViewModel> Attachments { get; set; }
-        public ComplaintChatViewModel Chat { get; set; }   // NEW
+        public ComplaintChatViewModel Chat { get; set; }
         public string RaiseByName { get; set; }
+
     }
 }

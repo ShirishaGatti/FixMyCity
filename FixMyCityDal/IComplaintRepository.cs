@@ -1,4 +1,4 @@
-﻿using FixMyCityModel.Model;
+using FixMyCityModel.Model;
 using FixMyCityModel.ViewModel;
 using System.Collections.Generic;
 
@@ -14,6 +14,10 @@ namespace FixMyCity.Repository
         List<Attachment> GetAttachmentsByComplaintId(int complaintId, int consumerId);
         Attachment GetAttachmentById(int attachmentId, int consumerId);
         void DeleteAttachment(int attachmentId, int consumerId);
+
+        int GetComplaintAttachmentCount(int complaintId);
+        int GetComplaintChatAttachmentCount(int complaintId);
+
         int SaveComplaint(Complaint c, int actorId, int roleId, int? statusId = null, int? assignedTo = null);
 
 

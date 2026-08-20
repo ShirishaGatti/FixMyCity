@@ -86,6 +86,13 @@
     @Html.Partial("_OfficerComplaintTable", Model)
 </div>
 
+<!-- ── Details drawer ────────────────────────────────────── -->
+<div id="detailsDrawerOverlay" class="dash-modal-overlay" style="display:none;" onclick="closeDetailsDrawer(event)">
+    <div class="dash-modal drawer-card" onclick="event.stopPropagation()" id="detailsDrawerContent">
+        <div class="text-center py-5"><span class="spinner-border"></span></div>
+    </div>
+</div>
+
 <div class="dash-card p-3 mt-4">
     <p class="text-muted small mb-0">Set your filters, then click Search or press Enter to apply them.</p>
 </div>
@@ -265,6 +272,34 @@
         });
 
         updateSortIndicators();
+
+        // ── Details drawer ──────────────────────────────────────────────
+        function openDetailsDrawer(id) {
+            document.getElementById('detailsDrawerOverlay').style.display = 'flex';
+            document.getElementById('detailsDrawerContent').innerHTML =
+                '<div class="text-center py-5"><span class="spinner-border"></span></div>';
+            $.ajax({
+                url: '/Officer/ComplaintDetailsPartial',
+                type: 'GET',
+                data: { id: id },
+                success: function (html) {
+                    $('#detailsDrawerContent').html(html);
+                },
+                error: function (xhr) {
+                    $('#detailsDrawerContent').html('<div class="p-4 text-danger">Unable to load complaint details. Status: ' + xhr.status + '</div>');
+                }
+            });
+        }
+
+        function closeDetailsDrawer(e) {
+            if (e) e.stopPropagation();
+            var panel = document.querySelector('#detailsDrawerContent .chat-panel');
+            if (panel && typeof panel.stopChatPolling === 'function') {
+                panel.stopChatPolling();
+            }
+            document.getElementById('detailsDrawerOverlay').style.display = 'none';
+            $('#detailsDrawerContent').empty();
+        }
 
         function openEditModal(button) {
             var row = $(button);

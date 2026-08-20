@@ -1,4 +1,4 @@
-﻿using FixMyCity.Exceptions;
+using FixMyCity.Exceptions;
 using FixMyCity.Infrastructure;
 using FixMyCityModel.Model;
 using FixMyCityModel.ViewModel;
@@ -182,6 +182,34 @@ namespace FixMyCity.Repository
                 throw new DataAccessException("Failed to delete attachment.", "ComplaintAttachment_Delete", ex);
             }
         }
+        public int GetComplaintAttachmentCount(int complaintId)
+        {
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.GetTotalAttachmentCount");
+                db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
+                return Convert.ToInt32(db.ExecuteScalar(com));
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to count complaint attachments.", "GetComplaintAttachmentCount", ex);
+            }
+        }
+
+        public int GetComplaintChatAttachmentCount(int complaintId)
+        {
+            try
+            {
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.GetChatAttachmentCount");
+                db.AddInParameter(com, "ComplaintId", DbType.Int32, complaintId);
+                return Convert.ToInt32(db.ExecuteScalar(com));
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to count chat attachments.", "GetChatAttachmentCoun", ex);
+            }
+        }
+
         // ComplaintRepository.cs — cache field, same shape as ItemRepository
         public int SaveComplaint(Complaint c, int actorId, int roleId, int? statusId = null, int? assignedTo = null)
 {

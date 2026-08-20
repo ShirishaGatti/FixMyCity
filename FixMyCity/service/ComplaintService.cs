@@ -68,6 +68,10 @@ namespace FixMyCity.service
             var existingNames = new HashSet<string>(
                 _complaintRepo.GetAttachmentsByComplaintId(complaintId, consumerId).Select(a => a.FileName.ToLowerInvariant()));
 
+            int existingCount = _complaintRepo.GetComplaintAttachmentCount(complaintId);
+            if (existingCount + validFiles.Count > 10)
+                throw new BusinessException($"A maximum of 10 documents can be uploaded per complaint. You already have {existingCount}.", "TOO_MANY_FILES");
+
             string complaintFolder = Path.Combine(GetUploadRoot(), complaintId.ToString());
             Directory.CreateDirectory(complaintFolder);
 

@@ -22,6 +22,7 @@ namespace FixMyCity.Controllers
         private readonly ISessionContext _session;
         private readonly IAuthService _authService;
         private readonly IMailService _mailService;
+        private readonly IComplaintService _complaintService;
         private readonly IConsumerService _consumerService;
 
         public AdminController()
@@ -420,6 +421,8 @@ catch (DataAccessException ex) { return Json(new { success = false, message = ex
             var vm = _adminService.GetComplaintById(id);
             return PartialView("_AssignComplaintModal", vm);
         }
+
+    
 
         [HttpPost]
         [ValidateAntiForgeryToken]

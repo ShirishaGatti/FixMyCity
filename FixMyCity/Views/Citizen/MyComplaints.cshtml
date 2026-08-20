@@ -459,7 +459,8 @@
 
                     if (res.success) {
                         var isNew = !$('#complaintIdField').val();
-                        showToast(isNew ? 'Complaint filed successfully!' : 'Complaint updated successfully!', 'success', isNew ? 'Filed' : 'Saved');
+                        var defaultMsg = isNew ? 'Complaint filed successfully!' : 'Complaint updated successfully!';
+                        showToast(res.message || defaultMsg, 'success', isNew ? 'Filed' : 'Saved');
                         closeComplaintModal();
                         setTimeout(function() { window.location.reload(); }, 1200);
                     }

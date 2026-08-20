@@ -61,6 +61,7 @@
     <Compile Include="Model\TokenPair.cs" />
     <Compile Include="Model\Ward.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModel\AdminComplaintDetailsViewModel.cs" />
     <Compile Include="ViewModel\AdminComplaintRow.cs" />
     <Compile Include="ViewModel\AdminDashboardViewModel.cs" />
     <Compile Include="ViewModel\AdminUser.cs" />

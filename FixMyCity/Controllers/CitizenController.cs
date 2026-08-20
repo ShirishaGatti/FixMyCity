@@ -83,7 +83,15 @@ namespace FixMyCity.Controllers
                 try { _complaintService.UploadAttachments(savedId, CurrentActorId, vm.Attachments); }
                 catch (BusinessException ex)
                 {
-                    return Json(new { success = true, message = "Complaint saved, but: " + ex.Message, complaintId = savedId });
+                    return Json(new { success = false, message = ex.Message, complaintId = savedId });
+                }
+                catch (DataAccessException ex)
+                {
+                    return Json(new { success = false, message = ex.Message, complaintId = savedId });
+                }
+                catch (Exception)
+                {
+                    return Json(new { success = false, message = "Complaint saved, but document upload failed. Please try again.", complaintId = savedId });
                 }
             }
 
@@ -133,7 +141,7 @@ namespace FixMyCity.Controllers
             catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }
         }
 
-        // Resolution-confirmation workflow — the citizen's half. Confirm closes
+        // Resolution-confirmation workflow ï¿½ the citizen's half. Confirm closes
         // the complaint outright; Reject sends it back to the officer as
         // Reopened. Both only succeed (SP-enforced) while the complaint is
         // Awaiting Customer Confirmation and belongs to the caller.

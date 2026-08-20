@@ -530,6 +530,7 @@
     <Content Include="Views\Shared\_ComplaintChat.cshtml" />
     <Content Include="Views\Shared\_ChatMessageBubble.cshtml" />
     <Content Include="Views\Citizen\_MyComplaintList.cshtml" />
+    <Content Include="Views\Officer\OfficerComplaintDetails.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

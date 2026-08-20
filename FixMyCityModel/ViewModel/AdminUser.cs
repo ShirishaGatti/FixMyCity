@@ -1,4 +1,4 @@
-﻿using FixMyCityModel.Model;
+using FixMyCityModel.Model;
 using System;
 using System.Collections.Generic;
 

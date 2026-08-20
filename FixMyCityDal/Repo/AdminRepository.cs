@@ -1,4 +1,4 @@
-﻿using FixMyCity.Exceptions;
+using FixMyCity.Exceptions;
 using FixMyCityModel.Model;
 using FixMyCityModel.ViewModel;
 using Microsoft.Practices.EnterpriseLibrary.Data;
