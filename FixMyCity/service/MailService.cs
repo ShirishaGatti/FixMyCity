@@ -12,7 +12,7 @@ namespace FixMyCity.Service
     public interface IMailService
     {
         void SendOtpEmail(string toEmail, string otp);
-        void SendAssignmentOtpEmail(string toEmail, string officerName, string complaintNumber, string complaintTitle, string priorityName, string otp);
+        void SendAssignmentOtpEmail(string toEmail, string officerName, string complaintNumber, string complaintTitle, string priorityName);
         void SendRoleChangedEmail(string toEmail, string citizenName, string roleName, string deptName);
         void SendComplaintProgressEmail(string toEmail, string citizenName, string complaintNumber, string complaintTitle, string oldStatus, string newStatus);
         void SendComplaintAssignedEmail(string toEmail, string citizenName, string complaintNumber, string complaintTitle, string officerName);
@@ -75,14 +75,9 @@ namespace FixMyCity.Service
             }
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Sends an OTP to an officer who has just been assigned a complaint.
-        /// Uses a dedicated mail body (distinct from the login OTP) so the
-        /// recipient immediately understands this code is for the assignment.
+   
         /// </summary>
-        public void SendAssignmentOtpEmail(string toEmail, string officerName, string complaintNumber, string complaintTitle, string priorityName, string otp)
+        public void SendAssignmentOtpEmail(string toEmail, string officerName, string complaintNumber, string complaintTitle, string priorityName)
         {
             if (string.IsNullOrWhiteSpace(toEmail)) return;
 
@@ -105,10 +100,9 @@ namespace FixMyCity.Service
                         { "{{COMPLAINT_NUMBER}}", complaintNumber },
                         { "{{COMPLAINT_TITLE}}", complaintTitle },
                         { "{{PRIORITY_NAME}}", priorityLabel },
-                        { "{{PRIORITY_COLOR}}", priorityColor },
-                        { "{{OTP}}", otp }
+                        { "{{PRIORITY_COLOR}}", priorityColor }
                     },
-                    string.Format("<div style='font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;border:1px solid #e0e0e0;border-radius:8px;'><h2 style='color:#0d6efd;margin-top:0;'>FixMyCity</h2><p>Hello {0}, a complaint has been assigned to you.</p><p><b>Complaint:</b> {1}<br><b>Title:</b> {2}<br><b>Priority:</b> <span style='background:{3};color:#fff;padding:2px 10px;border-radius:12px;'>{4}</span></p><p>Use this OTP to sign in and take ownership:</p><h1 style='letter-spacing:8px;color:#202124;'>{5}</h1><p style='color:#5f6368;font-size:13px;'>This code expires in 5 minutes. Do not share it with anyone.</p></div>", officerName, complaintNumber, complaintTitle, priorityColor, priorityLabel, otp));
+                    string.Format("<div style='font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:24px;border:1px solid #e0e0e0;border-radius:8px;'><h2 style='color:#0d6efd;margin-top:0;'>FixMyCity</h2><p>Hello {0}, a complaint has been assigned to you.</p><p><b>Complaint:</b> {1}<br><b>Title:</b> {2}<br><b>Priority:</b> <span style='background:{3};color:#fff;padding:2px 10px;border-radius:12px;'>{4}</span></p><p style='color:#5f6368;font-size:13px;'>This code expires in 5 minutes. Do not share it with anyone.</p></div>", officerName, complaintNumber, complaintTitle, priorityColor, priorityLabel));
 
                 using (var message = new MailMessage())
                 {

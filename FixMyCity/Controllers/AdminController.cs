@@ -22,6 +22,7 @@ namespace FixMyCity.Controllers
         private readonly ISessionContext _session;
         private readonly IAuthService _authService;
         private readonly IMailService _mailService;
+        private readonly IComplaintService _complaintService;
         private readonly IConsumerService _consumerService;
 
         public AdminController()
@@ -421,6 +422,8 @@ catch (DataAccessException ex) { return Json(new { success = false, message = ex
             return PartialView("_AssignComplaintModal", vm);
         }
 
+    
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public JsonResult SaveAssignment(int complaintId, int? assignedTo)
@@ -473,14 +476,14 @@ catch (DataAccessException ex) { return Json(new { success = false, message = ex
                 var officer = _adminService.GetUserById(officerConsumerId);
                 if (officer == null || string.IsNullOrWhiteSpace(officer.Email)) return;
 
-                string otp = _authService.CreateOtp(officerConsumerId, "COMPLAINT_ASSIGNED");
+                //string otp = _authService.CreateOtp(officerConsumerId, "COMPLAINT_ASSIGNED");
 
                 string number = complaint?.ComplaintNumber ?? $"#{complaint?.ComplaintId}";
                 string title = complaint?.Title ?? "Complaint";
                 string priority = complaint?.Priorities?.FirstOrDefault(p => p.PriorityId == priorityId)?.PriorityName
                                   ?? complaint?.PriorityName ?? "Medium";
 
-                _mailService.SendAssignmentOtpEmail(officer.Email, officer.Name, number, title, priority, otp);
+                _mailService.SendAssignmentOtpEmail(officer.Email, officer.Name, number, title, priority);
             }
             catch (Exception ex)
             {
@@ -488,44 +491,7 @@ catch (DataAccessException ex) { return Json(new { success = false, message = ex
                 FixMyCity.Infrastructure.FileLogger.Log(ex, "AdminController.SendAssignmentOtp");
             }
         }
-        /*  [HttpPost]
-        public ActionResult GetOfficers(AdminUserListFilterViewModel filter)
-        {
-            filter = filter ?? new AdminUserListFilterViewModel();
-           // filter.RoleId = RoleIds.SupportExecutive;
-            var vm = _adminService.GetOfficers(filter);
-            return PartialView("_OfficerTable", vm);
-        }
-        /*
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult UpdateOfficer(int consumerId, string designation, int? wardId, int? deptId)
-        {
-            try
-            {
-                _adminService.UpdateOfficer(consumerId, designation, wardId, deptId, CurrentActorId);
-                return Json(new { success = true, message = "Officer updated." });
-            }
-            catch (BusinessException ex) { return Json(new { success = false, message = ex.Message }); }
-            catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteOfficer(int id)
-        {
-            try
-            {
-                _adminService.DeleteUser(id, CurrentActorId); // Officer is a Consumer; delete is same as user delete
-                return Json(new { success = true, message = "Officer deleted." });
-            }
-            catch (BusinessException ex) { return Json(new { success = false, message = ex.Message }); }
-            catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }
-        }*/
-
-        // ============================================================
-        // PROFILE
-        // ============================================================
+     
 
         [HttpGet]
         public ActionResult Profile()

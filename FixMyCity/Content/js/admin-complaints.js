@@ -85,19 +85,7 @@
         var title = $(this).data("title") || "this complaint";
 
         confirmDialog('Are you sure you want to delete complaint "' + title + '"?', function () {
-           /* confirmDialog('Are you sure you want to delete this complaint?', function () {
-                $.ajax({
-                    url: '/Complaint/DeleteComplaint/' + id, type: 'POST',
-                    data: {
-                        __RequestVerificationToken: antiForgeryToken
-                    },
-                    success: function (res) {
-                        if (res.success) window.location.reload();
-                        else alert(res.message);
-                    },
-                    error: function () { alert('Failed to delete complaint.'); }
-                });
-            });*/
+         
             $.ajax({
                 url: window.adminComplaintsUrls.deleteComplaint,
                 method: "POST",

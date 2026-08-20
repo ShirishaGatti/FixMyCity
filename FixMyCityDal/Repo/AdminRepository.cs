@@ -1,4 +1,4 @@
-﻿using FixMyCity.Exceptions;
+using FixMyCity.Exceptions;
 using FixMyCityModel.Model;
 using FixMyCityModel.ViewModel;
 using Microsoft.Practices.EnterpriseLibrary.Data;
@@ -695,24 +695,7 @@ namespace FixMyCity.Repository
             }
             return newId;
         }
-  /*      public void UpdateOfficer(
-    int consumerId,
-    string designation,
-    int? wardId,
-    int? deptId,
-    int actorId)
-        {
-            using (DbCommand cmd = db.GetStoredProcCommand("Admin_UpdateOfficer"))
-            {
-                db.AddInParameter(cmd, "@ConsumerId", DbType.Int32, consumerId);
-                db.AddInParameter(cmd, "@Designation", DbType.String, designation);
-                db.AddInParameter(cmd, "@WardId", DbType.Int32, wardId);
-                db.AddInParameter(cmd, "@DeptId", DbType.Int32, deptId);
-                db.AddInParameter(cmd, "@ActorId", DbType.Int32, actorId);
-
-                db.ExecuteNonQuery(cmd);
-            }
-        }*/
+  
         private static bool HasColumn(IDataReader reader, string columnName)
         {
             for (int i = 0; i < reader.FieldCount; i++)

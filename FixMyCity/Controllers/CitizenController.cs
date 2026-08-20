@@ -83,7 +83,15 @@ namespace FixMyCity.Controllers
                 try { _complaintService.UploadAttachments(savedId, CurrentActorId, vm.Attachments); }
                 catch (BusinessException ex)
                 {
-                    return Json(new { success = true, message = "Complaint saved, but: " + ex.Message, complaintId = savedId });
+                    return Json(new { success = false, message = ex.Message, complaintId = savedId });
+                }
+                catch (DataAccessException ex)
+                {
+                    return Json(new { success = false, message = ex.Message, complaintId = savedId });
+                }
+                catch (Exception)
+                {
+                    return Json(new { success = false, message = "Complaint saved, but document upload failed. Please try again.", complaintId = savedId });
                 }
             }
 
@@ -133,7 +141,7 @@ namespace FixMyCity.Controllers
             catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }
         }
 
-        // Resolution-confirmation workflow — the citizen's half. Confirm closes
+        // Resolution-confirmation workflow ï¿½ the citizen's half. Confirm closes
         // the complaint outright; Reject sends it back to the officer as
         // Reopened. Both only succeed (SP-enforced) while the complaint is
         // Awaiting Customer Confirmation and belongs to the caller.
@@ -301,25 +309,6 @@ namespace FixMyCity.Controllers
             int cityId = vm.CityId ?? (cities.Count > 0 ? cities[0].CityId : 1);
             vm.Wards = _consumerService.GetWardsByCity(cityId);
         }
-        /* [RoleAuthorize(RoleIds.Citizen)]
-         [HttpGet]
-         public ActionResult ComplaintDetailsPartial(int id)
-         {
-             try
-             {
-                 var vm = new ComplaintDetailsViewModel
-                 {
-                     Complaint = _complaintService.GetComplaintDetails(id, CurrentActorId),
-                     Attachments = _complaintService.GetAttachments(id, CurrentActorId),
-                     Chat = _chatService.GetThread(id, CurrentActorId, roleId, 0)   // NEW
-                 };
-                 return PartialView("ComplaintDetails", vm);
-             }
-             catch (NotFoundException)
-             {
-                 return Content("<div class='p-4'>Complaint not found.</div>");
-             }
-         }
-         */
+    
     }
 }
