@@ -518,20 +518,5 @@ namespace FixMyCity.Repository
             };
         }
 
-        /// <summary>
-        /// Best-effort file log for the "// To Do: Handle Exception" slots above —
-        /// logging must never itself throw and mask the original exception.
-        /// </summary>
-        //private static void FileLog(Exception ex, string storedProcedure)
-        //{
-        //    try
-        //    {
-        //        System.IO.File.AppendAllText(
-        //            System.Web.Hosting.HostingEnvironment.MapPath("~/App_Data/Logs/errors.log"),
-        //            String.Format("{0:u} | SP:{1} | {2}\r\n", DateTime.UtcNow, storedProcedure, ex));
-        //    }
-        //    catch { /* swallow — logging is not allowed to crash the request */ }
-        //}
-
     }
 }

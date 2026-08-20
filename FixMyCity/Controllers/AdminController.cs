@@ -491,44 +491,7 @@ catch (DataAccessException ex) { return Json(new { success = false, message = ex
                 FixMyCity.Infrastructure.FileLogger.Log(ex, "AdminController.SendAssignmentOtp");
             }
         }
-        /*  [HttpPost]
-        public ActionResult GetOfficers(AdminUserListFilterViewModel filter)
-        {
-            filter = filter ?? new AdminUserListFilterViewModel();
-           // filter.RoleId = RoleIds.SupportExecutive;
-            var vm = _adminService.GetOfficers(filter);
-            return PartialView("_OfficerTable", vm);
-        }
-        /*
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult UpdateOfficer(int consumerId, string designation, int? wardId, int? deptId)
-        {
-            try
-            {
-                _adminService.UpdateOfficer(consumerId, designation, wardId, deptId, CurrentActorId);
-                return Json(new { success = true, message = "Officer updated." });
-            }
-            catch (BusinessException ex) { return Json(new { success = false, message = ex.Message }); }
-            catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult DeleteOfficer(int id)
-        {
-            try
-            {
-                _adminService.DeleteUser(id, CurrentActorId); // Officer is a Consumer; delete is same as user delete
-                return Json(new { success = true, message = "Officer deleted." });
-            }
-            catch (BusinessException ex) { return Json(new { success = false, message = ex.Message }); }
-            catch (DataAccessException ex) { return Json(new { success = false, message = ex.Message }); }
-        }*/
-
-        // ============================================================
-        // PROFILE
-        // ============================================================
+     
 
         [HttpGet]
         public ActionResult Profile()

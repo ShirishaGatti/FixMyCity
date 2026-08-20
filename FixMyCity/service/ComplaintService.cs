@@ -129,12 +129,7 @@ namespace FixMyCity.service
                     CreatedAt = a.CreatedAt
                 }).ToList();
 
-        /*   public Complaint GetComplaintDetails(int complaintId, int consumerId)
-           {
-               var complaint = _complaintRepo.GetById(complaintId, consumerId);
-               if (complaint == null) throw new NotFoundException("Complaint not found.");
-               return complaint;
-           }*/
+      
         public Complaint GetComplaintDetails(int complaintId, int consumerId)
         {
             var complaint = _complaintRepo.GetById(complaintId, consumerId: consumerId);
@@ -314,10 +309,7 @@ namespace FixMyCity.service
                 Priorities = priorities
             };
         }
-      /*  public Complaint GetAssignedComplaint(int officerId, int complaintId)
-        {
-            return _complaintRepo.GetAssignedComplaintById(complaintId, officerId);
-        }*/
+   
         public void DeleteComplaint(int complaintId, int consumerId)
         {
             bool deleted = _complaintRepo.DeleteComplaint(complaintId, consumerId);
