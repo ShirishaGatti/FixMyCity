@@ -75,13 +75,7 @@ namespace FixMyCity.service
             _repo.UpdateUser(consumerId, newRoleId, deptId, actorId);
         }
 
-        public void UpdateUserStatus(int consumerId, bool isActive, int actorId)
-        {
-            if (consumerId <= 0) throw new BusinessException("Invalid user.", "INVALID_USER");
-            _repo.UpdateUserStatus(consumerId, isActive, actorId);
-        }
-
-        public void DeleteUser(int consumerId, int actorId)
+       public void DeleteUser(int consumerId, int actorId)
         {
             if (consumerId <= 0) throw new BusinessException("Invalid user.", "INVALID_USER");
             _repo.DeleteUser(consumerId, actorId);
@@ -188,9 +182,13 @@ namespace FixMyCity.service
                     throw new BusinessException("Unknown entity type.", "INVALID_ENTITY");
             }
         }
-
+        public void UpdateUserStatus(int consumerId, bool isActive, int actorId)
+        {
+            if (consumerId <= 0) throw new BusinessException("Invalid user.", "INVALID_USER");
+            _repo.UpdateUserStatus(consumerId, isActive, actorId);
+        }
         public List<District> GetDistricts(int? stateId) => _repo.GetDistricts(stateId);
-
+     
         public List<Ward> GetWardsByCity(int cityId)
         {
             var all = _repo.GetWardsFull();

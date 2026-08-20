@@ -322,20 +322,7 @@ catch (DataAccessException ex) { return Json(new { success = false, message = ex
             }
         }
 
-        [HttpPost]
-        public JsonResult UpdateUserStatus(int id, bool isActive)
-        {
-            try
-            {
-                _adminService.UpdateUserStatus(id, isActive, CurrentActorId);
-                return Json(new { success = true });
-            }
-            catch (BusinessException ex)
-            {
-                return Json(new { success = false, message = ex.Message, code = ex.ErrorCode });
-            }
-        }
-
+       
         [HttpGet]
         public ActionResult EditUser(int id)
         {
@@ -491,7 +478,20 @@ catch (DataAccessException ex) { return Json(new { success = false, message = ex
                 FixMyCity.Infrastructure.FileLogger.Log(ex, "AdminController.SendAssignmentOtp");
             }
         }
-     
+        [HttpPost]
+        public JsonResult UpdateUserStatus(int id, bool isActive)
+        {
+            try
+            {
+                _adminService.UpdateUserStatus(id, isActive, CurrentActorId);
+                return Json(new { success = true });
+            }
+            catch (BusinessException ex)
+            {
+                return Json(new { success = false, message = ex.Message, code = ex.ErrorCode });
+            }
+        }
+
 
         [HttpGet]
         public ActionResult Profile()

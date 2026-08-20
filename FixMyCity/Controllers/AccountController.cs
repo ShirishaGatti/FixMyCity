@@ -25,15 +25,7 @@ namespace FixMyCity.Controllers
             _authService = authService;
             _emailService = emailService;
         }
-        /* private void PopulateCitiesAndWards(int? selectedCityId = null, int? selectedWardId = null)
-         {
-             var cities = _authRepo.GetCities();
-             ViewBag.Cities = new SelectList(cities, "CityId", "CityName", selectedCityId);
-
-             int cityId = selectedCityId ?? (cities.Count > 0 ? cities[0].CityId : 1);
-             var wards = _authRepo.GetWardsByCity(cityId);
-             ViewBag.Wards = new SelectList(wards, "WardId", "WardName", selectedWardId);
-         }*/
+     
         private void PopulateCitiesAndWards(RegisterViewModel vm = null)
         {
             if (vm == null) vm = new RegisterViewModel();

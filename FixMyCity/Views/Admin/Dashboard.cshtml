@@ -161,53 +161,7 @@
             </div>
         </div>
     </div>
-    <!-- Recent Complaints Feed Table -->
-    @*<div class="row g-3">
-            <div class="col-12">
-                <div class="dash-card">
-                    <div class="dash-card-header">
-                        <span><i class="bi bi-list-stars me-2 text-primary"></i>Recent Municipal Activity Feed</span>
-                        <a href="@Url.Action("Users","Admin")" class="btn btn-sm btn-outline-primary" style="border-radius:8px;font-size:0.78rem;">View All Users</a>
-                    </div>
-                    <div class="dash-card-body p-0">
-                        @if (Model?.RecentComplaints != null && Model.RecentComplaints.Any())
-                        {
-                            <div class="table-responsive">
-                                <table class="table dash-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Complaint #</th>
-                                            <th>Title</th>
-                                            <th>Category</th>
-                                            <th>Status</th>
-                                            <th>Priority</th>
-                                            <th>Filed Date</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var c in Model.RecentComplaints)
-                                        {
-                                            <tr>
-                                                <td><code style="color:#38bdf8;font-weight:700;">@c.ComplaintNumber</code></td>
-                                                <td class="fw-semibold">@c.Title</td>
-                                                <td><span class="badge bg-dark text-light border border-secondary">@(c.CategoryName ?? "General")</span></td>
-                                                <td><span class="status-badge @(c.StatusName?.ToLower().Replace(" ","") ?? "")">@(c.StatusName ?? "Open")</span></td>
-                                                <td><span class="priority-badge @(c.PriorityName?.ToLower() ?? "")">@(c.PriorityName ?? "Medium")</span></td>
-                                                <td class="text-muted" style="font-size:.8rem">@c.CreatedAt.ToString("dd MMM yyyy")</td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-                        }
-                        else
-                        {
-                            <div class="p-4 text-center text-muted">No recent complaints available.</div>
-                        }
-                    </div>
-                </div>
-            </div>
-        </div>*@
+ 
     @section adminScripts {
         <script>
             document.addEventListener("DOMContentLoaded", function () {

@@ -7,12 +7,14 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
+using System.Runtime.Caching;
 
 namespace FixMyCity.Repository
 {
     public class AdminRepository : IAdminRepository
     {
         private readonly Database db;
+        private static readonly MemoryCache _cache = MemoryCache.Default;
 
         public AdminRepository()
         {
@@ -385,62 +387,71 @@ namespace FixMyCity.Repository
         {
             var officers = new List<Consumer>();
 
-            Database db = DatabaseFactory.CreateDatabase();
-
-            using (DbCommand cmd = db.GetStoredProcCommand("FixMyCity.Admin_GetOfficers"))
+            try
             {
-                using (IDataReader reader = db.ExecuteReader(cmd))
+                DbCommand com = db.GetStoredProcCommand("FixMyCity.Admin_GetOfficers");
+
+                DataSet ds = db.ExecuteDataSet(com);
+
+                if (ds != null && ds.Tables.Count > 0)
                 {
-                    while (reader.Read())
+                    foreach (DataRow row in ds.Tables[0].Rows)
                     {
                         officers.Add(new Consumer
                         {
-                            ConsumerId = Convert.ToInt32(reader["ConsumerId"]),
+                            ConsumerId = Convert.ToInt32(row["ConsumerId"]),
 
-                            Name = reader["Name"] == DBNull.Value
+                            Name = row["Name"] == DBNull.Value
                                 ? null
-                                : reader["Name"].ToString(),
+                                : row["Name"].ToString(),
 
-                            Email = reader["Email"] == DBNull.Value
+                            Email = row["Email"] == DBNull.Value
                                 ? null
-                                : reader["Email"].ToString(),
+                                : row["Email"].ToString(),
 
-                            Contact = reader["Contact"] == DBNull.Value
+                            Contact = row["Contact"] == DBNull.Value
                                 ? null
-                                : reader["Contact"].ToString(),
+                                : row["Contact"].ToString(),
 
-                            DOB = reader["DOB"] == DBNull.Value
+                            DOB = row["DOB"] == DBNull.Value
                                 ? (DateTime?)null
-                                : Convert.ToDateTime(reader["DOB"]),
+                                : Convert.ToDateTime(row["DOB"]),
 
-                            AddressLine = reader["AddressLine"] == DBNull.Value
+                            AddressLine = row["AddressLine"] == DBNull.Value
                                 ? null
-                                : reader["AddressLine"].ToString(),
+                                : row["AddressLine"].ToString(),
 
-                            CityId = reader["CityId"] == DBNull.Value
+                            CityId = row["CityId"] == DBNull.Value
                                 ? (int?)null
-                                : Convert.ToInt32(reader["CityId"]),
+                                : Convert.ToInt32(row["CityId"]),
 
-                            WardId = reader["WardId"] == DBNull.Value
+                            WardId = row["WardId"] == DBNull.Value
                                 ? (int?)null
-                                : Convert.ToInt32(reader["WardId"]),
+                                : Convert.ToInt32(row["WardId"]),
 
-                            RoleId = Convert.ToInt32(reader["RoleId"]),
+                            RoleId = Convert.ToInt32(row["RoleId"]),
 
-                            DeptId = reader["DeptId"] == DBNull.Value
+                            DeptId = row["DeptId"] == DBNull.Value
                                 ? (int?)null
-                                : Convert.ToInt32(reader["DeptId"]),
+                                : Convert.ToInt32(row["DeptId"]),
 
-                            Designation = reader["Designation"] == DBNull.Value
+                            Designation = row["Designation"] == DBNull.Value
                                 ? null
-                                : reader["Designation"].ToString(),
+                                : row["Designation"].ToString(),
 
-                            IsActive = Convert.ToBoolean(reader["IsActive"]),
+                            IsActive = Convert.ToBoolean(row["IsActive"]),
 
-                            CreatedDate = Convert.ToDateTime(reader["CreatedDate"])
+                            CreatedDate = Convert.ToDateTime(row["CreatedDate"])
                         });
                     }
                 }
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException(
+                    "Failed to load officers.",
+                    "Admin_GetOfficers",
+                    ex);
             }
 
             return officers;
@@ -572,39 +583,86 @@ namespace FixMyCity.Repository
 
         private static readonly HashSet<string> EntitiesWithParent = new HashSet<string> { "district", "city", "ward" };
 
-        public List<MasterEntityViewModel> GetMasterList(string entityType, int? parentId, bool includeInactive)
+        public List<MasterEntityViewModel> GetMasterList(
+       string entityType,
+       int? parentId,
+       bool includeInactive)
         {
             string sproc;
+
             if (!MasterListProcs.TryGetValue(entityType, out sproc))
-                throw new BusinessException("Unknown entity type.", "INVALID_ENTITY");
+                throw new BusinessException(
+                    "Unknown entity type.",
+                    "INVALID_ENTITY");
 
             var list = new List<MasterEntityViewModel>();
+
             try
             {
                 DbCommand com = db.GetStoredProcCommand(sproc);
-                if (EntitiesWithParent.Contains(entityType))
-                    db.AddInParameter(com, "ParentId", DbType.Int32, parentId.HasValue ? (object)parentId.Value : DBNull.Value);
-                db.AddInParameter(com, "IncludeInactive", DbType.Boolean, includeInactive);
 
-                using (IDataReader reader = db.ExecuteReader(com))
+                if (EntitiesWithParent.Contains(entityType))
                 {
-                    while (reader.Read())
+                    db.AddInParameter(
+                        com,
+                        "ParentId",
+                        DbType.Int32,
+                        parentId.HasValue
+                            ? (object)parentId.Value
+                            : DBNull.Value);
+                }
+
+                db.AddInParameter(
+                    com,
+                    "IncludeInactive",
+                    DbType.Boolean,
+                    includeInactive);
+
+                DataSet ds = db.ExecuteDataSet(com);
+
+                if (ds != null && ds.Tables.Count > 0)
+                {
+                    foreach (DataRow row in ds.Tables[0].Rows)
                     {
                         list.Add(new MasterEntityViewModel
                         {
-                            Id = Convert.ToInt32(reader["Id"]),
-                            Name = reader["Name"].ToString(),
-                            ParentId = reader["ParentId"] == DBNull.Value ? (int?)null : Convert.ToInt32(reader["ParentId"]),
-                            ParentName = reader["ParentName"] == DBNull.Value ? null : reader["ParentName"].ToString(),
-                            IsActive = Convert.ToBoolean(reader["IsActive"]),
-                            WardNo = HasColumn(reader, "WardNo") && reader["WardNo"] != DBNull.Value ? reader["WardNo"].ToString() : null,
-                            DepartmentName = HasColumn(reader, "DepartmentName") && reader["DepartmentName"] != DBNull.Value
-                            ? reader["DepartmentName"].ToString(): null,
+                            Id = Convert.ToInt32(row["Id"]),
+
+                            Name = row["Name"] == DBNull.Value
+                                ? null
+                                : row["Name"].ToString(),
+
+                            ParentId = row["ParentId"] == DBNull.Value
+                                ? (int?)null
+                                : Convert.ToInt32(row["ParentId"]),
+
+                            ParentName = row["ParentName"] == DBNull.Value
+                                ? null
+                                : row["ParentName"].ToString(),
+
+                            IsActive = Convert.ToBoolean(row["IsActive"]),
+
+                            WardNo = ds.Tables[0].Columns.Contains("WardNo")
+                                && row["WardNo"] != DBNull.Value
+                                ? row["WardNo"].ToString()
+                                : null,
+
+                            DepartmentName = ds.Tables[0].Columns.Contains("DepartmentName")
+                                && row["DepartmentName"] != DBNull.Value
+                                ? row["DepartmentName"].ToString()
+                                : null
                         });
                     }
                 }
             }
-            catch (SqlException ex) { throw new DataAccessException("Failed to load master data.", sproc, ex); }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException(
+                    "Failed to load master data.",
+                    sproc,
+                    ex);
+            }
+
             return list;
         }
 
