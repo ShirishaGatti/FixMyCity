@@ -24,13 +24,6 @@ namespace FixMyCity.service
             _consumerService = new ConsumerService();
         }
 
-        //public ComplaintService(IComplaintRepository complaintRepo,
-        //                        IConsumerService consumerService)
-        //{
-        //    _complaintRepo = complaintRepo;
-        //    _consumerService = consumerService;
-        //}
-
         public MyComplaintsViewModel GetComplaints(int consumerId, int assignedTo, int roleId)
         {
             return new MyComplaintsViewModel
@@ -251,46 +244,20 @@ namespace FixMyCity.service
                     .ToList()
             };
         }
-
         public MyComplaintsViewModel GetOfficerComplaints(int officerId, OfficerComplaintsQuery query)
         {
-            if (query == null)
-                query = new OfficerComplaintsQuery();
+            if (query == null) query = new OfficerComplaintsQuery();
 
             _complaintRepo.ExpireOverdueResolutions();
 
             var statuses = _complaintRepo.GetStatuses();
             var categories = _complaintRepo.GetCategories();
             var priorities = _complaintRepo.GetPriorities();
-            var complaints = _complaintRepo.GetAssignedByOfficerId(officerId);
 
-            if (!string.IsNullOrWhiteSpace(query.SearchTerm))
-            {
-                var searchLower = query.SearchTerm.Trim().ToLowerInvariant();
-                complaints = complaints.Where(c =>
-                    (!string.IsNullOrEmpty(c.ComplaintNumber) && c.ComplaintNumber.ToLowerInvariant().Contains(searchLower)) ||
-                    (!string.IsNullOrEmpty(c.Title) && c.Title.ToLowerInvariant().Contains(searchLower)) ||
-                    (!string.IsNullOrEmpty(c.CategoryName) && c.CategoryName.ToLowerInvariant().Contains(searchLower)) ||
-                    (!string.IsNullOrEmpty(c.PriorityName) && c.PriorityName.ToLowerInvariant().Contains(searchLower)) ||
-                    (!string.IsNullOrEmpty(c.StatusName) && c.StatusName.ToLowerInvariant().Contains(searchLower)))
-                    .ToList();
-            }
+            var result = _complaintRepo.GetAssignedByOfficerId(officerId, query);
 
-            if (query.StatusId.HasValue)
-                complaints = complaints.Where(c => c.StatusId == query.StatusId.Value).ToList();
-
-            if (query.PriorityId.HasValue)
-                complaints = complaints.Where(c => c.PriorityId == query.PriorityId.Value).ToList();
-
-            if (query.CategoryId.HasValue)
-                complaints = complaints.Where(c => c.CategoryId == query.CategoryId.Value).ToList();
-
-            complaints = SortRegisteredComplaints(complaints, query.SortColumn, query.SortDirection);
-
-            var totalRecords = complaints.Count;
             var page = query.Page <= 0 ? 1 : query.Page;
             var pageSize = query.PageSize <= 0 ? 10 : query.PageSize;
-            var pagedComplaints = complaints.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
             return new MyComplaintsViewModel
             {
@@ -302,14 +269,14 @@ namespace FixMyCity.service
                 SortDirection = query.SortDirection,
                 CurrentPage = page,
                 PageSize = pageSize,
-                TotalRecords = totalRecords,
-                Complaints = pagedComplaints,
+                TotalRecords = result.TotalCount,
+                Complaints = result.Complaints,
                 Statuses = statuses,
                 Categories = categories,
                 Priorities = priorities
             };
         }
-   
+
         public void DeleteComplaint(int complaintId, int consumerId)
         {
             bool deleted = _complaintRepo.DeleteComplaint(complaintId, consumerId);

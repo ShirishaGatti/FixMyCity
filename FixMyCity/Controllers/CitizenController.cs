@@ -23,12 +23,20 @@ namespace FixMyCity.Controllers
         private readonly IComplaintChatService _chatService;
 
         public CitizenController()
+            : this(new ConsumerService(), new ComplaintService(), new ComplaintChatService(), new JwtSessionContext())
         {
-            _consumerService = new ConsumerService();
-            _complaintService = new ComplaintService();
-            _chatService = new ComplaintChatService();      // NEW
-
-            _session = new JwtSessionContext();
+        }
+        
+        public CitizenController(
+            ConsumerService consumerService,
+            ComplaintService complaintService,
+            ComplaintChatService chatService,
+            JwtSessionContext session)
+        {
+            _consumerService = consumerService;
+            _complaintService = complaintService;
+            _chatService = chatService;
+            _session = session;
         }
         private int CurrentActorId => _session.ConsumerId;
         private int roleId => _session.RoleId;
@@ -193,8 +201,8 @@ namespace FixMyCity.Controllers
                 var vm = new ComplaintDetailsViewModel
                 {
                     Complaint = _complaintService.GetComplaintDetails(id, CurrentActorId),
-                    Attachments = _complaintService.GetAttachments(id, CurrentActorId),
-                    Chat = _chatService.GetThread(id, CurrentActorId, roleId, 0)
+                    Attachments = _complaintService.GetAttachments(id, CurrentActorId)
+                  //  Chat = _chatService.GetThread(id, CurrentActorId, roleId, 0)
                 };
 
                 return PartialView("ComplaintDetails", vm);

@@ -304,7 +304,7 @@ use Training_DB_Shirisha_Gatti
 SELECT
     c.ComplaintNumber,
     c.AssignedTo,
-    asg.Name AS AssigneeName
+    asg.Name AS AssignedName
 FROM FixMyCity.Complaint c
 LEFT JOIN FixMyCity.Consumer asg
     ON asg.ConsumerId = c.AssignedTo;

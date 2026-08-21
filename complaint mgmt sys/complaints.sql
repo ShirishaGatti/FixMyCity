@@ -567,7 +567,7 @@ BEGIN
         st.StatusName,
         c.RaisedBy,
         c.AssignedTo,
-        asg.Name AS AssigneeName,
+        asg.Name AS AssignedName,
         c.AddressLine,
         c.Landmark,
         c.WardId,

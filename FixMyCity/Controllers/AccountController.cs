@@ -224,7 +224,7 @@ namespace FixMyCity.Controllers
             switch (roleId)
             {
                 case RoleIds.Citizen: redirectUrl = Url.Action("MyComplaints", "Citizen"); break;
-                case RoleIds.SupportExecutive: redirectUrl = Url.Action("Queue", "Officer"); break;
+                case RoleIds.SupportExecutive: redirectUrl = Url.Action("Complaints", "Officer"); break;
                 case RoleIds.Admin: redirectUrl = Url.Action("Dashboard", "Admin"); break;
                 default: redirectUrl = Url.Action("Login", "Account"); break;
             }

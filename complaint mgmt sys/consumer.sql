@@ -67,7 +67,7 @@ BEGIN
     SET NOCOUNT ON;
     SELECT c.ComplaintId, c.ComplaintNumber, c.Title, c.Description,
            c.CategoryId, cat.CategoryName, c.PriorityId, pr.PriorityName,
-           c.StatusId, st.StatusName, c.RaisedBy, c.AssignedTo, asg.Name AS AssigneeName,
+           c.StatusId, st.StatusName, c.RaisedBy, c.AssignedTo, asg.Name AS AssignedName,
            c.AddressLine, c.Landmark, c.WardId, w.WardName, c.CityId, ci.CityName,
            c.ResolvedDate, c.ClosedDate, c.ReopenCount, c.CreatedAt
     FROM FixMyCity.Complaint c
@@ -96,7 +96,7 @@ BEGIN
     SET NOCOUNT ON;
     SELECT c.ComplaintId, c.ComplaintNumber, c.Title, c.Description,
            c.CategoryId, cat.CategoryName, c.PriorityId, pr.PriorityName,
-           c.StatusId, st.StatusName, c.RaisedBy, c.AssignedTo, asg.Name AS AssigneeName,
+           c.StatusId, st.StatusName, c.RaisedBy, c.AssignedTo, asg.Name AS AssignedName,
            c.AddressLine, c.Landmark, c.WardId, w.WardName, c.CityId, ci.CityName,
            c.ResolvedDate, c.ClosedDate, c.ReopenCount, c.CreatedAt
     FROM FixMyCity.Complaint c
@@ -106,7 +106,7 @@ BEGIN
     JOIN FixMyCity.Ward w                ON w.WardId       = c.WardId
     JOIN FixMyCity.City ci               ON ci.CityId      = c.CityId
     LEFT JOIN FixMyCity.Consumer asg     ON asg.ConsumerId = c.AssignedTo
-    -- @ConsumerId scopes the query to the owning citizen — prevents one
+    -- @ConsumerId scopes the query to the owning citizen ï¿½ prevents one
     -- citizen from viewing another citizen's complaint by guessing the id
     WHERE c.ComplaintId = @ComplaintId AND c.RaisedBy = @ConsumerId AND c.IsActive = 1;
 END

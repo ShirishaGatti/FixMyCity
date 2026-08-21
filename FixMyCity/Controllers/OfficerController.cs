@@ -112,12 +112,21 @@ namespace FixMyCity.Controllers
                 {
                     return Content("<div class='p-4'>Complaint not found or not assigned to you.</div>");
                 }
-                
+
                 var raiserName = "";
                 if (complaint.RaisedBy > 0)
                 {
-                    var raiser = _consumerService.GetProfile(complaint.RaisedBy);
-                    raiserName = raiser != null ? raiser.Name : "Unknown";
+                    try
+                    {
+                        var raiser = _consumerService.GetProfile(complaint.RaisedBy);
+                        raiserName = raiser != null ? raiser.Name : "Deleted User";
+                    }
+                    catch (NotFoundException)
+                    {
+                        // Citizen account was deactivated/deleted after filing — complaint
+                        // itself is still valid and must remain viewable by the officer.
+                        raiserName = "Deleted User";
+                    }
                 }
                 ViewData["RaiseByName"] = raiserName;
                 var vm = new ComplaintDetailsViewModel
@@ -135,12 +144,7 @@ namespace FixMyCity.Controllers
                 return Content("<div class='p-4'>Complaint not found.</div>");
             }
         }
-        [HttpGet]
-        public ActionResult Queue()
-        {
-            // Reuse the Officer controller's Complaints action to show the assigned complaints/queue.
-            return RedirectToAction("Complaints", "Officer");
-        }
+      
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult UpdateComplaint(int complaintId, int categoryId, int priorityId, int statusId, int? assignedTo)

@@ -235,6 +235,10 @@ namespace FixMyCity.Repository
         db.ExecuteNonQuery(com);
         int savedId = Convert.ToInt32(db.GetParameterValue(com, "SavedComplaintId"));
         ClearComplaintCache(actorId);
+        if (c.RaisedBy > 0 && c.RaisedBy != actorId)
+        {
+            ClearComplaintCache(c.RaisedBy);
+        }
         return savedId;
     }
     catch (SqlException ex)
@@ -252,8 +256,7 @@ namespace FixMyCity.Repository
                 db.AddInParameter(com, "OfficerId", DbType.Int32, officerId);
                 db.AddOutParameter(com, "RaisedBy", DbType.Int32, 4);
                 db.ExecuteNonQuery(com);
-                // Bust the citizen's cache (not the officer's — officer lists aren't cached),
-                // so their MyComplaints view reflects "Awaiting Confirmation" immediately.
+                
                 object raisedByValue = db.GetParameterValue(com, "RaisedBy");
                 if (raisedByValue != null && raisedByValue != DBNull.Value)
                     ClearComplaintCache(Convert.ToInt32(raisedByValue));
@@ -350,26 +353,39 @@ namespace FixMyCity.Repository
             return affectedConsumerIds;
         }
 
-        public List<Complaint> GetAssignedByOfficerId(int officerId)
+        public ComplaintSearchResult GetAssignedByOfficerId(int officerId, OfficerComplaintsQuery query)
         {
-            var list = new List<Complaint>();
             try
             {
-
                 DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_GetAssignedByOfficer");
                 db.AddInParameter(com, "OfficerId", DbType.Int32, officerId);
+                db.AddInParameter(com, "SearchTerm", DbType.String, string.IsNullOrWhiteSpace(query.SearchTerm) ? (object)DBNull.Value : query.SearchTerm.Trim());
+                db.AddInParameter(com, "StatusId", DbType.Int32, (object)query.StatusId ?? DBNull.Value);
+                db.AddInParameter(com, "PriorityId", DbType.Int32, (object)query.PriorityId ?? DBNull.Value);
+                db.AddInParameter(com, "CategoryId", DbType.Int32, (object)query.CategoryId ?? DBNull.Value);
+                db.AddInParameter(com, "SortColumn", DbType.String, string.IsNullOrWhiteSpace(query.SortColumn) ? "CreatedAt" : query.SortColumn);
+                db.AddInParameter(com, "SortDirection", DbType.String, string.IsNullOrWhiteSpace(query.SortDirection) ? "desc" : query.SortDirection);
+                db.AddInParameter(com, "PageNumber", DbType.Int32, query.Page <= 0 ? 1 : query.Page);
+                db.AddInParameter(com, "PageSize", DbType.Int32, query.PageSize <= 0 ? 10 : query.PageSize);
+
                 DataSet ds = db.ExecuteDataSet(com);
+                var list = new List<Complaint>();
+                int totalCount = 0;
                 if (ds != null && ds.Tables.Count > 0)
+                {
                     foreach (DataRow row in ds.Tables[0].Rows)
                         list.Add(MapComplaint(row));
+                    if (ds.Tables[0].Rows.Count > 0)
+                        totalCount = Convert.ToInt32(ds.Tables[0].Rows[0]["TotalCount"]);
+                }
+                return new ComplaintSearchResult { Complaints = list, TotalCount = totalCount };
             }
             catch (SqlException ex)
             {
-                throw new DataAccessException("Failed to retrieve assigned complaints.", "Complaint_GetAssignedByOfficerId", ex);
+                throw new DataAccessException("Failed to retrieve assigned complaints.", "Complaint_GetAssignedByOfficer", ex);
             }
-            return list;
         }
-   
+
         public bool DeleteComplaint(int complaintId, int consumerId)
         {
             try

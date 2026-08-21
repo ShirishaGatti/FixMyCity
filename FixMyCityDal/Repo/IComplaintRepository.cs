@@ -17,13 +17,13 @@ namespace FixMyCity.Repository
 
         int GetComplaintAttachmentCount(int complaintId);
         int GetComplaintChatAttachmentCount(int complaintId);
-
+        ComplaintSearchResult GetAssignedByOfficerId(int officerId, OfficerComplaintsQuery query);
         int SaveComplaint(Complaint c, int actorId, int roleId, int? statusId = null, int? assignedTo = null);
 
 
         bool DeleteComplaint(int complaintId, int consumerId);
         ComplaintSearchResult Search(int consumerId, ComplaintListFilterViewModel filter); List<ComplaintStatus> GetStatuses();
-        List<Complaint> GetAssignedByOfficerId(int officerId);
+ 
     //    Complaint GetAssignedComplaintById(int complaintId, int officerId);
         Complaint GetById(int complaintId, int? consumerId = null, int? officerId = null);
         // Resolution-confirmation workflow

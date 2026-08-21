@@ -84,9 +84,7 @@
     <Compile Include="ViewModel\StaffRegisterViewModel.cs" />
     <Compile Include="ViewModel\VerifyOtpViewModel.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="JWT\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Compile Include="Model\District.cs" />
   </ItemGroup>
