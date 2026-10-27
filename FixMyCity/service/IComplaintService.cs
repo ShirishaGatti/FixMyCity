@@ -26,6 +26,8 @@ namespace FixMyCity.service
         void DeleteComplaint(int complaintId, int consumerId);
         MyComplaintsViewModel Search(int consumerId, ComplaintListFilterViewModel filter);
         ComplaintExportViewModel GetComplaintForExport(int complaintId, int consumerId);
+        MyComplaintsViewModel GetList(int currentActorId);
+        MyComplaintsViewModel GetComplaintList(int consumerId, ComplaintListFilterViewModel filter);
 
         // Resolution-confirmation workflow
         void ResolveComplaint(int complaintId, int officerId);

@@ -1,3 +1,4 @@
+using FixMyCity.Model;
 using FixMyCityModel;
 using FixMyCityModel.Model;
 using FixMyCityModel.ViewModel;
@@ -32,5 +33,12 @@ namespace FixMyCity.Repository
         bool RotateRefreshToken(string oldHash, string newHash, int consumerId, string email, int roleId,
                                  DateTime expiresAt, bool rememberMe, DateTime trustExpiresAt);
         bool RevokeAllRefreshTokens(int consumerId);
+
+        bool InvalidateOpenLoginChallenges(int consumerId, string purpose);
+        bool InsertLoginChallenge(LoginChallenge challenge);
+        LoginChallenge GetLoginChallengeByTokenHash(string tokenHash);
+        bool IncrementLoginChallengeAttempts(int challengeId);
+        bool MarkLoginChallengeConsumed(int challengeId);
+        int DeleteExpiredLoginChallenges(DateTime olderThanUtc);
     }
 }

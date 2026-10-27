@@ -23,5 +23,31 @@ namespace FixMyCity
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             AntiForgeryConfig.UniqueClaimTypeIdentifier = "ConsumerId";
         }
+        protected void Application_PostAuthorizeRequest()
+        {
+            if (HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath
+                    .StartsWith("~/api/", StringComparison.OrdinalIgnoreCase))
+            {
+                HttpContext.Current.SetSessionStateBehavior(
+                    System.Web.SessionState.SessionStateBehavior.Required);
+            }
+        }
+        protected void Application_EndRequest()
+        {
+            var path = Request.Path;
+            if (Response.StatusCode == 302 &&
+                path.StartsWith("/api/", StringComparison.OrdinalIgnoreCase))
+            {
+                var location = Response.Headers["Location"] ?? "";
+                if (location.IndexOf("/Account/Login", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    Response.ClearContent();
+                    Response.StatusCode = 401;
+                    Response.Headers.Remove("Location");
+                    Response.ContentType = "application/json";
+                    Response.Write("{\"success\":false,\"message\":\"Session expired. Please log in.\"}");
+                }
+            }
+        }
     }
 }

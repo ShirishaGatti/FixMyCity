@@ -67,10 +67,20 @@ namespace FixMyCity.Service
                     }
                 }
             }
+            catch (SmtpException ex)
+            {
+                System.Diagnostics.Debug.WriteLine(
+                    "SMTP Status: " + ex.StatusCode);
+
+                System.Diagnostics.Debug.WriteLine(
+                    "SMTP Error: " + ex);
+
+                FileLogger.Log(ex, "MailService.SendOtpEmail");
+            }
             catch (Exception ex)
             {
-                // Best-effort: log the failure but do NOT re-throw.
-                // A mail outage must never prevent a user from logging in.
+                System.Diagnostics.Debug.WriteLine(ex.ToString());
+
                 FileLogger.Log(ex, "MailService.SendOtpEmail");
             }
         }

@@ -35,8 +35,40 @@ namespace FixMyCity.service
                 Cities = _consumerService.GetCities()
             };
         }
+        public MyComplaintsViewModel GetComplaintList(int consumerId,ComplaintListFilterViewModel filter)
+        {
+            _complaintRepo.ExpireOverdueResolutions();
 
-             private static readonly string[] AllowedExtensions =
+            ComplaintSearchResult result =
+                _complaintRepo.Search(consumerId, filter);
+
+            return new MyComplaintsViewModel
+            {
+                Complaints = result.Complaints,
+                Filter = filter,
+                TotalCount = result.TotalCount,
+                TotalPages = (int)Math.Ceiling(
+                    result.TotalCount / (double)filter.PageSize)
+            };
+        }
+
+        public MyComplaintsViewModel GetList(int consumerId)
+        {
+            return new MyComplaintsViewModel
+            {
+                Categories = _complaintRepo.GetCategories(),
+                Priorities = _complaintRepo.GetPriorities(),
+                Statuses = _complaintRepo.GetStatuses(),
+                Cities = _consumerService.GetCities(),
+
+                Filter = new ComplaintListFilterViewModel
+                {
+                    PageNumber = 1,
+                    PageSize = 10
+                }
+            };
+        }
+        private static readonly string[] AllowedExtensions =
     (ConfigurationManager.AppSettings["AllowedAttachmentExtensions"] ?? ".jpg,.jpeg,.png,.pdf,.doc,.docx")
         .Split(',').Select(e => e.Trim().ToLowerInvariant()).ToArray();
 

@@ -1,9 +1,6 @@
 using FixMyCity.Infrastructure;
 using FixMyCity.Exceptions;
 using FixMyCity.Repository;
-
-using FixMyCityModel;
-using FixMyCityModel.ViewModel;
 using System;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,6 +8,8 @@ using System.Text.RegularExpressions;
 using FixMyCityModel.Model;
 using System.Collections.Generic;
 using System.Linq;
+using FixMyCityModel.ViewModel;
+using FixMyCity.Model;
 
 namespace FixMyCity.Service
 {
@@ -448,5 +447,130 @@ namespace FixMyCity.Service
 
             return _repo.GetWardsByCity(cityId);
         }
+
+
+        public LoginChallengeResult CreateLoginChallenge(int consumerId, bool rememberMe)
+        {
+            string token = NewToken(32);   // 256-bit random, sent to the client
+            string otp = NewOtp();       // 6 digits, sent by email only
+
+            // Only one live challenge per user and purpose.
+            _repo.InvalidateOpenLoginChallenges(consumerId, "LOGIN");
+
+            _repo.InsertLoginChallenge(new LoginChallenge
+            {
+                TokenHash = Sha256Hex(token),
+                OtpHash = Sha256Hex(otp),
+                ConsumerId = consumerId,
+                Purpose = "LOGIN",
+                RememberMe = rememberMe,
+                ExpiresAt = DateTime.UtcNow.AddMinutes(10)
+            });
+
+            return new LoginChallengeResult { PendingToken = token, Otp = otp };
+        }
+
+        public LoginChallenge VerifyLoginChallenge(string pendingToken, string otp)
+        {
+            if (string.IsNullOrWhiteSpace(pendingToken) || string.IsNullOrWhiteSpace(otp))
+                throw new BusinessException("Invalid verification request.", "OTP_INVALID");
+
+            LoginChallenge c = _repo.GetLoginChallengeByTokenHash(Sha256Hex(pendingToken));
+
+            if (c == null || c.ConsumedAt != null || c.ExpiresAt < DateTime.UtcNow)
+                throw new BusinessException(
+                    "Your verification session has expired. Please log in again.", "OTP_EXPIRED");
+
+            if (c.AttemptCount >= 5)
+                throw new BusinessException(
+                    "Too many attempts. Please log in again.", "OTP_LOCKED");
+
+            if (!ConstantTimeEquals(c.OtpHash, Sha256Hex(otp.Trim())))
+            {
+                _repo.IncrementLoginChallengeAttempts(c.ChallengeId);
+                throw new BusinessException("Invalid verification code.", "OTP_INVALID");
+            }
+
+            // Atomic single-use: if a parallel request already consumed it, fail.
+
+            bool consumed = _repo.MarkLoginChallengeConsumed(c.ChallengeId);
+
+            if (!consumed)
+            {
+                throw new BusinessException(
+                    "Your verification session has expired. Please log in again.",
+                    "OTP_EXPIRED");
+            }
+
+            return c;
+        }
+
+        // ---------- helpers ----------
+
+        private static string NewToken(int byteCount)
+        {
+            var buf = new byte[byteCount];
+            using (var rng = new RNGCryptoServiceProvider())
+                rng.GetBytes(buf);
+
+            // URL-safe base64, no padding
+            return Convert.ToBase64String(buf).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+        }
+
+        private static string NewOtp()
+        {
+            // Uniform 6-digit code from a CSPRNG (rejection sampling avoids modulo bias).
+            using (var rng = new RNGCryptoServiceProvider())
+            {
+                var b = new byte[4];
+                uint limit = uint.MaxValue - (uint.MaxValue % 1000000);
+                uint v;
+                do
+                {
+                    rng.GetBytes(b);
+                    v = BitConverter.ToUInt32(b, 0);
+                } while (v >= limit);
+
+                return (v % 1000000).ToString("D6");
+            }
+        }
+
+        private static string Sha256Hex(string input)
+        {
+            using (var sha = SHA256.Create())
+            {
+                byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
+                var sb = new StringBuilder(64);
+                foreach (byte x in hash) sb.Append(x.ToString("x2"));
+                return sb.ToString();
+            }
+        }
+
+        private static bool ConstantTimeEquals(string a, string b)
+        {
+            if (a == null || b == null || a.Length != b.Length) return false;
+            int diff = 0;
+            for (int i = 0; i < a.Length; i++) diff |= a[i] ^ b[i];
+            return diff == 0;
+        }
+
+
+        public Consumer GetConsumerById(int consumerId)
+        {
+            if (consumerId <= 0)
+                throw new BusinessException(
+                    "Invalid account.",
+                    "INVALID_CONSUMER");
+
+            Consumer consumer = _repo.GetConsumerById(consumerId);
+
+            if (consumer == null)
+                throw new BusinessException(
+                    "Account not found.",
+                    "USER_NOT_FOUND");
+
+            return consumer;
+        }
+
     }
 }

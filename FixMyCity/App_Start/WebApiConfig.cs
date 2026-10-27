@@ -8,11 +8,21 @@ namespace FixMyCity.App_Start
         public static void Register(HttpConfiguration config)
         {
             // Enable CORS
+            //var cors = new EnableCorsAttribute(
+            //    "http://localhost:4200",
+            //    "*",
+            //    "*"
+            //);
+
             var cors = new EnableCorsAttribute(
-                "http://localhost:4200",
-                "*",
-                "*"
-            );
+                 origins: "http://localhost:4200",
+                 headers: "*",
+                 methods: "*")
+            {
+                SupportsCredentials = true
+            };
+
+            config.EnableCors(cors);
 
             config.EnableCors(cors);
 

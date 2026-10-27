@@ -407,8 +407,8 @@ namespace FixMyCity.Repository
         {
             string cacheKey = GenerateSearchCacheKey(consumerId, filter);
 
-            if (_cache.Contains(cacheKey))
-                return (ComplaintSearchResult)_cache.Get(cacheKey);
+            //if (_cache.Contains(cacheKey))
+            //    return (ComplaintSearchResult)_cache.Get(cacheKey);
             try
             {
                 DbCommand com = db.GetStoredProcCommand("FixMyCity.Complaint_Search");

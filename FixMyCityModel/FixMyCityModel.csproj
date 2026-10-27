@@ -96,6 +96,7 @@
     <Compile Include="Model\Consumer.cs" />
     <Compile Include="Model\ConsumerCredential.cs" />
     <Compile Include="Model\Department.cs" />
+    <Compile Include="Model\LoginChallenge.cs" />
     <Compile Include="Model\RefreshToken.cs" />
     <Compile Include="Model\Role.cs" />
     <Compile Include="Model\State.cs" />

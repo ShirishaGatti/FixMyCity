@@ -1,4 +1,5 @@
 ﻿using FixMyCity.Exceptions;
+using FixMyCity.Model;
 using FixMyCityModel;
 using FixMyCityModel.Model;
 using FixMyCityModel.ViewModel;
@@ -11,19 +12,6 @@ using System.Data.SqlClient;
 
 namespace FixMyCity.Repository
 {
-    /// <summary>
-    /// Data-access class for Auth (Consumer credentials, OTP, refresh tokens).
-    /// Follows the same Enterprise Library Data Application Block pattern as
-    /// the Tags business class: Database field from DatabaseFactory,
-    /// GetStoredProcCommand + AddInParameter/AddOutParameter, ExecuteDataSet/
-    /// ExecuteNonQuery, try/catch swallowing to a bool/null return.
-    ///
-    /// Requires in Web.config:
-    ///   <connectionStrings>
-    ///     <add name="ComplaintDb" connectionString="..." providerName="System.Data.SqlClient" />
-    ///   </connectionStrings>
-    ///   <dataConfiguration defaultDatabase="ComplaintDb" />
-    /// </summary>
     public class AuthRepository : IAuthRepository
     {
         private readonly Database db;
@@ -490,7 +478,128 @@ namespace FixMyCity.Repository
 
             return true;
         }
+        public bool InvalidateOpenLoginChallenges(int consumerId, string purpose)
+        {
+            try
+            {
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.LoginChallengeInvalidateOpen");
+                this.db.AddInParameter(com, "ConsumerId", DbType.Int32, consumerId);
+                this.db.AddInParameter(com, "Purpose", DbType.String, purpose);
+                this.db.ExecuteNonQuery(com);
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to invalidate open login challenges.", "LoginChallengeInvalidateOpen", ex);
+            }
 
+            return true;
+        }
+        public bool InsertLoginChallenge(LoginChallenge challenge)
+        {
+            try
+            {
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.LoginChallengeInsert");
+                this.db.AddInParameter(com, "TokenHash", DbType.String, challenge.TokenHash);
+                this.db.AddInParameter(com, "OtpHash", DbType.String, challenge.OtpHash);
+                this.db.AddInParameter(com, "ConsumerId", DbType.Int32, challenge.ConsumerId);
+                this.db.AddInParameter(com, "Purpose", DbType.String, challenge.Purpose);
+                this.db.AddInParameter(com, "RememberMe", DbType.Boolean, challenge.RememberMe);
+                this.db.AddInParameter(com, "ExpiresAt", DbType.DateTime2, challenge.ExpiresAt);
+                this.db.ExecuteNonQuery(com);
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to create login challenge.", "LoginChallengeInsert", ex);
+            }
+
+            return true;
+        }
+        public LoginChallenge GetLoginChallengeByTokenHash(string tokenHash)
+        {
+            try
+            {
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.LoginChallengeGetByTokenHash");
+                this.db.AddInParameter(com, "TokenHash", DbType.String, tokenHash);
+                DataSet ds = this.db.ExecuteDataSet(com);
+                if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    DataRow row = ds.Tables[0].Rows[0];
+                    return new LoginChallenge
+                    {
+                        ChallengeId = Convert.ToInt32(row["ChallengeId"]),
+                        TokenHash = Convert.ToString(row["TokenHash"]),
+                        OtpHash = Convert.ToString(row["OtpHash"]),
+                        ConsumerId = Convert.ToInt32(row["ConsumerId"]),
+                        Purpose = Convert.ToString(row["Purpose"]),
+                        RememberMe = Convert.ToBoolean(row["RememberMe"]),
+                        AttemptCount = Convert.ToByte(row["AttemptCount"]),
+                        ExpiresAt = DateTime.SpecifyKind(Convert.ToDateTime(row["ExpiresAt"]), DateTimeKind.Utc),
+                        ConsumedAt = row["ConsumedAt"] is DBNull
+                            ? (DateTime?)null
+                            : DateTime.SpecifyKind(Convert.ToDateTime(row["ConsumedAt"]), DateTimeKind.Utc),
+                        CreatedAt = DateTime.SpecifyKind(Convert.ToDateTime(row["CreatedAt"]), DateTimeKind.Utc)
+                    };
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to load login challenge.", "LoginChallengeGetByTokenHash", ex);
+            }
+
+            return null;
+        }
+        public bool IncrementLoginChallengeAttempts(int challengeId)
+        {
+            try
+            {
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.LoginChallengeIncrementAttempts");
+                this.db.AddInParameter(com, "ChallengeId", DbType.Int32, challengeId);
+                this.db.ExecuteNonQuery(com);
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to increment login challenge attempts.", "LoginChallengeIncrementAttempts", ex);
+            }
+
+            return true;
+        }
+        public bool MarkLoginChallengeConsumed(int challengeId)
+        {
+            bool consumed = false;
+            try
+            {
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.LoginChallengeMarkConsumed");
+                this.db.AddInParameter(com, "ChallengeId", DbType.Int32, challengeId);
+                this.db.AddOutParameter(com, "Consumed", DbType.Boolean, 1);
+                this.db.ExecuteNonQuery(com);
+                consumed = Convert.ToBoolean(this.db.GetParameterValue(com, "Consumed"));
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to consume login challenge.", "LoginChallengeMarkConsumed", ex);
+            }
+
+            return consumed;
+        }
+
+               public int DeleteExpiredLoginChallenges(DateTime olderThanUtc)
+        {
+            int deleted = 0;
+            try
+            {
+                DbCommand com = this.db.GetStoredProcCommand("FixMyCity.LoginChallengeDeleteExpired");
+                this.db.AddInParameter(com, "Cutoff", DbType.DateTime2, olderThanUtc);
+                this.db.AddOutParameter(com, "RowsDeleted", DbType.Int32, 4);
+                this.db.ExecuteNonQuery(com);
+                deleted = Convert.ToInt32(this.db.GetParameterValue(com, "RowsDeleted"));
+            }
+            catch (SqlException ex)
+            {
+                throw new DataAccessException("Failed to clean up login challenges.", "LoginChallengeDeleteExpired", ex);
+            }
+
+            return deleted;
+        }
         /// Maps one ConsumerCredential row (from either GetCredentialByEmail
         /// or Otp_GetState — same column shape) onto the model.
         private static ConsumerCredential MapCredential(DataRow row)

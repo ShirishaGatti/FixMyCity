@@ -1,4 +1,5 @@
 ﻿
+using FixMyCity.Model;
 using FixMyCityModel;
 using FixMyCityModel.Model;
 using FixMyCityModel.ViewModel;
@@ -25,5 +26,8 @@ namespace FixMyCity.Service
         List<City> GetCities();
 
         List<Ward> GetWardsByCity(int cityId);
+        Consumer GetConsumerById(int consumerId);
+        LoginChallengeResult CreateLoginChallenge(int consumerId, bool rememberMe);
+        LoginChallenge VerifyLoginChallenge(string pendingToken, string otp); // throws BusinessException
     }
 }
